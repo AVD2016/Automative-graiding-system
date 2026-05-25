@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Grade Monitoring System</title>
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="home-body">
+
+<header class="topbar">
+  <img src="icon.png" alt="Site Icon" class="site-icon">
+</header>
+
+  <div class="home-container">
+
+    <h1>Welcome</h1>
+    <h2>Student Grade Monitoring System</h2>
+
+    <p>
+      A central platform for students and lecturers to manage grades,
+      track performance, and monitor academic progress.
+    </p>
+
+    <div class="home-actions">
+
+      <!-- Login button redirects to login page -->
+      <button class="btn primary" onclick="goToLogin()">
+        Login
+      </button>
+
+      <button class="btn secondary" onclick="showInfo()">
+        About System
+      </button>
+
+    </div>
+
+    <div id="infoBox" class="info-box hidden">
+      <p>
+        This system allows lecturers to manage grades and students to
+        track their academic progress in real time.
+      </p>
+    </div>
+
+  </div>
+
+  <script>
+    function goToLogin() {
+      window.location.href = "login.html";
+    }
+
+    function showInfo() {
+      const box = document.getElementById("infoBox");
+      box.classList.toggle("hidden");
+    }
+  </script>
+
+</body>
+</html>
