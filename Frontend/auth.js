@@ -9,7 +9,7 @@ loginForm.addEventListener("submit", async (e) => {
   loading.style.display = "block";
 
   const role = document.getElementById("role").value;
-  const username = document.getElementById("email").value;
+  const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
 
   try {

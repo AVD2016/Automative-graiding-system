@@ -37,7 +37,7 @@ public class LoginController {
 
     switch (userType) {
 
-      case "STUDENT":
+      case "student":
 
         Student student = studentRepository.findByUsername(username)
             .orElseThrow(() -> new RuntimeException("Student not found"));
@@ -49,7 +49,7 @@ public class LoginController {
         return student;
 
 
-      case "LECTURER":
+      case "lecturer":
 
         Lecturer lecturer = lecturerRepository.findByUsername(username)
             .orElseThrow(() -> new RuntimeException("Lecturer not found"));
@@ -61,7 +61,7 @@ public class LoginController {
         return lecturer;
 
 
-      case "ADMINISTRATOR":
+      case "administrator":
 
         Administrator admin = administratorRepository.findByUsername(username)
             .orElseThrow(() -> new RuntimeException("Administrator not found"));
