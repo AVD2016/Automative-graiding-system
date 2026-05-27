@@ -44,7 +44,7 @@ public class LoginController {
         Optional<Student> optionalStudent = studentRepository.findByUsername(username);
 
         if (optionalStudent.isEmpty()) {
-          return ResponseEntity.status(404).body("User not found");
+          return ResponseEntity.status(401).body("Invalid username or password");
         }
 
         Student student = optionalStudent.get();
@@ -60,7 +60,7 @@ public class LoginController {
 
         Optional<Lecturer> optionalLecturer = lecturerRepository.findByUsername(username);
         if (optionalLecturer.isEmpty()) {
-          return ResponseEntity.status(404).body("User not found");
+          return ResponseEntity.status(401).body("Invalid username or password");
         }
 
         Lecturer lecturer = optionalLecturer.get();
@@ -77,7 +77,7 @@ public class LoginController {
         Optional<Administrator> optionalAdmin = administratorRepository.findByUsername(username);
 
         if (optionalAdmin.isEmpty()) {
-          return ResponseEntity.status(404).body("User not found");
+          return ResponseEntity.status(401).body("Invalid username or password");
         }
 
         Administrator admin = optionalAdmin.get();
