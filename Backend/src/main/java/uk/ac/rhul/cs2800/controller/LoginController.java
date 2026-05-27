@@ -1,6 +1,8 @@
 package uk.ac.rhul.cs2800.controller;
 
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,11 +41,16 @@ public class LoginController {
 
       case "student":
 
-        Student student = studentRepository.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("Student not found"));
+        Optional<Student> optionalStudent = studentRepository.findByUsername(username);
+
+        if (optionalStudent.isEmpty()) {
+          return ResponseEntity.status(404).body("User not found");
+        }
+
+        Student student = optionalStudent.get();
 
         if (!student.getPassword().equals(password)) {
-          throw new RuntimeException("Invalid password");
+          return ResponseEntity.status(401).body("Invalid username or password");
         }
 
         return student;
@@ -51,11 +58,15 @@ public class LoginController {
 
       case "lecturer":
 
-        Lecturer lecturer = lecturerRepository.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("Lecturer not found"));
+        Optional<Lecturer> optionalLecturer = lecturerRepository.findByUsername(username);
+        if (optionalLecturer.isEmpty()) {
+          return ResponseEntity.status(404).body("User not found");
+        }
+
+        Lecturer lecturer = optionalLecturer.get();
 
         if (!lecturer.getPassword().equals(password)) {
-          throw new RuntimeException("Invalid password");
+          return ResponseEntity.status(401).body("Invalid username or password");
         }
 
         return lecturer;
@@ -63,11 +74,16 @@ public class LoginController {
 
       case "administrator":
 
-        Administrator admin = administratorRepository.findByUsername(username)
-            .orElseThrow(() -> new RuntimeException("Administrator not found"));
+        Optional<Administrator> optionalAdmin = administratorRepository.findByUsername(username);
+
+        if (optionalAdmin.isEmpty()) {
+          return ResponseEntity.status(404).body("User not found");
+        }
+
+        Administrator admin = optionalAdmin.get();
 
         if (!admin.getPassword().equals(password)) {
-          throw new RuntimeException("Invalid password");
+          return ResponseEntity.status(401).body("Invalid username or password");
         }
 
         return admin;

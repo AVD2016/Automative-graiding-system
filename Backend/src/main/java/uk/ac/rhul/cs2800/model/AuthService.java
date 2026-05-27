@@ -22,21 +22,21 @@ public class AuthService {
 
     switch (role) {
 
-      case STUDENT:
+      case student:
         Student s = studentRepo.findByUsername(username)
             .orElseThrow(() -> new RuntimeException("Not found"));
         if (!s.getPassword().equals(password))
           throw new RuntimeException("Wrong password");
         return s;
 
-      case LECTURER:
+      case lecturer:
         Lecturer l = lecturerRepo.findByUsername(username)
             .orElseThrow(() -> new RuntimeException("Not found"));
         if (!l.getPassword().equals(password))
           throw new RuntimeException("Wrong password");
         return l;
 
-      case ADMIN:
+      case administrator:
         Administrator a =
             adminRepo.findByUsername(username).orElseThrow(() -> new RuntimeException("Not found"));
         if (!a.getPassword().equals(password))
