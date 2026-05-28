@@ -21,6 +21,12 @@ public class RestConfiguration implements RepositoryRestConfigurer {
     config.exposeIdsFor(Student.class);
     config.exposeIdsFor(Module.class);
     config.exposeIdsFor(Grade.class);
+
+
+    cors.addMapping("/**")
+        .allowedOrigins(
+            "https://automative-graiding-system-5ksjwwrh1-vladabramov-s-projects.vercel.app")
+        .allowedMethods("*").allowedHeaders("*");
   }
 
 }
