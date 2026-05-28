@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Administrator Dashboard</title>
+
+  <style>
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f4f6f9;
+      display: flex;
+      height: 100vh;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      width: 240px;
+      background-color: #1e293b;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding-top: 20px;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 22px;
+    }
+
+    .sidebar button {
+      background: none;
+      border: none;
+      color: white;
+      padding: 18px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 16px;
+      transition: 0.2s;
+    }
+
+    .sidebar button:hover {
+      background-color: #334155;
+    }
+
+    /* MAIN */
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TOP BAR */
+
+    .topbar {
+      height: 70px;
+      background-color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 25px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .topbar-left img {
+      width: 45px;
+      height: 45px;
+    }
+
+    .topbar-left h1 {
+      font-size: 22px;
+      color: #1e293b;
+    }
+
+    .admin-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #1e293b;
+    }
+
+    /* CONTENT */
+
+    .content {
+      padding: 30px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+    }
+
+    .card {
+      background-color: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      margin-bottom: 20px;
+      color: #1e293b;
+    }
+
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .action-buttons button {
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      background-color: #2563eb;
+      color: white;
+      cursor: pointer;
+      font-size: 15px;
+      transition: 0.2s;
+    }
+
+    .action-buttons button:hover {
+      background-color: #1d4ed8;
+    }
+
+    @media (max-width: 900px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        width: 180px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+
+  <div class="sidebar">
+
+    <h2>Admin Panel</h2>
+
+    <button onclick="showLecturerPanel()">
+      Lecturer Management
+    </button>
+
+    <button onclick="showStudentPanel()">
+      Student Management
+    </button>
+
+    <button onclick="logout()">
+      Logout
+    </button>
+
+  </div>
+
+  <!-- MAIN -->
+
+  <div class="main">
+
+    <!-- TOPBAR -->
+
+    <div class="topbar">
+
+      <div class="topbar-left">
+        <img src="icon.png" alt="System Icon">
+        <h1>Automated Grading System</h1>
+      </div>
+
+      <div class="admin-name" id="adminName">
+        Administrator
+      </div>
+
+    </div>
+
+    <!-- CONTENT -->
+
+    <div class="content">
+
+      <!-- LECTURER MANAGEMENT -->
+
+      <div class="card">
+
+        <h2>Lecturer Management</h2>
+
+        <div class="action-buttons">
+
+          <button>
+            View All Lecturers
+          </button>
+
+          <button>
+            Add New Lecturer
+          </button>
+
+          <button>
+            Assign Lecturer To Module
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- STUDENT MANAGEMENT -->
+
+      <div class="card">
+
+        <h2>Student & Module Management</h2>
+
+        <div class="action-buttons">
+
+          <button>
+            View All Students
+          </button>
+
+          <button>
+            Add Student To Module
+          </button>
+
+          <button>
+            View Module Enrolments
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+
+    // GET LOGGED IN USER FROM LOCAL STORAGE
+
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    // DISPLAY ADMIN NAME
+
+    if (user) {
+      document.getElementById("adminName").textContent =
+        user.firstName + " " + user.lastName;
+    }
+
+    // PANEL FUNCTIONS
+
+    function showLecturerPanel() {
+      alert("Open Lecturer Management Window");
+    }
+
+    function showStudentPanel() {
+      alert("Open Student Management Window");
+    }
+
+    // LOGOUT
+
+    function logout() {
+      localStorage.clear();
+      window.location.href = "/index.html";
+    }
+
+  </script>
+
+</body>
+</html>
