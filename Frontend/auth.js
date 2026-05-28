@@ -29,8 +29,11 @@ loginForm.addEventListener("submit", async (e) => {
 
     loading.style.display = "none";
 
+	if (res.status === 401) {
+  	message.textContent = "Invalid password";
+  	return;
+	}
     if (res.ok) {
-      // NOTE: your backend currently returns full entity, not token
       localStorage.setItem("role", role);
       localStorage.setItem("user", JSON.stringify(data));
 
@@ -43,8 +46,9 @@ loginForm.addEventListener("submit", async (e) => {
       }
 
     } else {
-      message.textContent = data.message || "Login failed";
-    }
+  message.textContent = `Error: ${res.status}`;
+  return;
+}
 
   } catch (err) {
     loading.style.display = "none";

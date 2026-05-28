@@ -1,6 +1,8 @@
 package uk.ac.rhul.cs2800.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
@@ -8,6 +10,7 @@ public class Administrator {
 
   /** Unique identifier for the administrator */
   @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private int id;
 
   /** Administrator first name */
