@@ -1,7 +1,6 @@
 package uk.ac.rhul.cs2800.config;
 
 import java.util.Arrays;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -32,9 +31,8 @@ public class SecurityConfig {
 
     CorsConfiguration config = new CorsConfiguration();
 
-    // ✅ Your Vercel frontend allowed here
     config.setAllowedOriginPatterns(Arrays.asList(
-        "https://automative-graiding-system.vercel.app"
+        "https://*.vercel.app"
     ));
 
     config.setAllowedMethods(Arrays.asList(
