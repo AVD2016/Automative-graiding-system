@@ -18,7 +18,7 @@ import uk.ac.rhul.cs2800.repository.StudentRepository;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "https://automative-graiding-system.vercel.app")
+@CrossOrigin(originPatterns = "https://*.vercel.app")
 public class LoginController {
 
   @Autowired
