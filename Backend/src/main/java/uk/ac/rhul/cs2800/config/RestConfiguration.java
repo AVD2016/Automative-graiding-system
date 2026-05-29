@@ -24,10 +24,9 @@ public class RestConfiguration implements RepositoryRestConfigurer {
 
 
     cors.addMapping("/**")
-        .allowedOrigins(
+        .allowedOriginPatterns(
             "https://*.vercel.app")
         .allowedMethods("*").allowedHeaders("*");
   }
 
 }
-

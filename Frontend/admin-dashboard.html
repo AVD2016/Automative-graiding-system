@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Administrator Dashboard</title>
 
-  <style>
+<style>
 
     * {
       margin: 0;
@@ -151,8 +151,6 @@
 
 <body>
 
-  <!-- SIDEBAR -->
-
   <div class="sidebar">
 
     <h2>Admin Panel</h2>
@@ -171,11 +169,7 @@
 
   </div>
 
-  <!-- MAIN -->
-
   <div class="main">
-
-    <!-- TOPBAR -->
 
     <div class="topbar">
 
@@ -190,11 +184,7 @@
 
     </div>
 
-    <!-- CONTENT -->
-
     <div class="content">
-
-      <!-- LECTURER MANAGEMENT -->
 
       <div class="card">
 
@@ -218,8 +208,6 @@
 
       </div>
 
-      <!-- STUDENT MANAGEMENT -->
-
       <div class="card">
 
         <h2>Student & Module Management</h2>
@@ -230,8 +218,9 @@
             View All Students
           </button>
 
-          <button>
-            Add Student To Module
+          <!-- UPDATED BUTTON -->
+          <button onclick="openAddStudent()">
+            Add new Student
           </button>
 
           <button>
@@ -246,37 +235,8 @@
 
   </div>
 
-  <script>
-
-    // GET LOGGED IN USER FROM LOCAL STORAGE
-
-    const user = JSON.parse(localStorage.getItem("user"));
-
-    // DISPLAY ADMIN NAME
-
-    if (user) {
-      document.getElementById("adminName").textContent =
-        user.firstName + " " + user.lastName;
-    }
-
-    // PANEL FUNCTIONS
-
-    function showLecturerPanel() {
-      alert("Open Lecturer Management Window");
-    }
-
-    function showStudentPanel() {
-      alert("Open Student Management Window");
-    }
-
-    // LOGOUT
-
-    function logout() {
-      localStorage.clear();
-      window.location.href = "/index.html";
-    }
-
-  </script>
+  <!-- External JS file -->
+  <script src="admin-dashboard.js"></script>
 
 </body>
 </html>

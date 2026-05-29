@@ -18,5 +18,7 @@ import uk.ac.rhul.cs2800.model.Student;
 public interface StudentRepository extends CrudRepository<Student, Integer> {
 
   Optional<Student> findByUsername(String username);
+
+  boolean existsByUsername(String username);
 }
 
