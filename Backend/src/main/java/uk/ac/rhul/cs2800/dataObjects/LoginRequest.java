@@ -1,4 +1,4 @@
-package uk.ac.rhul.cs2800.model;
+package uk.ac.rhul.cs2800.dataObjects;
 
 
 public class LoginRequest {

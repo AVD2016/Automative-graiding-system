@@ -2,6 +2,7 @@ package uk.ac.rhul.cs2800.model;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.ac.rhul.cs2800.dataObjects.Role;
 import uk.ac.rhul.cs2800.repository.AdministratorRepository;
 import uk.ac.rhul.cs2800.repository.LecturerRepository;
 import uk.ac.rhul.cs2800.repository.StudentRepository;

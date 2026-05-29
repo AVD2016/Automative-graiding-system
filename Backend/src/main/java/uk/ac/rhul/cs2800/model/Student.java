@@ -264,4 +264,9 @@ public class Student {
     Registration registration = new Registration(module);
     this.registered.add(registration);
   }
+
+  public List<Registration> getRegistered() {
+    return new ArrayList<>(registered);
+  }
 }
+

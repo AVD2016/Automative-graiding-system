@@ -1,5 +1,6 @@
 package uk.ac.rhul.cs2800.controller;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -7,6 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.ac.rhul.cs2800.dataObjects.StudentDTO;
+import uk.ac.rhul.cs2800.dataObjects.StudentModuleDTO;
 import uk.ac.rhul.cs2800.model.Student;
 import uk.ac.rhul.cs2800.repository.StudentRepository;
 
@@ -44,5 +47,24 @@ public class AddStudentController {
     Student savedStudent = studentRepository.save(student);
 
     return ResponseEntity.ok(savedStudent);
+  }
+  
+  @PostMapping("/getStudents")
+  public ResponseEntity<List<StudentDTO>> getAllStudents() {
+
+    List<Student> students = (List<Student>) studentRepository.findAll();
+
+    List<StudentDTO> dtoList = students.stream().map(student -> {
+
+      List<StudentModuleDTO> modules = student.getRegistered().stream()
+          .map(reg -> new StudentModuleDTO(reg.getModule().getCode(), reg.getModule().getName()))
+          .toList();
+
+      return new StudentDTO(student.getId(), student.getFirstName(), student.getLastName(),
+          student.getUsername(), student.getEmail(), modules);
+
+    }).toList();
+
+    return ResponseEntity.ok(dtoList);
   }
 }

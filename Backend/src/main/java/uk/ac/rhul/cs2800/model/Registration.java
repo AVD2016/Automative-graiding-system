@@ -1,5 +1,6 @@
 package uk.ac.rhul.cs2800.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -38,6 +39,7 @@ public class Registration {
   /** The student associated with this registration. */
   @ManyToOne
   @JoinColumn(name = "student_id")
+  @JsonIgnore
   private Student student;
 
   /**

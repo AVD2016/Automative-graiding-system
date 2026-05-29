@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>View Students</title>
+
+  <style>
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 30px;
+    }
+
+    h1 {
+      color: #1e293b;
+      margin-bottom: 20px;
+    }
+
+    .student-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .student-card h2 {
+      margin-top: 0;
+      color: #2563eb;
+    }
+
+    .info {
+      margin: 8px 0;
+    }
+
+    .modules {
+      margin-top: 15px;
+      padding-top: 10px;
+      border-top: 1px solid #ddd;
+    }
+
+    .module-item {
+      background: #eef2ff;
+      padding: 8px;
+      border-radius: 6px;
+      margin-top: 8px;
+    }
+
+    .back-button {
+      margin-top: 20px;
+      padding: 12px 20px;
+      border: none;
+      background: #2563eb;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .back-button:hover {
+      background: #1d4ed8;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <h1>All Students</h1>
+
+  <div id="studentsContainer"></div>
+
+  <button class="back-button" onclick="goBack()">
+    Back to Dashboard
+  </button>
+
+  <script src="viewStudents.js"></script>
+
+</body>
+</html>
