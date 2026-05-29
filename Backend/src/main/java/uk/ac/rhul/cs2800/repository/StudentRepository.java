@@ -20,7 +20,5 @@ public interface StudentRepository extends CrudRepository<Student, Integer> {
   Optional<Student> findByUsername(String username);
 
   boolean existsByUsername(String username);
-
-  boolean existsById(String username);
 }
 
