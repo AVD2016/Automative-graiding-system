@@ -6,6 +6,7 @@ document.getElementById("addStudentForm").addEventListener("submit", async funct
     firstName: document.getElementById("firstName").value,
     lastName: document.getElementById("lastName").value,
     username: document.getElementById("username").value,
+    password: document.getElementById("password").value
     email: document.getElementById("email").value
   };
 

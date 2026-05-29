@@ -87,6 +87,15 @@ public class Student {
     this.email = email;
   }
 
+  public Student(int id, String firstName, String lastName, String username, String email, String password) {
+    this.id = id;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.username = username;
+    this.email = email;
+    this.password = password;
+  }
+
   /**
    * Sets student id.
    *
