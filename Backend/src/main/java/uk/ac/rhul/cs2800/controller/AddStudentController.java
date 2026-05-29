@@ -18,7 +18,7 @@ public class AddStudentController {
   @Autowired
   private StudentRepository studentRepository;
 
-  @PostMapping
+  @PostMapping("/addStudent")
   public ResponseEntity<?> addStudent(@RequestBody Student student) {
 
     if (student == null) {
@@ -34,6 +34,10 @@ public class AddStudentController {
     }
 
     if (studentRepository.existsByUsername(student.getUsername())) {
+      return ResponseEntity.badRequest().body("Username already exists");
+    }
+
+    if (studentRepository.existsById(student.getId())) {
       return ResponseEntity.badRequest().body("Username already exists");
     }
 
