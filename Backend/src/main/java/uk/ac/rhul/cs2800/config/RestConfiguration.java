@@ -25,7 +25,7 @@ public class RestConfiguration implements RepositoryRestConfigurer {
 
     cors.addMapping("/**")
         .allowedOrigins(
-            "https://automative-graiding-system-5ksjwwrh1-vladabramov-s-projects.vercel.app")
+            "https://*.vercel.app")
         .allowedMethods("*").allowedHeaders("*");
   }
 
