@@ -41,7 +41,7 @@ public class AddStudentController {
     }
 
     if (studentRepository.existsById(student.getId())) {
-      return ResponseEntity.badRequest().body("Username already exists");
+      return ResponseEntity.badRequest().body("ID already exists");
     }
 
     Student savedStudent = studentRepository.save(student);
