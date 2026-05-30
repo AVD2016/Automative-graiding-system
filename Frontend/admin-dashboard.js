@@ -19,6 +19,11 @@ function openAddStudent() {
   window.location.href = "addStudent.html";
 }
 
+
+function openViewAllStudents() {
+  window.location.href = "View Students.html";
+}
+
 function logout() {
   localStorage.clear();
   window.location.href = "/index.html";
