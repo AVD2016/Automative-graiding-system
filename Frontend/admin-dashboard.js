@@ -21,7 +21,7 @@ function openAddStudent() {
 
 
 function openViewAllStudents() {
-  window.location.href = "ViewStudents.html";
+  window.location.href = "viewStudents.html";
 }
 
 function logout() {
