@@ -6,7 +6,7 @@ async function loadStudents() {
   try {
 
     const response = await fetch(
-      "https://automative-graiding-system.onrender.com/api/student"
+      "https://automative-graiding-system.onrender.com/api/student/getStudents"
     );
 
     if (!response.ok) {
