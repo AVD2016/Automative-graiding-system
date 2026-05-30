@@ -1,4 +1,4 @@
-const container = document.getElementById("studentsContainer");
+const tableBody = document.getElementById("studentsTableBody");
 
 // LOAD STUDENTS
 async function loadStudents() {
@@ -6,7 +6,7 @@ async function loadStudents() {
   try {
 
     const response = await fetch(
-      "https://automative-graiding-system.onrender.com/api/student/getStudents"
+      "https://automative-graiding-system.onrender.com/api/student"
     );
 
     if (!response.ok) {
@@ -15,75 +15,77 @@ async function loadStudents() {
 
     const students = await response.json();
 
-    // CLEAR CONTAINER
-    container.innerHTML = "";
+    tableBody.innerHTML = "";
 
     // NO STUDENTS
     if (students.length === 0) {
-      container.innerHTML = "<p>No students found.</p>";
+
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="6" class="loading">
+            No students found.
+          </td>
+        </tr>
+      `;
+
       return;
     }
 
-    // DISPLAY EACH STUDENT
+    // DISPLAY STUDENTS
     students.forEach(student => {
 
-      const card = document.createElement("div");
-      card.className = "student-card";
+      const row = document.createElement("tr");
 
-      // MODULE LIST
+      // MODULES HTML
       let modulesHtml = "";
 
-      if (student.registered && student.registered.length > 0) {
+      if (student.modules && student.modules.length > 0) {
 
-        student.registered.forEach(registration => {
+        student.modules.forEach(module => {
 
-          if (registration.module) {
-
-            modulesHtml += `
-              <div class="module-item">
-                <strong>${registration.module.code}</strong>
-                - ${registration.module.name}
-              </div>
-            `;
-          }
+          modulesHtml += `
+            <div class="module-badge">
+              ${module.code} - ${module.name}
+            </div>
+          `;
         });
 
       } else {
 
-        modulesHtml = "<p>No registered modules.</p>";
+        modulesHtml = `
+          <span class="empty-modules">
+            No modules registered
+          </span>
+        `;
       }
 
-      // CARD HTML
-      card.innerHTML = `
-        <h2>${student.firstName} ${student.lastName}</h2>
-
-        <div class="info">
-          <strong>ID:</strong> ${student.id}
-        </div>
-
-        <div class="info">
-          <strong>Username:</strong> ${student.username}
-        </div>
-
-        <div class="info">
-          <strong>Email:</strong> ${student.email}
-        </div>
-
-        <div class="modules">
-          <strong>Registered Modules:</strong>
-          ${modulesHtml}
-        </div>
+      row.innerHTML = `
+        <td>${student.id}</td>
+        <td>${student.firstName}</td>
+        <td>${student.lastName}</td>
+        <td>${student.username}</td>
+        <td>${student.email}</td>
+        <td>
+          <div class="modules-cell">
+            ${modulesHtml}
+          </div>
+        </td>
       `;
 
-      container.appendChild(card);
+      tableBody.appendChild(row);
     });
 
   } catch (error) {
 
     console.error(error);
 
-    container.innerHTML =
-      "<p>Error loading students.</p>";
+    tableBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="error-message">
+          Error loading students.
+        </td>
+      </tr>
+    `;
   }
 }
 
@@ -92,5 +94,5 @@ function goBack() {
   window.location.href = "admin-dashboard.html";
 }
 
-// LOAD ON PAGE OPEN
+// LOAD DATA
 loadStudents();
