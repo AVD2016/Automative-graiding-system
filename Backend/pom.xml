@@ -78,10 +78,13 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
+   <dependency>
+  	<groupId>org.springframework.boot</groupId>
+  	<artifactId>spring-boot-starter-web</artifactId>
+	</dependency>
 	</dependencies>
+	
 
-
-  <!-- START: You can reuse this part for CW2 -->
   <build>
     <plugins>
       <plugin>
@@ -215,5 +218,4 @@
       </plugin>
     </plugins>
   </reporting>
-  <!-- END: You can reuse this part for CW2 -->
 </project>
