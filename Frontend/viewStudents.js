@@ -1,6 +1,5 @@
 const tableBody = document.getElementById("studentsTableBody");
 
-// LOAD STUDENTS
 async function loadStudents() {
 
   try {
@@ -17,7 +16,7 @@ async function loadStudents() {
 
     tableBody.innerHTML = "";
 
-    // NO STUDENTS
+    
     if (students.length === 0) {
 
       tableBody.innerHTML = `
@@ -31,7 +30,7 @@ async function loadStudents() {
       return;
     }
 
-    // DISPLAY STUDENTS
+    // distplay students
     students.forEach(student => {
 
       const row = document.createElement("tr");
@@ -89,10 +88,117 @@ async function loadStudents() {
   }
 }
 
-// BACK BUTTON
+
 function goBack() {
   window.location.href = "admin-dashboard.html";
 }
 
-// LOAD DATA
+// load students
 loadStudents();
+
+
+// Registering student on a module
+let selectedStudentId = null;
+
+
+async function openModuleModal(studentId) {
+
+  selectedStudentId = studentId;
+
+  const modal = document.getElementById("moduleModal");
+  const modulesList = document.getElementById("modulesList");
+
+  modal.style.display = "block";
+
+  try {
+
+    const response = await fetch(
+      `https://automative-graiding-system.onrender.com/api/module/getAvailableModules/${studentId}`
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to load modules");
+    }
+
+    const modules = await response.json();
+
+    modulesList.innerHTML = "";
+
+    modules.forEach(module => {
+
+      modulesList.innerHTML += `
+        <div class="module-option">
+          <label>
+            <input type="checkbox"
+                   value="${module.code}">
+            <strong>${module.code}</strong>
+            - ${module.name}
+          </label>
+        </div>
+      `;
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    modulesList.innerHTML =
+      "<p>Error loading modules.</p>";
+  }
+}
+
+
+function closeModal() {
+
+  document.getElementById("moduleModal").style.display = "none";
+}
+
+async function submitModuleRegistration() {
+
+  const selectedModules = [];
+
+  document.querySelectorAll(
+    '#modulesList input[type="checkbox"]:checked'
+  ).forEach(checkbox => {
+
+    selectedModules.push(checkbox.value);
+  });
+
+  if (selectedModules.length === 0) {
+    alert("Select at least one module.");
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      "https://automative-graiding-system.onrender.com/api/registration/register",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          studentId: selectedStudentId,
+          modules: selectedModules
+        })
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Registration failed");
+    }
+
+    alert("Student registered successfully!");
+
+    closeModal();
+
+    loadStudents();
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert("Error registering modules.");
+  }
+}
