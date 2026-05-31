@@ -6,8 +6,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.ac.rhul.cs2800.model.Module;
 import uk.ac.rhul.cs2800.model.Registration;
@@ -19,7 +21,10 @@ import uk.ac.rhul.cs2800.repository.StudentRepository;
 /**
  * REST controller responsible for handling student-module registrations.
  */
+
 @RestController
+@RequestMapping("/api/registrations")
+@CrossOrigin(originPatterns = "https://*.vercel.app")
 public class RegistrationController {
 
   RegistrationRepository registrationRepository;
@@ -68,7 +73,7 @@ public class RegistrationController {
     return ResponseEntity.ok(registration);
   }
 
-  @PostMapping("/registrations/sync")
+  @PostMapping("/sync")
   @Transactional
   public ResponseEntity<?> syncRegistrations(@RequestBody Map<String, Object> payload) {
 
