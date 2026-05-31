@@ -58,17 +58,28 @@ async function loadStudents() {
         `;
       }
 
-      row.innerHTML = `
-        <td>${student.id}</td>
-        <td>${student.firstName}</td>
-        <td>${student.lastName}</td>
-        <td>${student.username}</td>
-        <td>${student.email}</td>
-        <td>
-          <div class="modules-cell">
-            ${modulesHtml}
-          </div>
-        </td>
+     row.innerHTML = `
+  <td>${student.id}</td>
+  <td>${student.firstName}</td>
+  <td>${student.lastName}</td>
+  <td>${student.username}</td>
+  <td>${student.email}</td>
+
+  <td>
+    <div class="modules-cell">
+      ${modulesHtml}
+    </div>
+  </td>
+
+  <td>
+    <button class="register-btn"
+            onclick="openModuleModal(${student.id})">
+
+      Register For Module
+
+    </button>
+  </td>
+`;
       `;
 
       tableBody.appendChild(row);
