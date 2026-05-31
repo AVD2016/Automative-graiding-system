@@ -22,6 +22,7 @@ public class Module {
   private String code;
 
   private String name;
+  private int credits;
   private boolean mnc;
 
   /**
@@ -48,6 +49,12 @@ public class Module {
     this.code = code;
     this.name = name;
     this.mnc = mnc;
+  }
+
+  public Module(String code, String name, int credits) {
+    this.code = code;
+    this.name = name;
+    this.credits = credits;
   }
 
   /**
