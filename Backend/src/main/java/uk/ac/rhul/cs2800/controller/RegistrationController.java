@@ -1,7 +1,11 @@
 package uk.ac.rhul.cs2800.controller;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -62,5 +66,52 @@ public class RegistrationController {
     registration = registrationRepository.save(registration);
 
     return ResponseEntity.ok(registration);
+  }
+
+  @PostMapping("/registrations/sync")
+  @Transactional
+  public ResponseEntity<?> syncRegistrations(@RequestBody Map<String, Object> payload) {
+
+    Integer studentId = (Integer) payload.get("studentId");
+
+    @SuppressWarnings("unchecked")
+    List<String> moduleCodes = (List<String>) payload.get("modules");
+
+    Student student = studentRepository.findById(studentId).orElseThrow();
+
+    // CURRENT registrations
+    List<Registration> existing = student.getRegistered();
+
+    Set<String> newModuleSet = moduleCodes.stream().collect(Collectors.toSet());
+
+    // 1. DELETE unselected modules
+    for (Registration reg : existing) {
+
+      String code = reg.getModule().getCode();
+
+      if (!newModuleSet.contains(code)) {
+
+        registrationRepository.delete(reg);
+      }
+    }
+
+    // 2. ADD missing modules
+    for (String code : newModuleSet) {
+
+      boolean alreadyExists = existing.stream().anyMatch(r -> r.getModule().getCode().equals(code));
+
+      if (!alreadyExists) {
+
+        Module module = moduleRepository.findById(code).orElseThrow();
+
+        Registration registration = new Registration();
+        registration.setStudent(student);
+        registration.setModule(module);
+
+        registrationRepository.save(registration);
+      }
+    }
+
+    return ResponseEntity.ok("Sync complete");
   }
 }
