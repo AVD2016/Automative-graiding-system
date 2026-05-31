@@ -16,12 +16,11 @@ async function loadStudents() {
 
     tableBody.innerHTML = "";
 
-    
     if (students.length === 0) {
 
       tableBody.innerHTML = `
         <tr>
-          <td colspan="6" class="loading">
+          <td colspan="7" class="loading">
             No students found.
           </td>
         </tr>
@@ -30,7 +29,7 @@ async function loadStudents() {
       return;
     }
 
-    // distplay students
+    // DISPLAY STUDENTS
     students.forEach(student => {
 
       const row = document.createElement("tr");
@@ -58,28 +57,29 @@ async function loadStudents() {
         `;
       }
 
-     row.innerHTML = `
-  <td>${student.id}</td>
-  <td>${student.firstName}</td>
-  <td>${student.lastName}</td>
-  <td>${student.username}</td>
-  <td>${student.email}</td>
+      row.innerHTML = `
+        <td>${student.id}</td>
+        <td>${student.firstName}</td>
+        <td>${student.lastName}</td>
+        <td>${student.username}</td>
+        <td>${student.email}</td>
 
-  <td>
-    <div class="modules-cell">
-      ${modulesHtml}
-    </div>
-  </td>
+        <td>
+          <div class="modules-cell">
+            ${modulesHtml}
+          </div>
+        </td>
 
-  <td>
-    <button class="register-btn"
-            onclick="openModuleModal(${student.id})">
+        <td>
+          <button class="register-btn"
+                  onclick="openModuleModal(${student.id})">
 
-      Register For Module
+            Register For Module
 
-    </button>
-  </td>
-`;
+          </button>
+        </td>
+      `;
+
       tableBody.appendChild(row);
     });
 
@@ -98,15 +98,23 @@ async function loadStudents() {
 }
 
 
+// BACK BUTTON
+
 function goBack() {
+
   window.location.href = "admin-dashboard.html";
 }
 
-// load students
+
+// LOAD STUDENTS
+
 loadStudents();
 
 
-// Registering student on a module
+// ======================================
+// REGISTERING STUDENT ON MODULES
+// ======================================
+
 let selectedStudentId = null;
 
 
@@ -115,6 +123,7 @@ async function openModuleModal(studentId) {
   selectedStudentId = studentId;
 
   const modal = document.getElementById("moduleModal");
+
   const modulesList = document.getElementById("modulesList");
 
   modal.style.display = "block";
@@ -126,6 +135,7 @@ async function openModuleModal(studentId) {
     );
 
     if (!response.ok) {
+
       throw new Error("Failed to load modules");
     }
 
@@ -137,12 +147,17 @@ async function openModuleModal(studentId) {
 
       modulesList.innerHTML += `
         <div class="module-option">
+
           <label>
+
             <input type="checkbox"
                    value="${module.code}">
+
             <strong>${module.code}</strong>
             - ${module.name}
+
           </label>
+
         </div>
       `;
     });
@@ -162,6 +177,7 @@ function closeModal() {
   document.getElementById("moduleModal").style.display = "none";
 }
 
+
 async function submitModuleRegistration() {
 
   const selectedModules = [];
@@ -174,7 +190,9 @@ async function submitModuleRegistration() {
   });
 
   if (selectedModules.length === 0) {
+
     alert("Select at least one module.");
+
     return;
   }
 
@@ -184,9 +202,11 @@ async function submitModuleRegistration() {
       "https://automative-graiding-system.onrender.com/api/registration/register",
       {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json"
         },
+
         body: JSON.stringify({
           studentId: selectedStudentId,
           modules: selectedModules
@@ -195,6 +215,7 @@ async function submitModuleRegistration() {
     );
 
     if (!response.ok) {
+
       throw new Error("Registration failed");
     }
 
@@ -209,5 +230,95 @@ async function submitModuleRegistration() {
     console.error(error);
 
     alert("Error registering modules.");
+  }
+}
+
+
+// ======================================
+// CREATE MODULE MODAL
+// ======================================
+
+function openCreateModuleModal() {
+
+  document.getElementById(
+    "createModuleModal"
+  ).style.display = "block";
+}
+
+
+function closeCreateModuleModal() {
+
+  document.getElementById(
+    "createModuleModal"
+  ).style.display = "none";
+}
+
+
+// ======================================
+// CREATE MODULE
+// ======================================
+
+async function createModule() {
+
+  const code = document.getElementById("moduleCode")
+    .value
+    .trim();
+
+  const name = document.getElementById("moduleName")
+    .value
+    .trim();
+
+  const credits = parseInt(
+    document.getElementById("moduleCredits").value
+  );
+
+  if (!code || !name || !credits) {
+
+    alert("Please fill all fields.");
+
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      "https://automative-graiding-system.onrender.com/api/module/createModule",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          code: code,
+          name: name,
+          credits: credits
+        })
+      }
+    );
+
+    if (!response.ok) {
+
+      throw new Error("Failed to create module");
+    }
+
+    alert("Module created successfully!");
+
+    closeCreateModuleModal();
+
+    // CLEAR FORM
+
+    document.getElementById("moduleCode").value = "";
+
+    document.getElementById("moduleName").value = "";
+
+    document.getElementById("moduleCredits").value = "";
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert("Error creating module.");
   }
 }

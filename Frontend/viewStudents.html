@@ -255,13 +255,27 @@
 
     <div class="header">
 
-      <h1>Student Records</h1>
+  <h1>Student Records</h1>
 
-      <button class="back-button" onclick="goBack()">
-        Back to Dashboard
-      </button>
+  <div style="display:flex; gap:10px;">
 
-    </div>
+    <button class="register-btn"
+            onclick="openCreateModuleModal()">
+
+      Create Module
+
+    </button>
+
+    <button class="back-button"
+            onclick="goBack()">
+
+      Back to Dashboard
+
+    </button>
+
+  </div>
+
+</div>
 
     <!-- TABLE -->
 
@@ -335,6 +349,54 @@
 
   </div>
 
+<!-- CREATE MODULE MODAL -->
+
+<div id="createModuleModal" class="modal">
+
+  <div class="modal-content">
+
+    <h2>Create New Module</h2>
+
+    <div style="display:flex; flex-direction:column; gap:15px;">
+
+      <input type="text"
+             id="moduleCode"
+             placeholder="Module Code"
+             style="padding:12px; border:1px solid #ccc; border-radius:8px;">
+
+      <input type="text"
+             id="moduleName"
+             placeholder="Module Name"
+             style="padding:12px; border:1px solid #ccc; border-radius:8px;">
+
+      <input type="number"
+             id="moduleCredits"
+             placeholder="Credits"
+             style="padding:12px; border:1px solid #ccc; border-radius:8px;">
+
+    </div>
+
+    <div class="modal-buttons">
+
+      <button class="save-btn"
+              onclick="createModule()">
+
+        Create Module
+
+      </button>
+
+      <button class="cancel-btn"
+              onclick="closeCreateModuleModal()">
+
+        Cancel
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
 
   <script src="viewStudents.js"></script>
 
