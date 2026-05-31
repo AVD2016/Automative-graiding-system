@@ -80,8 +80,6 @@ async function loadStudents() {
     </button>
   </td>
 `;
-      `;
-
       tableBody.appendChild(row);
     });
 
@@ -91,7 +89,7 @@ async function loadStudents() {
 
     tableBody.innerHTML = `
       <tr>
-        <td colspan="6" class="error-message">
+        <td colspan="7" class="error-message">
           Error loading students.
         </td>
       </tr>
