@@ -23,36 +23,52 @@ public class ChatController {
   private String apiKey;
 
   @PostMapping("/send")
-  public ResponseEntity<String> chat(@RequestBody Map<String, String> body) {
+  public ResponseEntity<?> chat(@RequestBody Map<String, String> body) {
 
-    String message = body.get("message");
+    try {
 
-    RestTemplate restTemplate = new RestTemplate();
+      String message = body.get("message");
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.setBearerAuth(apiKey);
+      RestTemplate restTemplate = new RestTemplate();
 
-    String requestJson =
-        """
-            {
-              "model": "gpt-4o-mini",
-              "messages": [
-                { "role": "system", "content": "You are helping a user to navigate a grade managment webpage and assist with any questions and requests."
-                 },
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_JSON);
+      headers.setBearerAuth(apiKey);
 
+      // safer JSON construction
+      String requestJson = String.format("""
+          {
+            "model": "gpt-4o-mini",
+            "messages": [
+              {
+                "role": "system",
+                "content": "You are helping a user navigate a university grade management system."
+              },
+              {
+                "role": "user",
+                "content": %s
+              }
+            ]
+          }
+          """, toJsonString(message));
 
-                { "role": "user", "content": "%s" }
-              ]
-            }
-            """
-            .formatted(message);
+      HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
 
-    HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
+      ResponseEntity<String> response = restTemplate.exchange(
+          "https://api.openai.com/v1/chat/completions", HttpMethod.POST, entity, String.class);
 
-    ResponseEntity<String> response = restTemplate.exchange(
-        "https://api.openai.com/v1/chat/completions", HttpMethod.POST, entity, String.class);
+      return ResponseEntity.ok(response.getBody());
 
-    return ResponseEntity.ok(response.getBody());
+    } catch (Exception e) {
+
+      e.printStackTrace();
+
+      return ResponseEntity.status(500)
+          .body(Map.of("error", "Chat failed", "message", e.getMessage()));
+    }
+  }
+
+  private String toJsonString(String input) {
+    return "\"" + input.replace("\"", "\\\"") + "\"";
   }
 }
