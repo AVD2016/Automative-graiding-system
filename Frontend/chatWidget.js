@@ -1,6 +1,4 @@
-// ===============================
 // CHAT TOGGLE
-// ===============================
 function toggleChat() {
   const widget = document.getElementById("chatWidget");
   if (!widget) return;
@@ -8,18 +6,18 @@ function toggleChat() {
   widget.classList.toggle("hidden");
 }
 
-// ===============================
+
 // SAVE MESSAGE TO STORAGE
-// ===============================
+
 function saveChatMessage(html) {
   const history = JSON.parse(localStorage.getItem("chatHistory")) || [];
   history.push(html);
   localStorage.setItem("chatHistory", JSON.stringify(history));
 }
 
-// ===============================
+
 // LOAD CHAT HISTORY
-// ===============================
+
 function loadChatHistory() {
   const messages = document.getElementById("chatMessages");
   if (!messages) return;
@@ -35,9 +33,8 @@ function loadChatHistory() {
   messages.scrollTop = messages.scrollHeight;
 }
 
-// ===============================
 // SEND MESSAGE
-// ===============================
+
 async function sendMessage() {
 
   const input = document.getElementById("chatInput");
@@ -90,15 +87,20 @@ async function sendMessage() {
   }
 }
 
-// ===============================
-// INIT
-// ===============================
-document.addEventListener("DOMContentLoaded", () => {
+function initChat() {
 
   const btn = document.getElementById("chatToggle");
-  if (btn) {
+  if (btn && !btn.dataset.bound) {
     btn.addEventListener("click", toggleChat);
+    btn.dataset.bound = "true"; // prevents duplicate binding
   }
 
   loadChatHistory();
-});
+}
+
+// Run immediately if DOM already loaded
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initChat);
+} else {
+  initChat(); // 🔥 IMPORTANT FIX
+}
