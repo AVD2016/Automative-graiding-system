@@ -33,8 +33,7 @@ public class ChatController {
 
       String message = body.get("message");
 
-      // TEMP session id
-      // later you can use logged-in student/admin ID
+      // session id
       String sessionId = "default-user";
 
       // get or create history
@@ -44,7 +43,7 @@ public class ChatController {
       // add user message
       history.add(Map.of("role", "user", "content", message));
 
-      // keep max 20 messages
+      // max 20 messages
       while (history.size() > 20) {
         history.removeFirst();
       }
@@ -108,7 +107,7 @@ public class ChatController {
 
       String reply = responseBody;
 
-      // VERY SIMPLE extraction
+      // extraction
       int start = responseBody.indexOf("\"content\":\"");
 
       if (start != -1) {
@@ -125,7 +124,7 @@ public class ChatController {
       // add assistant reply to history
       history.add(Map.of("role", "assistant", "content", reply));
 
-      // trim again
+      // trim
       while (history.size() > 20) {
         history.removeFirst();
       }
