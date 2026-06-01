@@ -1,19 +1,61 @@
+// ===============================
+// CHAT TOGGLE
+// ===============================
 function toggleChat() {
   const widget = document.getElementById("chatWidget");
+  if (!widget) return;
+
   widget.classList.toggle("hidden");
 }
 
+// ===============================
+// SAVE MESSAGE TO STORAGE
+// ===============================
+function saveChatMessage(html) {
+  const history = JSON.parse(localStorage.getItem("chatHistory")) || [];
+  history.push(html);
+  localStorage.setItem("chatHistory", JSON.stringify(history));
+}
+
+// ===============================
+// LOAD CHAT HISTORY
+// ===============================
+function loadChatHistory() {
+  const messages = document.getElementById("chatMessages");
+  if (!messages) return;
+
+  const history = JSON.parse(localStorage.getItem("chatHistory")) || [];
+
+  messages.innerHTML = "";
+
+  history.forEach(msg => {
+    messages.innerHTML += msg;
+  });
+
+  messages.scrollTop = messages.scrollHeight;
+}
+
+// ===============================
+// SEND MESSAGE
+// ===============================
 async function sendMessage() {
 
   const input = document.getElementById("chatInput");
   const messages = document.getElementById("chatMessages");
 
+  if (!input || !messages) return;
+
   const text = input.value.trim();
   if (!text) return;
 
-  // show user message
-  messages.innerHTML += `<div><b>You:</b> ${text}</div>`;
+  // USER MESSAGE
+  const userMsg = `<div><b>You:</b> ${text}</div>`;
+  messages.innerHTML += userMsg;
+  saveChatMessage(userMsg);
+
   input.value = "";
+
+  messages.scrollTop = messages.scrollHeight;
 
   try {
 
@@ -29,26 +71,34 @@ async function sendMessage() {
 
     const data = await response.json();
 
-    //  response text
     const reply = data.reply || "No response";
 
-    messages.innerHTML += `<div><b>Bot:</b> ${reply}</div>`;
+    // BOT MESSAGE
+    const botMsg = `<div><b>Bot:</b> ${reply}</div>`;
+    messages.innerHTML += botMsg;
+    saveChatMessage(botMsg);
+
     messages.scrollTop = messages.scrollHeight;
 
   } catch (error) {
 
     console.error(error);
 
-    messages.innerHTML += `<div><b>Bot:</b> Error contacting server</div>`;
+    const errorMsg = `<div><b>Bot:</b> Error contacting server</div>`;
+    messages.innerHTML += errorMsg;
+    saveChatMessage(errorMsg);
   }
 }
 
-// WAIT UNTIL PAGE LOADS
+// ===============================
+// INIT
+// ===============================
 document.addEventListener("DOMContentLoaded", () => {
 
   const btn = document.getElementById("chatToggle");
-
   if (btn) {
     btn.addEventListener("click", toggleChat);
   }
+
+  loadChatHistory();
 });

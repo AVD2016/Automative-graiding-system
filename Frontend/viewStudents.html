@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>View Students</title>
 
+  <link rel="stylesheet" href="chatWidget.css">
+
   <style>
 
+    /* =========================
+       GLOBAL RESET (SAFE)
+    ========================= */
     * {
       box-sizing: border-box;
       font-family: Arial, sans-serif;
@@ -15,31 +20,36 @@
     body {
       margin: 0;
       background-color: #f4f6f9;
-      padding: 30px;
       color: #1e293b;
     }
 
-    .page-container {
+    /* =========================
+       PAGE SCOPE WRAPPER
+    ========================= */
+    .view-students-page {
+      padding: 30px;
+    }
+
+    .view-students-page .page-container {
       max-width: 1500px;
       margin: auto;
     }
 
     /* HEADER */
-
-    .header {
+    .view-students-page .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 25px;
     }
 
-    .header h1 {
+    .view-students-page .header h1 {
       margin: 0;
       font-size: 32px;
       color: #1e293b;
     }
 
-    .back-button {
+    .view-students-page .back-button {
       padding: 12px 18px;
       border: none;
       background-color: #2563eb;
@@ -50,57 +60,55 @@
       transition: 0.2s;
     }
 
-    .back-button:hover {
+    .view-students-page .back-button:hover {
       background-color: #1d4ed8;
     }
 
     /* TABLE */
-
-    .table-container {
+    .view-students-page .table-container {
       background: white;
       border-radius: 14px;
       overflow-x: auto;
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
     }
 
-    table {
+    .view-students-page table {
       width: 100%;
       border-collapse: collapse;
       min-width: 1200px;
     }
 
-    thead {
+    .view-students-page thead {
       background-color: #1e293b;
       color: white;
     }
 
-    th {
+    .view-students-page th {
       text-align: left;
       padding: 16px;
       font-size: 14px;
       letter-spacing: 0.3px;
     }
 
-    td {
+    .view-students-page td {
       padding: 16px;
       border-bottom: 1px solid #e5e7eb;
       vertical-align: top;
       font-size: 14px;
     }
 
-    tbody tr:hover {
+    .view-students-page tbody tr:hover {
       background-color: #f8fafc;
     }
 
     /* MODULES */
-
-    .modules-cell {
+    .view-students-page .modules-cell {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
     }
 
-    .module-badge {
+    .view-students-page .module-badge {
       background-color: #dbeafe;
       color: #1e40af;
       padding: 6px 10px;
@@ -109,27 +117,25 @@
       white-space: nowrap;
     }
 
-    .empty-modules {
+    .view-students-page .empty-modules {
       color: #64748b;
       font-style: italic;
     }
 
     /* STATUS */
-
-    .loading,
-    .error-message {
+    .view-students-page .loading,
+    .view-students-page .error-message {
       padding: 25px;
       text-align: center;
       font-size: 16px;
     }
 
-    .error-message {
+    .view-students-page .error-message {
       color: #dc2626;
     }
 
     /* BUTTONS */
-
-    .register-btn {
+    .view-students-page .register-btn {
       border: none;
       background-color: #2563eb;
       color: white;
@@ -140,13 +146,12 @@
       transition: 0.2s;
     }
 
-    .register-btn:hover {
+    .view-students-page .register-btn:hover {
       background-color: #1d4ed8;
     }
 
     /* MODAL */
-
-    .modal {
+    .view-students-page .modal {
       display: none;
       position: fixed;
       z-index: 1000;
@@ -157,7 +162,7 @@
       background-color: rgba(0,0,0,0.45);
     }
 
-    .modal-content {
+    .view-students-page .modal-content {
       background: white;
       width: 550px;
       max-width: 90%;
@@ -167,43 +172,43 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
 
-    .modal-content h2 {
+    .view-students-page .modal-content h2 {
       margin-top: 0;
       margin-bottom: 20px;
       color: #1e293b;
     }
 
-    #modulesList {
+    .view-students-page #modulesList {
       max-height: 400px;
       overflow-y: auto;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
     }
 
-    .module-option {
+    .view-students-page .module-option {
       padding: 12px;
       border-bottom: 1px solid #e5e7eb;
     }
 
-    .module-option:last-child {
+    .view-students-page .module-option:last-child {
       border-bottom: none;
     }
 
-    .module-option:hover {
+    .view-students-page .module-option:hover {
       background-color: #f8fafc;
     }
 
-    .module-option label {
+    .view-students-page .module-option label {
       cursor: pointer;
       display: block;
       width: 100%;
     }
 
-    .module-option input {
+    .view-students-page .module-option input {
       margin-right: 10px;
     }
 
-    .registered-label {
+    .view-students-page .registered-label {
       color: green;
       font-size: 13px;
       margin-left: 8px;
@@ -211,14 +216,13 @@
     }
 
     /* MODAL BUTTONS */
-
-    .modal-buttons {
+    .view-students-page .modal-buttons {
       display: flex;
       gap: 10px;
       margin-top: 20px;
     }
 
-    .modal-buttons button {
+    .view-students-page .modal-buttons button {
       padding: 12px 16px;
       border: none;
       border-radius: 8px;
@@ -228,61 +232,52 @@
       transition: 0.2s;
     }
 
-    .save-btn {
+    .view-students-page .save-btn {
       background-color: #2563eb;
     }
 
-    .save-btn:hover {
+    .view-students-page .save-btn:hover {
       background-color: #1d4ed8;
     }
 
-    .cancel-btn {
+    .view-students-page .cancel-btn {
       background-color: #64748b;
     }
 
-    .cancel-btn:hover {
+    .view-students-page .cancel-btn:hover {
       background-color: #475569;
     }
 
   </style>
 </head>
 
-<body>
+<body class="view-students-page">
 
   <div class="page-container">
 
     <!-- HEADER -->
-
     <div class="header">
 
-  <h1>Student Records</h1>
+      <h1>Student Records</h1>
 
-  <div style="display:flex; gap:10px;">
+      <div style="display:flex; gap:10px;">
 
-    <button class="register-btn"
-            onclick="openCreateModuleModal()">
+        <button class="register-btn" onclick="openCreateModuleModal()">
+          Create Module
+        </button>
 
-      Create Module
+        <button class="back-button" onclick="goBack()">
+          Back to Dashboard
+        </button>
 
-    </button>
+      </div>
 
-    <button class="back-button"
-            onclick="goBack()">
-
-      Back to Dashboard
-
-    </button>
-
-  </div>
-
-</div>
+    </div>
 
     <!-- TABLE -->
-
     <div class="table-container">
 
       <table>
-
         <thead>
           <tr>
             <th>ID</th>
@@ -296,109 +291,82 @@
         </thead>
 
         <tbody id="studentsTableBody">
-
           <tr>
-            <td colspan="7" class="loading">
-              Loading students...
-            </td>
+            <td colspan="7" class="loading">Loading students...</td>
           </tr>
-
         </tbody>
 
       </table>
 
     </div>
-
   </div>
 
-  <!-- MODULE REGISTRATION MODAL -->
-
+  <!-- MODULE MODAL -->
   <div id="moduleModal" class="modal">
-
     <div class="modal-content">
-
       <h2>Register Student For Modules</h2>
-
-      <!-- MODULE CHECKBOXES WILL BE INSERTED HERE -->
-
-      <div id="modulesList">
-
-      </div>
-
-      <!-- MODAL BUTTONS -->
+      <div id="modulesList"></div>
 
       <div class="modal-buttons">
-
-        <button class="save-btn"
-                onclick="submitModuleRegistration()">
-
+        <button class="save-btn" onclick="submitModuleRegistration()">
           Save Registration
-
         </button>
-
-        <button class="cancel-btn"
-                onclick="closeModal()">
-
+        <button class="cancel-btn" onclick="closeModal()">
           Cancel
-
         </button>
+      </div>
+    </div>
+  </div>
 
+  <!-- CREATE MODULE MODAL -->
+  <div id="createModuleModal" class="modal">
+    <div class="modal-content">
+      <h2>Create New Module</h2>
+
+      <div style="display:flex; flex-direction:column; gap:15px;">
+        <input type="text" id="moduleCode" placeholder="Module Code"
+               style="padding:12px; border:1px solid #ccc; border-radius:8px;">
+
+        <input type="text" id="moduleName" placeholder="Module Name"
+               style="padding:12px; border:1px solid #ccc; border-radius:8px;">
+
+        <input type="number" id="moduleCredits" placeholder="Credits"
+               style="padding:12px; border:1px solid #ccc; border-radius:8px;">
+      </div>
+
+      <div class="modal-buttons">
+        <button class="save-btn" onclick="createModule()">
+          Create Module
+        </button>
+        <button class="cancel-btn" onclick="closeCreateModuleModal()">
+          Cancel
+        </button>
       </div>
 
     </div>
-
   </div>
 
-<!-- CREATE MODULE MODAL -->
-
-<div id="createModuleModal" class="modal">
-
-  <div class="modal-content">
-
-    <h2>Create New Module</h2>
-
-    <div style="display:flex; flex-direction:column; gap:15px;">
-
-      <input type="text"
-             id="moduleCode"
-             placeholder="Module Code"
-             style="padding:12px; border:1px solid #ccc; border-radius:8px;">
-
-      <input type="text"
-             id="moduleName"
-             placeholder="Module Name"
-             style="padding:12px; border:1px solid #ccc; border-radius:8px;">
-
-      <input type="number"
-             id="moduleCredits"
-             placeholder="Credits"
-             style="padding:12px; border:1px solid #ccc; border-radius:8px;">
-
-    </div>
-
-    <div class="modal-buttons">
-
-      <button class="save-btn"
-              onclick="createModule()">
-
-        Create Module
-
-      </button>
-
-      <button class="cancel-btn"
-              onclick="closeCreateModuleModal()">
-
-        Cancel
-
-      </button>
-
-    </div>
-
+  <!-- CHAT (UNCHANGED) -->
+  <div id="chatToggle" class="chat-toggle">
+    <img src="question.jpg" alt="Chat" />
   </div>
 
-</div>
+  <div id="chatWidget" class="chat-widget hidden">
+    <div class="chat-header">
+      <span>Support Chat</span>
+      <button onclick="toggleChat()">✕</button>
+    </div>
+
+    <div id="chatMessages" class="chat-messages"></div>
+
+    <div class="chat-input">
+      <input id="chatInput" type="text" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
 
   <script src="viewStudents.js"></script>
+  <script src="chatWidget.js"></script>
 
 </body>
 </html>

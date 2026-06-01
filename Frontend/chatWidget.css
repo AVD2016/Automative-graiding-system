@@ -5,8 +5,8 @@
   right: 25px;
   width: 55px;
   height: 55px;
-  border-radius: 50%;
-  background-color: #2563eb;
+  background: transparent;
+  box-shadow: none;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add Student</title>
 
+  <link rel="stylesheet" href="chatWidget.css">
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -13,7 +15,7 @@
       padding: 0;
     }
 
-    .container {
+    .student-container {
       max-width: 500px;
       margin: 60px auto;
       background: white;
@@ -22,19 +24,20 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
-    h2 {
+    .student-title {
       margin-bottom: 20px;
       color: #1e293b;
     }
 
-    label {
+
+    .student-label {
       display: block;
       margin-top: 12px;
       font-weight: bold;
       color: #1e293b;
     }
 
-    input {
+    .student-input {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
@@ -42,7 +45,7 @@
       border-radius: 8px;
     }
 
-    button {
+    .student-submit {
       margin-top: 20px;
       width: 100%;
       padding: 12px;
@@ -54,11 +57,11 @@
       font-size: 16px;
     }
 
-    button:hover {
+    .student-submit:hover {
       background: #1d4ed8;
     }
 
-    .back {
+    .student-back {
       margin-top: 15px;
       text-align: center;
       display: block;
@@ -70,38 +73,61 @@
 
 <body>
 
-  <div class="container">
+  <div class="student-container">
 
-    <h2>Add Student</h2>
+    <h2 class="student-title">Add Student</h2>
 
     <form id="addStudentForm">
 
-      <label>ID</label>
-      <input type="number" id="id" required>
+      <label class="student-label">ID</label>
+      <input type="number" id="id" class="student-input" required>
 
-      <label>First Name</label>
-      <input type="text" id="firstName" required>
+      <label class="student-label">First Name</label>
+      <input type="text" id="firstName" class="student-input" required>
 
-      <label>Last Name</label>
-      <input type="text" id="lastName" required>
+      <label class="student-label">Last Name</label>
+      <input type="text" id="lastName" class="student-input" required>
 
-      <label>Username</label>
-      <input type="text" id="username" required>
+      <label class="student-label">Username</label>
+      <input type="text" id="username" class="student-input" required>
 
-      <label>Temporary Password</label>
-      <input type="text" id="password" required>
+      <label class="student-label">Temporary Password</label>
+      <input type="text" id="password" class="student-input" required>
 
-      <label>Email</label>
-      <input type="email" id="email" required>
+      <label class="student-label">Email</label>
+      <input type="email" id="email" class="student-input" required>
 
-      <button type="submit">Add Student</button>
+      <button type="submit" class="student-submit">Add Student</button>
 
     </form>
 
-    <span class="back" onclick="goBack()">← Back to Dashboard</span>
+    <span class="student-back" onclick="goBack()">← Back to Dashboard</span>
 
   </div>
 
+  <!-- CHAT BUTTON -->
+  <div id="chatToggle" class="chat-toggle">
+    <img src="question.jpg" alt="Chat" />
+  </div>
+
+  <!-- CHAT WINDOW -->
+  <div id="chatWidget" class="chat-widget hidden">
+
+    <div class="chat-header">
+      <span>Support Chat</span>
+      <button onclick="toggleChat()">✕</button>
+    </div>
+
+    <div id="chatMessages" class="chat-messages"></div>
+
+    <div class="chat-input">
+      <input id="chatInput" type="text" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+
+  </div>
+
+  <script src="chatWidget.js"></script>
   <script src="addStudent.js"></script>
 
 </body>

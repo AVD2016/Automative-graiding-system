@@ -70,7 +70,7 @@ public class ChatController {
           """
                 {
                   "role": "system",
-                  "content": "You are helping users navigate a university grading system. Keep responses short and clear."
+                  "content": "Instructions: You are helping users navigate a university grading system. Use only plain text, 100 words limit. the rest of the context are past messages (yours and users), continue the chat."
                 }
               """);
 
