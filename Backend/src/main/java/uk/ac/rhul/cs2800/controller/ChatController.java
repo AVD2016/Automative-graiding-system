@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -33,8 +35,8 @@ public class ChatController {
 
       String message = body.get("message");
 
-      // session id
-      String sessionId = "default-user";
+      // 🔑 IMPORTANT: replace later with real userId from frontend
+      String sessionId = body.getOrDefault("userId", "default-user");
 
       // get or create history
       LinkedList<Map<String, String>> history =
@@ -43,7 +45,7 @@ public class ChatController {
       // add user message
       history.add(Map.of("role", "user", "content", message));
 
-      // max 20 messages
+      // keep last 20 messages
       while (history.size() > 20) {
         history.removeFirst();
       }
@@ -51,80 +53,82 @@ public class ChatController {
       RestTemplate restTemplate = new RestTemplate();
 
       HttpHeaders headers = new HttpHeaders();
-
       headers.setContentType(MediaType.APPLICATION_JSON);
-
       headers.setBearerAuth(apiKey);
 
       headers.set("HTTP-Referer", "https://your-site.vercel.app");
-
       headers.set("X-Title", "Grade System Chat");
 
-      // build messages JSON
-      StringBuilder messagesJson = new StringBuilder();
+      // -----------------------------
+      // Build messages JSON manually
+      // -----------------------------
+      StringBuilder messages = new StringBuilder();
+      messages.append("[");
 
-      messagesJson.append(
+      // system prompt
+      messages.append(
           """
-              [
                 {
                   "role": "system",
-                  "content": "You are helping users navigate / use a university grading system. Respond only with plain text, 150 words limit."
-                },
+                  "content": "You are helping users navigate a university grading system. Keep responses short and clear."
+                }
               """);
 
-      for (Map<String, String> msg : history) {
-
-        messagesJson.append("""
-            {
-              "role": "%s",
-              "content": "%s"
-            },
-            """.formatted(msg.get("role"),
-            msg.get("content").replace("\"", "\\\"").replace("\n", "\\n")));
+      if (!history.isEmpty()) {
+        messages.append(",");
       }
 
-      // remove trailing comma
-      if (messagesJson.lastIndexOf(",") != -1) {
-        messagesJson.deleteCharAt(messagesJson.lastIndexOf(","));
+      for (int i = 0; i < history.size(); i++) {
+
+        Map<String, String> msg = history.get(i);
+
+        String role = msg.get("role");
+        String content =
+            msg.get("content").replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
+
+        messages.append("""
+              {
+                "role": "%s",
+                "content": "%s"
+              }
+            """.formatted(role, content));
+
+        if (i < history.size() - 1) {
+          messages.append(",");
+        }
       }
 
-      messagesJson.append("]");
+      messages.append("]");
 
       String requestJson = """
           {
             "model": "openrouter/owl-alpha",
             "messages": %s
           }
-          """.formatted(messagesJson);
+          """.formatted(messages);
 
       HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
 
       ResponseEntity<String> response = restTemplate.exchange(
           "https://openrouter.ai/api/v1/chat/completions", HttpMethod.POST, entity, String.class);
 
-      // extract assistant reply
       String responseBody = response.getBody();
 
-      String reply = responseBody;
+      System.out.println("OPENROUTER RESPONSE: " + responseBody);
 
-      // extraction
-      int start = responseBody.indexOf("\"content\":\"");
+      // -----------------------------
+      // SAFE JSON parsing (FIX)
+      // -----------------------------
+      ObjectMapper mapper = new ObjectMapper();
 
-      if (start != -1) {
+      JsonNode root = mapper.readTree(responseBody);
 
-        start += 11;
+      String reply = root.path("choices").get(0).path("message").path("content").asText();
 
-        int end = responseBody.indexOf("\"", start);
-
-        if (end != -1) {
-          reply = responseBody.substring(start, end);
-        }
-      }
-
-      // add assistant reply to history
+      // store assistant reply
       history.add(Map.of("role", "assistant", "content", reply));
 
-      // trim
+      // trim again
       while (history.size() > 20) {
         history.removeFirst();
       }
