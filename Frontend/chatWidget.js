@@ -17,7 +17,7 @@ async function sendMessage() {
 
   try {
 
-    const response = await fetch("http://automative-graiding-system.onrender.com/api/chat/send", {
+    const response = await fetch("https://automative-graiding-system.onrender.com/api/chat/send", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
