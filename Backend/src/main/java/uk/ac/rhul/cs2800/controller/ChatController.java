@@ -23,7 +23,7 @@ public class ChatController {
   private String apiKey;
 
   @PostMapping("/send")
-  public ResponseEntity<?> chat(@RequestBody Map<String, String> body) {
+  public ResponseEntity<String> chat(@RequestBody Map<String, String> body) {
 
     try {
 
@@ -35,40 +35,37 @@ public class ChatController {
       headers.setContentType(MediaType.APPLICATION_JSON);
       headers.setBearerAuth(apiKey);
 
-      // safer JSON construction
-      String requestJson = String.format("""
+      // IMPORTANT OpenRouter headers (recommended)
+      headers.set("HTTP-Referer", "http://localhost");
+      headers.set("X-Title", "Grade System Chat");
+
+      String requestJson = """
           {
-            "model": "gpt-4o-mini",
+            "model": "openrouter/owl-alpha",
             "messages": [
               {
                 "role": "system",
-                "content": "You are helping a user navigate a university grade management system."
+                "content": "You are a helpful assistant for a university grading system."
               },
-              {
+          {
                 "role": "user",
-                "content": %s
-              }
+                "content": "%s"
+          }
             ]
           }
-          """, toJsonString(message));
+          """.formatted(message.replace("\"", "\\\""));
 
       HttpEntity<String> entity = new HttpEntity<>(requestJson, headers);
 
       ResponseEntity<String> response = restTemplate.exchange(
-          "https://api.openai.com/v1/chat/completions", HttpMethod.POST, entity, String.class);
+          "https://openrouter.ai/api/v1/chat/completions", HttpMethod.POST, entity, String.class);
 
       return ResponseEntity.ok(response.getBody());
 
     } catch (Exception e) {
-
       e.printStackTrace();
-
       return ResponseEntity.status(500)
-          .body(Map.of("error", "Chat failed", "message", e.getMessage()));
+          .body("{\"error\":\"chat failed\",\"message\":\"" + e.getMessage() + "\"}");
     }
-  }
-
-  private String toJsonString(String input) {
-    return "\"" + input.replace("\"", "\\\"") + "\"";
   }
 }
