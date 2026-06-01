@@ -38,9 +38,8 @@ public class ChatController {
             {
               "model": "gpt-4o-mini",
               "messages": [
-                { "role": "system", "content": "You are helping a user to navigate a grade managment webpage and assist with any questions and requests.
-
-                " },
+                { "role": "system", "content": "You are helping a user to navigate a grade managment webpage and assist with any questions and requests."
+                 },
 
 
                 { "role": "user", "content": "%s" }
