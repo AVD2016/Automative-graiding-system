@@ -18,7 +18,7 @@ import org.springframework.web.client.RestTemplate;
 @CrossOrigin(originPatterns = "https://*.vercel.app")
 public class ChatController {
 
-  private final String API_KEY = "YOUR_OPENAI_API_KEY";
+  private final String API_KEY = "${HelpChatAPIKey}";
 
   @PostMapping("/send")
   public ResponseEntity<String> chat(@RequestBody Map<String, String> body) {
