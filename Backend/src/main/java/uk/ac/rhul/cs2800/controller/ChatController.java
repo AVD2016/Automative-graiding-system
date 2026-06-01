@@ -1,6 +1,7 @@
 package uk.ac.rhul.cs2800.controller;
 
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -18,7 +19,8 @@ import org.springframework.web.client.RestTemplate;
 @CrossOrigin(originPatterns = "https://*.vercel.app")
 public class ChatController {
 
-  private final String API_KEY = "${HelpChatAPIKey}";
+  @Value("${HelpChatAPIKey}")
+  private String apiKey;
 
   @PostMapping("/send")
   public ResponseEntity<String> chat(@RequestBody Map<String, String> body) {
@@ -29,7 +31,7 @@ public class ChatController {
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.setBearerAuth(API_KEY);
+    headers.setBearerAuth(apiKey);
 
     String requestJson =
         """
