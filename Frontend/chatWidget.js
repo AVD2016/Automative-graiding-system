@@ -29,10 +29,8 @@ async function sendMessage() {
 
     const data = await response.json();
 
-    // OpenAI response text is inside:
-    const reply =
-      data.choices?.[0]?.message?.content ||
-      "No response";
+    //  response text
+    const reply = data.reply || "No response";
 
     messages.innerHTML += `<div><b>Bot:</b> ${reply}</div>`;
     messages.scrollTop = messages.scrollHeight;

@@ -116,9 +116,7 @@ public class ChatController {
 
       System.out.println("OPENROUTER RESPONSE: " + responseBody);
 
-      // -----------------------------
-      // SAFE JSON parsing (FIX)
-      // -----------------------------
+      // JSON
       ObjectMapper mapper = new ObjectMapper();
 
       JsonNode root = mapper.readTree(responseBody);
