@@ -65,7 +65,7 @@ public class RegistrationController {
 
     Registration registration = new Registration();
 
-    registration.setStudent(student);
+    registration.setUser(student);
     registration.setModule(module);
 
     registration = registrationRepository.save(registration);
@@ -110,7 +110,7 @@ public class RegistrationController {
         Module module = moduleRepository.findById(code).orElseThrow();
 
         Registration registration = new Registration();
-        registration.setStudent(student);
+        registration.setUser(student);
         registration.setModule(module);
 
         registrationRepository.save(registration);

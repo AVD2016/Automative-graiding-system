@@ -38,9 +38,9 @@ public class Registration {
 
   /** The student associated with this registration. */
   @ManyToOne
-  @JoinColumn(name = "student_id")
+  @JoinColumn(name = "user_id")
   @JsonIgnore
-  private Student student;
+  private User user;
 
   /**
    * Creates a new {@code Registration} with no associated module.
@@ -107,8 +107,8 @@ public class Registration {
    *
    * @return the student linked to this registration
    */
-  public Student getStudent() {
-    return student;
+  public User getUser() {
+    return user;
   }
 
   /**
@@ -116,7 +116,7 @@ public class Registration {
    *
    * @param student the student to assign to this registration
    */
-  public void setStudent(Student student) {
-    this.student = student;
+  public void setUser(User user) {
+    this.user = user;
   }
 }

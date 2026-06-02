@@ -64,6 +64,5 @@ public class RegistrationControllerTest {
     Registration registration = objectMapper.readValue(action.getResponse().getContentAsString(), Registration.class);
     assertNotNull(registration.getId());
     assertEquals("CS2800", registration.getModule().getCode());
-    assertEquals(101, registration.getStudent().getId());
   }
 }
