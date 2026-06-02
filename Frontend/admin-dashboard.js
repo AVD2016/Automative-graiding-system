@@ -28,3 +28,7 @@ function logout() {
   localStorage.clear();
   window.location.href = "/index.html";
 }
+
+function showAddNewStudent(){
+indow.location.href = "AddNewLecturer.html";
+}

@@ -3,7 +3,6 @@ package uk.ac.rhul.cs2800.model;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import uk.ac.rhul.cs2800.exception.NoGradeAvailableException;
 import uk.ac.rhul.cs2800.exception.NoRegistrationException;
@@ -20,25 +19,8 @@ import uk.ac.rhul.cs2800.exception.NoRegistrationException;
  * @since 2025-10-23
  */
 @Entity
-public class Student {
+public class Student extends User {
 
-  /** The unique identifier for the student. */
-  @Id
-  private int id;
-
-  /** The student's first name. */
-  private String firstName;
-
-  /** The student's last name. */
-  private String lastName;
-
-  /** The student's system username. */
-  private String username;
-
-  /** The student's email address. */
-  private String email;
-
-  private String password;
   /**
    * A mapping between modules and the student's grades for those modules. Each key represents a
    * {@link Module}, and the corresponding value represents the student's {@link Grade} for that
@@ -56,7 +38,7 @@ public class Student {
    * modules.
    * </p>
    */
-  @OneToMany(mappedBy = "student")
+  @OneToMany(mappedBy = "user")
   private List<Registration> registered = new ArrayList<>();
 
   /**
@@ -88,111 +70,9 @@ public class Student {
   }
 
   public Student(int id, String firstName, String lastName, String username, String email, String password) {
-    this.id = id;
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.username = username;
-    this.email = email;
-    this.password = password;
+    super(id, firstName, lastName, username, email, password);
   }
 
-  /**
-   * Sets student id.
-   *
-   * @param id of the student
-   */
-  public void setId(int id) {
-    this.id = id;
-  }
-
-  /**
-   * returns student id.
-   *
-   * @return student id
-   */
-  public int getId() {
-    return this.id;
-  }
-
-  /**
-   * sets student first name.
-   *
-   * @param firstName of the student
-   */
-  public void setFirstName(String firstName) {
-    this.firstName = firstName;
-  }
-
-  /**
-   * returns student first name.
-   *
-   * @return first name of the student
-   */
-  public String getFirstName() {
-    return this.firstName;
-  }
-
-  /**
-   * sets student last name.
-   *
-   * @param lastName of the student
-   */
-  public void setLastName(String lastName) {
-    this.lastName = lastName;
-  }
-
-  /**
-   * returns student last name.
-   *
-   * @return last name of the student
-   */
-  public String getLastName() {
-    return this.lastName;
-  }
-
-  /**
-   * sets student username.
-   *
-   * @param username of the student
-   */
-  public void setUsername(String username) {
-    this.username = username;
-  }
-
-  /**
-   * returns Student username.
-   *
-   * @return username of the student
-   */
-  public String getUsername() {
-    return this.username;
-  }
-
-  /**
-   * sets email of the student.
-   *
-   * @param email of the student
-   */
-  public void setEmail(String email) {
-    this.email = email;
-  }
-
-  /**
-   * returns student email.
-   *
-   * @return email of the student
-   */
-  public String getEmail() {
-    return this.email;
-  }
-
-  public void setPassword(String password) {
-    this.password = password;
-  }
-
-  public String getPassword() {
-    return this.password;
-  }
 
   /**
    * Creates new instance of Grade class. Maps Grades to Modules.
