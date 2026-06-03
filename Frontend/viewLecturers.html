@@ -40,6 +40,7 @@
     .view-lecturers-page .header h1 {
       margin: 0;
       font-size: 32px;
+      color: #1e293b;
     }
 
     .view-lecturers-page .back-button {
@@ -49,22 +50,11 @@
       color: white;
       border-radius: 8px;
       cursor: pointer;
+      font-size: 14px;
+      transition: 0.2s;
     }
 
     .view-lecturers-page .back-button:hover {
-      background-color: #1d4ed8;
-    }
-
-    .view-lecturers-page .register-btn {
-      border: none;
-      background-color: #2563eb;
-      color: white;
-      padding: 12px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .view-lecturers-page .register-btn:hover {
       background-color: #1d4ed8;
     }
 
@@ -79,7 +69,7 @@
     .view-lecturers-page table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 900px;
+      min-width: 1200px;
     }
 
     .view-lecturers-page thead {
@@ -87,40 +77,75 @@
       color: white;
     }
 
-    .view-lecturers-page th,
+    .view-lecturers-page th {
+      text-align: left;
+      padding: 16px;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+    }
+
     .view-lecturers-page td {
       padding: 16px;
       border-bottom: 1px solid #e5e7eb;
+      vertical-align: top;
       font-size: 14px;
-      text-align: left;
     }
 
     .view-lecturers-page tbody tr:hover {
       background-color: #f8fafc;
     }
 
-    /* MODULE BADGES */
-    .modules-cell {
+    /* MODULES */
+    .view-lecturers-page .modules-cell {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
     }
 
-    .module-badge {
+    .view-lecturers-page .module-badge {
       background-color: #dbeafe;
       color: #1e40af;
       padding: 6px 10px;
       border-radius: 20px;
       font-size: 13px;
+      white-space: nowrap;
     }
 
-    .empty {
+    .view-lecturers-page .empty-modules {
       color: #64748b;
       font-style: italic;
     }
 
-    /* MODAL (same as student page) */
-    .modal {
+    /* STATUS */
+    .view-lecturers-page .loading,
+    .view-lecturers-page .error-message {
+      padding: 25px;
+      text-align: center;
+      font-size: 16px;
+    }
+
+    .view-lecturers-page .error-message {
+      color: #dc2626;
+    }
+
+    /* BUTTONS */
+    .view-lecturers-page .register-btn {
+      border: none;
+      background-color: #2563eb;
+      color: white;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: 0.2s;
+    }
+
+    .view-lecturers-page .register-btn:hover {
+      background-color: #1d4ed8;
+    }
+
+    /* MODAL */
+    .view-lecturers-page .modal {
       display: none;
       position: fixed;
       z-index: 1000;
@@ -131,41 +156,91 @@
       background-color: rgba(0,0,0,0.45);
     }
 
-    .modal-content {
+    .view-lecturers-page .modal-content {
       background: white;
       width: 550px;
       max-width: 90%;
       margin: 80px auto;
       padding: 25px;
       border-radius: 14px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
 
-    .modal-buttons {
+    .view-lecturers-page .modal-content h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #1e293b;
+    }
+
+    .view-lecturers-page #modulesList {
+      max-height: 400px;
+      overflow-y: auto;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+    }
+
+    .view-lecturers-page .module-option {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .view-lecturers-page .module-option:last-child {
+      border-bottom: none;
+    }
+
+    .view-lecturers-page .module-option:hover {
+      background-color: #f8fafc;
+    }
+
+    .view-lecturers-page .module-option label {
+      cursor: pointer;
+      display: block;
+      width: 100%;
+    }
+
+    .view-lecturers-page .module-option input {
+      margin-right: 10px;
+    }
+
+    .view-lecturers-page .registered-label {
+      color: green;
+      font-size: 13px;
+      margin-left: 8px;
+      font-weight: bold;
+    }
+
+    /* MODAL BUTTONS */
+    .view-lecturers-page .modal-buttons {
       display: flex;
       gap: 10px;
       margin-top: 20px;
     }
 
-    .save-btn {
+    .view-lecturers-page .modal-buttons button {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      font-size: 14px;
+      transition: 0.2s;
+    }
+
+    .view-lecturers-page .save-btn {
       background-color: #2563eb;
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      cursor: pointer;
     }
 
-    .cancel-btn {
+    .view-lecturers-page .save-btn:hover {
+      background-color: #1d4ed8;
+    }
+
+    .view-lecturers-page .cancel-btn {
       background-color: #64748b;
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      cursor: pointer;
     }
 
-    .save-btn:hover { background-color: #1d4ed8; }
-    .cancel-btn:hover { background-color: #475569; }
+    .view-lecturers-page .cancel-btn:hover {
+      background-color: #475569;
+    }
 
   </style>
 </head>
@@ -205,18 +280,46 @@
             <th>Username</th>
             <th>Email</th>
             <th>Registered Modules</th>
+            <th>Actions</th>
           </tr>
         </thead>
 
         <tbody id="lecturersTableBody">
           <tr>
-            <td colspan="6">Loading lecturers...</td>
+            <td colspan="7" class="loading">
+              Loading lecturers...
+            </td>
           </tr>
         </tbody>
 
       </table>
 
     </div>
+  </div>
+
+  <!-- MODULE REGISTRATION MODAL -->
+  <div id="moduleModal" class="modal">
+
+    <div class="modal-content">
+
+      <h2>Register Lecturer For Modules</h2>
+
+      <div id="modulesList"></div>
+
+      <div class="modal-buttons">
+
+        <button class="save-btn" onclick="submitModuleRegistration()">
+          Save Registration
+        </button>
+
+        <button class="cancel-btn" onclick="closeModal()">
+          Cancel
+        </button>
+
+      </div>
+
+    </div>
+
   </div>
 
   <!-- CREATE MODULE MODAL -->
@@ -227,17 +330,32 @@
       <h2>Create New Module</h2>
 
       <div style="display:flex; flex-direction:column; gap:15px;">
-        <input type="text" id="moduleCode" placeholder="Module Code"
-               style="padding:12px; border:1px solid #ccc; border-radius:8px;">
 
-        <input type="text" id="moduleName" placeholder="Module Name"
-               style="padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <input
+          type="text"
+          id="moduleCode"
+          placeholder="Module Code"
+          style="padding:12px; border:1px solid #ccc; border-radius:8px;"
+        >
 
-        <input type="number" id="moduleCredits" placeholder="Credits"
-               style="padding:12px; border:1px solid #ccc; border-radius:8px;">
+        <input
+          type="text"
+          id="moduleName"
+          placeholder="Module Name"
+          style="padding:12px; border:1px solid #ccc; border-radius:8px;"
+        >
+
+        <input
+          type="number"
+          id="moduleCredits"
+          placeholder="Credits"
+          style="padding:12px; border:1px solid #ccc; border-radius:8px;"
+        >
+
       </div>
 
       <div class="modal-buttons">
+
         <button class="save-btn" onclick="createModule()">
           Create Module
         </button>
@@ -245,8 +363,30 @@
         <button class="cancel-btn" onclick="closeCreateModuleModal()">
           Cancel
         </button>
+
       </div>
 
+    </div>
+
+  </div>
+
+  <!-- CHAT -->
+  <div id="chatToggle" class="chat-toggle">
+    <img src="question.jpg" alt="Chat" />
+  </div>
+
+  <div id="chatWidget" class="chat-widget hidden">
+
+    <div class="chat-header">
+      <span>Support Chat</span>
+      <button onclick="toggleChat()">✕</button>
+    </div>
+
+    <div id="chatMessages" class="chat-messages"></div>
+
+    <div class="chat-input">
+      <input id="chatInput" type="text" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
     </div>
 
   </div>

@@ -109,7 +109,7 @@ function closeCreateModuleModal() {
 // NAVIGATION
 // =========================
 function goBack() {
-  window.location.href = "adminDashboard.html";
+  window.location.href = "admin-dashboard.html";
 }
 
 // =========================
