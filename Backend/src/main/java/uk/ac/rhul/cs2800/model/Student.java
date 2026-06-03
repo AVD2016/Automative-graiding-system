@@ -3,6 +3,7 @@ package uk.ac.rhul.cs2800.model;
 import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import uk.ac.rhul.cs2800.exception.NoGradeAvailableException;
 import uk.ac.rhul.cs2800.exception.NoRegistrationException;
@@ -21,6 +22,8 @@ import uk.ac.rhul.cs2800.exception.NoRegistrationException;
 @Entity
 public class Student extends User {
 
+  @Id
+  protected int id;
   /**
    * A mapping between modules and the student's grades for those modules. Each key represents a
    * {@link Module}, and the corresponding value represents the student's {@link Grade} for that
@@ -49,8 +52,10 @@ public class Student extends User {
   }
 
 
+
   public Student(int id, String firstName, String lastName, String username, String email, String password) {
     super(id, firstName, lastName, username, email, password);
+    this.id = id;
   }
 
 
