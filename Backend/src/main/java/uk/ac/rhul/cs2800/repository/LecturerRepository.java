@@ -6,4 +6,6 @@ import uk.ac.rhul.cs2800.model.Lecturer;
 
 public interface LecturerRepository extends CrudRepository<Lecturer, Integer> {
   Optional<Lecturer> findByUsername(String username);
+
+  boolean existsByUsername(String username);
 }

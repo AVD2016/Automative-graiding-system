@@ -29,6 +29,6 @@ function logout() {
   window.location.href = "/index.html";
 }
 
-function showAddNewStudent(){
-indow.location.href = "AddNewLecturer.html";
+function openAddNewLecturer(){
+window.location.href = "addNewLecturer.html";
 }
