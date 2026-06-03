@@ -13,6 +13,7 @@ public abstract class User {
 
   @Id
   protected int id;
+
   protected String firstName;
   protected String lastName;
   protected String username;

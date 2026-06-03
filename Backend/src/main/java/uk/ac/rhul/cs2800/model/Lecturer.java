@@ -9,8 +9,6 @@ import jakarta.persistence.OneToMany;
 @Entity
 public class Lecturer extends User {
 
-  protected int id;
-
   @OneToMany(mappedBy = "user")
   private List<Registration> registered = new ArrayList<>();
 
