@@ -20,8 +20,6 @@ import uk.ac.rhul.cs2800.exception.NoRegistrationException;
  */
 @Entity
 public class Student extends User {
-
-  protected int id;
   /**
    * A mapping between modules and the student's grades for those modules. Each key represents a
    * {@link Module}, and the corresponding value represents the student's {@link Grade} for that

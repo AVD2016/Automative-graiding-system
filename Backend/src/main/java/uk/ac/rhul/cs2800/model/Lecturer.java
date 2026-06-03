@@ -20,5 +20,12 @@ public class Lecturer extends User {
     this.id = id;
   }
 
+  public List<Registration> getRegistered() {
+    return new ArrayList<>(registered);
+  }
+
+  public void setRegistered(List<Registration> registered) {
+    this.registered = registered;
+  }
 
 }

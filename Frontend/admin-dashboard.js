@@ -32,3 +32,7 @@ function logout() {
 function openAddNewLecturer(){
 window.location.href = "addNewLecturer.html";
 }
+
+function openViewLecturers(){
+  window.location.href = "viewLecturers.html"
+}
