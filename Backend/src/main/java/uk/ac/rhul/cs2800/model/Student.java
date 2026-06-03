@@ -45,29 +45,9 @@ public class Student extends User {
    * Default constructor with empty parameters assigned.
    */
   public Student() {
-    this.id = 0;
-    this.firstName = "";
-    this.lastName = "";
-    this.username = "";
-    this.email = "";
+    super();
   }
 
-  /**
-   * Main constructor to create an instance of the class.
-   *
-   * @param id the unique ID number of the student
-   * @param firstName the student's first name
-   * @param lastName the student's last name
-   * @param username the course name the student is enrolled in
-   * @param email the student's email address
-   */
-  public Student(int id, String firstName, String lastName, String username, String email) {
-    this.id = id;
-    this.firstName = firstName;
-    this.lastName = lastName;
-    this.username = username;
-    this.email = email;
-  }
 
   public Student(int id, String firstName, String lastName, String username, String email, String password) {
     super(id, firstName, lastName, username, email, password);
@@ -141,7 +121,7 @@ public class Student extends User {
    * @param module the module to register the student for
    */
   public void registerModule(Module module) {
-    Registration registration = new Registration(module);
+    Registration registration = new Registration(module, this);
     this.registered.add(registration);
   }
 

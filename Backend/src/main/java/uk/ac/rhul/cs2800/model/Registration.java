@@ -41,7 +41,7 @@ public class Registration {
   @JoinColumn(name = "user_id")
   @JsonIgnore
   private User user;
-
+  
   /**
    * Creates a new {@code Registration} with no associated module.
    *
@@ -62,6 +62,11 @@ public class Registration {
     this.module = module;
   }
 
+  public Registration(Module module, User user) {
+    this.module = module;
+    this.user = user;
+  }
+  
   /**
    * Returns the unique identifier for this registration.
    *
