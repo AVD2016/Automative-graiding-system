@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.ac.rhul.cs2800.model.Lecturer;
 import uk.ac.rhul.cs2800.model.Module;
 import uk.ac.rhul.cs2800.model.Registration;
 import uk.ac.rhul.cs2800.model.Student;
+import uk.ac.rhul.cs2800.repository.LecturerRepository;
 import uk.ac.rhul.cs2800.repository.ModuleRepository;
 import uk.ac.rhul.cs2800.repository.StudentRepository;
 
@@ -31,6 +33,9 @@ public class ModuleController {
 
   @Autowired
   private StudentRepository studentRepository;
+
+  @Autowired
+  LecturerRepository lecturerRepository;
 
   @GetMapping("/getAvailableModules/{studentId}")
   public List<Map<String, Object>> getAvailableModules(@PathVariable int studentId) {
@@ -65,6 +70,51 @@ public class ModuleController {
 
       moduleData.put("code", module.getCode());
       moduleData.put("name", module.getName());
+      moduleData.put("registered", registered);
+
+      response.add(moduleData);
+    }
+
+    return response;
+  }
+
+  @GetMapping("/getAvailableModulesLecturer/{lecturerId}")
+  public List<Map<String, Object>> getAvailableModulesLecturer(@PathVariable int lecturerId) {
+
+    List<Map<String, Object>> response = new ArrayList<>();
+
+    Optional<Lecturer> optionalLecturer = lecturerRepository.findById(lecturerId);
+
+    if (optionalLecturer.isEmpty()) {
+
+      return response;
+    }
+
+    Lecturer lecturer = optionalLecturer.get();
+
+    Iterable<Module> allModules = moduleRepository.findAll();
+
+    for (Module module : allModules) {
+
+      boolean registered = false;
+
+      for (Registration registration : lecturer.getRegistered()) {
+
+        if (registration.getModule() != null
+            && registration.getModule().getCode().equals(module.getCode())) {
+
+          registered = true;
+
+          break;
+        }
+      }
+
+      Map<String, Object> moduleData = new HashMap<>();
+
+      moduleData.put("code", module.getCode());
+
+      moduleData.put("name", module.getName());
+
       moduleData.put("registered", registered);
 
       response.add(moduleData);

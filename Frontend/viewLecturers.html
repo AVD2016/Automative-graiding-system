@@ -1,398 +1,333 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>View Lecturers</title>
+const lecturersTableBody = document.getElementById("lecturersTableBody");
 
-  <link rel="stylesheet" href="chatWidget.css">
+// ======================================
+// LOAD LECTURERS
+// ======================================
 
-  <style>
+async function loadLecturers() {
 
-    * {
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
+  try {
+
+    const response = await fetch(
+      "https://automative-graiding-system.onrender.com/api/lecturer/getLecturers"
+    );
+
+    if (!response.ok) {
+
+      throw new Error("Failed to fetch lecturers");
     }
 
-    body {
-      margin: 0;
-      background-color: #f4f6f9;
-      color: #1e293b;
+    const lecturers = await response.json();
+
+    lecturersTableBody.innerHTML = "";
+
+    if (lecturers.length === 0) {
+
+      lecturersTableBody.innerHTML = `
+        <tr>
+          <td colspan="7" class="loading">
+            No lecturers found.
+          </td>
+        </tr>
+      `;
+
+      return;
     }
 
-    .view-lecturers-page {
-      padding: 30px;
+    lecturers.forEach(lecturer => {
+
+      let modulesHtml = "";
+
+      if (lecturer.modules && lecturer.modules.length > 0) {
+
+        lecturer.modules.forEach(module => {
+
+          modulesHtml += `
+            <div class="module-badge">
+              ${module.code} - ${module.name}
+            </div>
+          `;
+        });
+
+      } else {
+
+        modulesHtml = `
+          <span class="empty-modules">
+            No modules registered
+          </span>
+        `;
+      }
+
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${lecturer.id}</td>
+        <td>${lecturer.firstName}</td>
+        <td>${lecturer.lastName}</td>
+        <td>${lecturer.username}</td>
+        <td>${lecturer.email}</td>
+
+        <td>
+          <div class="modules-cell">
+            ${modulesHtml}
+          </div>
+        </td>
+
+        <td>
+          <button class="register-btn"
+                  onclick="openModuleModal(${lecturer.id})">
+
+            Register For Module
+
+          </button>
+        </td>
+      `;
+
+      lecturersTableBody.appendChild(row);
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    lecturersTableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="error-message">
+          Error loading lecturers.
+        </td>
+      </tr>
+    `;
+  }
+}
+
+
+// ======================================
+// NAVIGATION
+// ======================================
+
+function goBack() {
+
+  window.location.href = "admin-dashboard.html";
+}
+
+
+// ======================================
+// INIT
+// ======================================
+
+loadLecturers();
+
+
+// ======================================
+// MODULE REGISTRATION
+// ======================================
+
+let selectedLecturerId = null;
+
+
+async function openModuleModal(lecturerId) {
+
+  selectedLecturerId = lecturerId;
+
+  const modal = document.getElementById("moduleModal");
+
+  const modulesList = document.getElementById("modulesList");
+
+  modal.style.display = "block";
+
+  try {
+
+    const response = await fetch(
+      `https://automative-graiding-system.onrender.com/api/module/getAvailableModulesLecturer/{lecturerId}`
+    );
+
+    if (!response.ok) {
+
+      throw new Error("Failed to load modules");
     }
 
-    .view-lecturers-page .page-container {
-      max-width: 1500px;
-      margin: auto;
+    const modules = await response.json();
+
+    modulesList.innerHTML = "";
+
+    modules.forEach(module => {
+
+      modulesList.innerHTML += `
+        <div class="module-option">
+
+          <label>
+
+            <input type="checkbox"
+                   value="${module.code}">
+
+            <strong>${module.code}</strong>
+            - ${module.name}
+
+          </label>
+
+        </div>
+      `;
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    modulesList.innerHTML =
+      "<p>Error loading modules.</p>";
+  }
+}
+
+
+function closeModal() {
+
+  document.getElementById("moduleModal").style.display = "none";
+}
+
+
+// ======================================
+// SAVE LECTURER REGISTRATION
+// ======================================
+
+async function submitModuleRegistration() {
+
+  const selectedModules = [];
+
+  document.querySelectorAll(
+    '#modulesList input[type="checkbox"]:checked'
+  ).forEach(checkbox => {
+
+    selectedModules.push(checkbox.value);
+  });
+
+  if (selectedModules.length === 0) {
+
+    alert("Select at least one module.");
+
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      "https://automative-graiding-system.onrender.com/api/registrations/syncLecturer",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          lecturerId: selectedLecturerId,
+          modules: selectedModules
+        })
+      }
+    );
+
+    if (!response.ok) {
+
+      throw new Error("Registration failed");
     }
 
-    /* HEADER */
-    .view-lecturers-page .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 25px;
+    alert("Lecturer registered successfully!");
+
+    closeModal();
+
+    loadLecturers();
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert("Error registering modules.");
+  }
+}
+
+
+// ======================================
+// CREATE MODULE MODAL
+// ======================================
+
+function openCreateModuleModal() {
+
+  document.getElementById(
+    "createModuleModal"
+  ).style.display = "block";
+}
+
+
+function closeCreateModuleModal() {
+
+  document.getElementById(
+    "createModuleModal"
+  ).style.display = "none";
+}
+
+
+// ======================================
+// CREATE MODULE
+// ======================================
+
+async function createModule() {
+
+  const code = document.getElementById("moduleCode")
+    .value
+    .trim();
+
+  const name = document.getElementById("moduleName")
+    .value
+    .trim();
+
+  const credits = parseInt(
+    document.getElementById("moduleCredits").value
+  );
+
+  if (!code || !name || !credits) {
+
+    alert("Please fill all fields.");
+
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      "https://automative-graiding-system.onrender.com/api/module/createModule",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          code: code,
+          name: name,
+          credits: credits
+        })
+      }
+    );
+
+    if (!response.ok) {
+
+      throw new Error("Failed to create module");
     }
 
-    .view-lecturers-page .header h1 {
-      margin: 0;
-      font-size: 32px;
-      color: #1e293b;
-    }
+    alert("Module created successfully!");
 
-    .view-lecturers-page .back-button {
-      padding: 12px 18px;
-      border: none;
-      background-color: #2563eb;
-      color: white;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: 0.2s;
-    }
+    closeCreateModuleModal();
 
-    .view-lecturers-page .back-button:hover {
-      background-color: #1d4ed8;
-    }
+    document.getElementById("moduleCode").value = "";
 
-    /* TABLE */
-    .view-lecturers-page .table-container {
-      background: white;
-      border-radius: 14px;
-      overflow-x: auto;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
+    document.getElementById("moduleName").value = "";
 
-    .view-lecturers-page table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 1200px;
-    }
+    document.getElementById("moduleCredits").value = "";
 
-    .view-lecturers-page thead {
-      background-color: #1e293b;
-      color: white;
-    }
+  } catch (error) {
 
-    .view-lecturers-page th {
-      text-align: left;
-      padding: 16px;
-      font-size: 14px;
-      letter-spacing: 0.3px;
-    }
+    console.error(error);
 
-    .view-lecturers-page td {
-      padding: 16px;
-      border-bottom: 1px solid #e5e7eb;
-      vertical-align: top;
-      font-size: 14px;
-    }
-
-    .view-lecturers-page tbody tr:hover {
-      background-color: #f8fafc;
-    }
-
-    /* MODULES */
-    .view-lecturers-page .modules-cell {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .view-lecturers-page .module-badge {
-      background-color: #dbeafe;
-      color: #1e40af;
-      padding: 6px 10px;
-      border-radius: 20px;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    .view-lecturers-page .empty-modules {
-      color: #64748b;
-      font-style: italic;
-    }
-
-    /* STATUS */
-    .view-lecturers-page .loading,
-    .view-lecturers-page .error-message {
-      padding: 25px;
-      text-align: center;
-      font-size: 16px;
-    }
-
-    .view-lecturers-page .error-message {
-      color: #dc2626;
-    }
-
-    /* BUTTONS */
-    .view-lecturers-page .register-btn {
-      border: none;
-      background-color: #2563eb;
-      color: white;
-      padding: 10px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 13px;
-      transition: 0.2s;
-    }
-
-    .view-lecturers-page .register-btn:hover {
-      background-color: #1d4ed8;
-    }
-
-    /* MODAL */
-    .view-lecturers-page .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.45);
-    }
-
-    .view-lecturers-page .modal-content {
-      background: white;
-      width: 550px;
-      max-width: 90%;
-      margin: 80px auto;
-      padding: 25px;
-      border-radius: 14px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    }
-
-    .view-lecturers-page .modal-content h2 {
-      margin-top: 0;
-      margin-bottom: 20px;
-      color: #1e293b;
-    }
-
-    .view-lecturers-page #modulesList {
-      max-height: 400px;
-      overflow-y: auto;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-    }
-
-    .view-lecturers-page .module-option {
-      padding: 12px;
-      border-bottom: 1px solid #e5e7eb;
-    }
-
-    .view-lecturers-page .module-option:last-child {
-      border-bottom: none;
-    }
-
-    .view-lecturers-page .module-option:hover {
-      background-color: #f8fafc;
-    }
-
-    .view-lecturers-page .module-option label {
-      cursor: pointer;
-      display: block;
-      width: 100%;
-    }
-
-    .view-lecturers-page .module-option input {
-      margin-right: 10px;
-    }
-
-    .view-lecturers-page .registered-label {
-      color: green;
-      font-size: 13px;
-      margin-left: 8px;
-      font-weight: bold;
-    }
-
-    /* MODAL BUTTONS */
-    .view-lecturers-page .modal-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
-    }
-
-    .view-lecturers-page .modal-buttons button {
-      padding: 12px 16px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      color: white;
-      font-size: 14px;
-      transition: 0.2s;
-    }
-
-    .view-lecturers-page .save-btn {
-      background-color: #2563eb;
-    }
-
-    .view-lecturers-page .save-btn:hover {
-      background-color: #1d4ed8;
-    }
-
-    .view-lecturers-page .cancel-btn {
-      background-color: #64748b;
-    }
-
-    .view-lecturers-page .cancel-btn:hover {
-      background-color: #475569;
-    }
-
-  </style>
-</head>
-
-<body class="view-lecturers-page">
-
-  <div class="page-container">
-
-    <!-- HEADER -->
-    <div class="header">
-
-      <h1>Lecturer Records</h1>
-
-      <div style="display:flex; gap:10px;">
-
-        <button class="register-btn" onclick="openCreateModuleModal()">
-          Create Module
-        </button>
-
-        <button class="back-button" onclick="goBack()">
-          Back to Dashboard
-        </button>
-
-      </div>
-
-    </div>
-
-    <!-- TABLE -->
-    <div class="table-container">
-
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Registered Modules</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-
-        <tbody id="lecturersTableBody">
-          <tr>
-            <td colspan="7" class="loading">
-              Loading lecturers...
-            </td>
-          </tr>
-        </tbody>
-
-      </table>
-
-    </div>
-  </div>
-
-  <!-- MODULE REGISTRATION MODAL -->
-  <div id="moduleModal" class="modal">
-
-    <div class="modal-content">
-
-      <h2>Register Lecturer For Modules</h2>
-
-      <div id="modulesList"></div>
-
-      <div class="modal-buttons">
-
-        <button class="save-btn" onclick="submitModuleRegistration()">
-          Save Registration
-        </button>
-
-        <button class="cancel-btn" onclick="closeModal()">
-          Cancel
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
-  <!-- CREATE MODULE MODAL -->
-  <div id="createModuleModal" class="modal">
-
-    <div class="modal-content">
-
-      <h2>Create New Module</h2>
-
-      <div style="display:flex; flex-direction:column; gap:15px;">
-
-        <input
-          type="text"
-          id="moduleCode"
-          placeholder="Module Code"
-          style="padding:12px; border:1px solid #ccc; border-radius:8px;"
-        >
-
-        <input
-          type="text"
-          id="moduleName"
-          placeholder="Module Name"
-          style="padding:12px; border:1px solid #ccc; border-radius:8px;"
-        >
-
-        <input
-          type="number"
-          id="moduleCredits"
-          placeholder="Credits"
-          style="padding:12px; border:1px solid #ccc; border-radius:8px;"
-        >
-
-      </div>
-
-      <div class="modal-buttons">
-
-        <button class="save-btn" onclick="createModule()">
-          Create Module
-        </button>
-
-        <button class="cancel-btn" onclick="closeCreateModuleModal()">
-          Cancel
-        </button>
-
-      </div>
-
-    </div>
-
-  </div>
-
-  <!-- CHAT -->
-  <div id="chatToggle" class="chat-toggle">
-    <img src="question.jpg" alt="Chat" />
-  </div>
-
-  <div id="chatWidget" class="chat-widget hidden">
-
-    <div class="chat-header">
-      <span>Support Chat</span>
-      <button onclick="toggleChat()">✕</button>
-    </div>
-
-    <div id="chatMessages" class="chat-messages"></div>
-
-    <div class="chat-input">
-      <input id="chatInput" type="text" placeholder="Type a message..." />
-      <button onclick="sendMessage()">Send</button>
-    </div>
-
-  </div>
-
-  <script src="viewLecturers.js"></script>
-  <script src="chatWidget.js"></script>
-
-</body>
-</html>
+    alert("Error creating module.");
+  }
+}
