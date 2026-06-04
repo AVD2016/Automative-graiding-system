@@ -138,7 +138,7 @@ async function openModuleModal(lecturerId) {
   try {
 
     const response = await fetch(
-      `https://automative-graiding-system.onrender.com/api/module/getAvailableModulesLecturer/{lecturerId}`
+      `https://automative-graiding-system.onrender.com/api/module/getAvailableModulesLecturer/${lecturerId}`
     );
 
     if (!response.ok) {
