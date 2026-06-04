@@ -11,9 +11,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.ac.rhul.cs2800.model.Lecturer;
 import uk.ac.rhul.cs2800.model.Module;
 import uk.ac.rhul.cs2800.model.Registration;
 import uk.ac.rhul.cs2800.model.Student;
+import uk.ac.rhul.cs2800.repository.LecturerRepository;
 import uk.ac.rhul.cs2800.repository.ModuleRepository;
 import uk.ac.rhul.cs2800.repository.RegistrationRepository;
 import uk.ac.rhul.cs2800.repository.StudentRepository;
@@ -32,6 +34,8 @@ public class RegistrationController {
   ModuleRepository moduleRepository;
 
   StudentRepository studentRepository;
+
+  LecturerRepository lecturerRepository;
 
   /**
    * Constructs a new {@code RegistrationController} with the required repositories.
@@ -55,7 +59,7 @@ public class RegistrationController {
    *
    * @throws java.util.NoSuchElementException if either the student or module does not exist
    */
-  @PostMapping(value = "/registrations/addStudentRegistration")
+  @PostMapping(value = "/addStudent")
   public ResponseEntity<Registration> addRegistration(@RequestBody Map<String, String> params) {
     Student student =
         studentRepository.findById(Integer.valueOf(params.get("student_id"))).orElseThrow();
@@ -73,7 +77,7 @@ public class RegistrationController {
     return ResponseEntity.ok(registration);
   }
 
-  @PostMapping("/sync")
+  @PostMapping("/syncStudent")
   @Transactional
   public ResponseEntity<?> syncRegistrations(@RequestBody Map<String, Object> payload) {
 
@@ -118,5 +122,54 @@ public class RegistrationController {
     }
 
     return ResponseEntity.ok("Sync complete");
+  }
+
+  @PostMapping("/syncLecturer")
+  @Transactional
+  public ResponseEntity<?> syncLecturerRegistrations(@RequestBody Map<String, Object> payload) {
+
+    Integer lecturerId = (Integer) payload.get("lecturerId");
+
+    @SuppressWarnings("unchecked")
+    List<String> moduleCodes = (List<String>) payload.get("modules");
+
+    Lecturer lecturer = lecturerRepository.findById(lecturerId).orElseThrow();
+
+    // CURRENT registrations
+    List<Registration> existing = lecturer.getRegistered();
+
+    Set<String> newModuleSet = moduleCodes.stream().collect(Collectors.toSet());
+
+    // DELETE unselected modules
+    for (Registration reg : existing) {
+
+      String code = reg.getModule().getCode();
+
+      if (!newModuleSet.contains(code)) {
+
+        registrationRepository.delete(reg);
+      }
+    }
+
+    // ADD missing modules
+    for (String code : newModuleSet) {
+
+      boolean alreadyExists = existing.stream().anyMatch(r -> r.getModule().getCode().equals(code));
+
+      if (!alreadyExists) {
+
+        Module module = moduleRepository.findById(code).orElseThrow();
+
+        Registration registration = new Registration();
+
+        registration.setUser(lecturer);
+
+        registration.setModule(module);
+
+        registrationRepository.save(registration);
+      }
+    }
+
+    return ResponseEntity.ok("Lecturer sync complete");
   }
 }

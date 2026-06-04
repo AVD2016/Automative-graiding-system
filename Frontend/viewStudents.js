@@ -199,7 +199,7 @@ async function submitModuleRegistration() {
   try {
 
     const response = await fetch(
-      "https://automative-graiding-system.onrender.com/api/registrations/sync",
+      "https://automative-graiding-system.onrender.com/api/registrations/syncStudent",
       {
         method: "POST",
 
