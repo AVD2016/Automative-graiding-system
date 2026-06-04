@@ -20,6 +20,7 @@ public class Lecturer extends User {
     this.id = id;
   }
 
+  @OneToMany(mappedBy = "user")
   public List<Registration> getRegistered() {
     return new ArrayList<>(registered);
   }

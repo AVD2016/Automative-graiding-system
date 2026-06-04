@@ -55,7 +55,7 @@ public class RegistrationController {
    *
    * @throws java.util.NoSuchElementException if either the student or module does not exist
    */
-  @PostMapping(value = "/registrations/addRegistration")
+  @PostMapping(value = "/registrations/addStudentRegistration")
   public ResponseEntity<Registration> addRegistration(@RequestBody Map<String, String> params) {
     Student student =
         studentRepository.findById(Integer.valueOf(params.get("student_id"))).orElseThrow();

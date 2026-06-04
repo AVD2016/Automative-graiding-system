@@ -1,15 +1,19 @@
 const lecturersTableBody = document.getElementById("lecturersTableBody");
 
-// =========================
+// ======================================
 // LOAD LECTURERS
-// =========================
+// ======================================
+
 async function loadLecturers() {
+
   try {
+
     const response = await fetch(
       "https://automative-graiding-system.onrender.com/api/lecturer/getLecturers"
     );
 
     if (!response.ok) {
+
       throw new Error("Failed to fetch lecturers");
     }
 
@@ -18,101 +22,312 @@ async function loadLecturers() {
     lecturersTableBody.innerHTML = "";
 
     if (lecturers.length === 0) {
-      lecturersTableBody.innerHTML =
-        `<tr><td colspan="6">No lecturers found</td></tr>`;
+
+      lecturersTableBody.innerHTML = `
+        <tr>
+          <td colspan="7" class="loading">
+            No lecturers found.
+          </td>
+        </tr>
+      `;
+
       return;
     }
 
     lecturers.forEach(lecturer => {
 
-      const modulesHTML = lecturer.modules && lecturer.modules.length > 0
-        ? lecturer.modules.map(m =>
-            `<span class="module-badge">${m.code} - ${m.name}</span>`
-          ).join("")
-        : `<span class="empty">No modules</span>`;
+      let modulesHtml = "";
 
-      const row = `
-        <tr>
-          <td>${lecturer.id}</td>
-          <td>${lecturer.firstName}</td>
-          <td>${lecturer.lastName}</td>
-          <td>${lecturer.username}</td>
-          <td>${lecturer.email}</td>
-          <td class="modules-cell">${modulesHTML}</td>
-        </tr>
+      if (lecturer.modules && lecturer.modules.length > 0) {
+
+        lecturer.modules.forEach(module => {
+
+          modulesHtml += `
+            <div class="module-badge">
+              ${module.code} - ${module.name}
+            </div>
+          `;
+        });
+
+      } else {
+
+        modulesHtml = `
+          <span class="empty-modules">
+            No modules registered
+          </span>
+        `;
+      }
+
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
+        <td>${lecturer.id}</td>
+        <td>${lecturer.firstName}</td>
+        <td>${lecturer.lastName}</td>
+        <td>${lecturer.username}</td>
+        <td>${lecturer.email}</td>
+
+        <td>
+          <div class="modules-cell">
+            ${modulesHtml}
+          </div>
+        </td>
+
+        <td>
+          <button class="register-btn"
+                  onclick="openModuleModal(${lecturer.id})">
+
+            Register For Module
+
+          </button>
+        </td>
       `;
 
-      lecturersTableBody.innerHTML += row;
+      lecturersTableBody.appendChild(row);
     });
 
   } catch (error) {
+
     console.error(error);
-    lecturersTableBody.innerHTML =
-      `<tr><td colspan="6" class="error-message">Failed to load lecturers</td></tr>`;
+
+    lecturersTableBody.innerHTML = `
+      <tr>
+        <td colspan="7" class="error-message">
+          Error loading lecturers.
+        </td>
+      </tr>
+    `;
   }
 }
 
-// =========================
-// CREATE MODULE
-// =========================
-async function createModule() {
 
-  const module = {
-    code: document.getElementById("moduleCode").value,
-    name: document.getElementById("moduleName").value,
-    credits: parseInt(document.getElementById("moduleCredits").value)
-  };
+// ======================================
+// NAVIGATION
+// ======================================
+
+function goBack() {
+
+  window.location.href = "admin-dashboard.html";
+}
+
+
+// ======================================
+// INIT
+// ======================================
+
+loadLecturers();
+
+
+// ======================================
+// MODULE REGISTRATION
+// ======================================
+
+let selectedLecturerId = null;
+
+
+async function openModuleModal(lecturerId) {
+
+  selectedLecturerId = lecturerId;
+
+  const modal = document.getElementById("moduleModal");
+
+  const modulesList = document.getElementById("modulesList");
+
+  modal.style.display = "block";
 
   try {
 
     const response = await fetch(
-      "https://automative-graiding-system.onrender.com/api/module/addModule",
+      `https://automative-graiding-system.onrender.com/api/module/getAvailableLecturerModules/${lecturerId}`
+    );
+
+    if (!response.ok) {
+
+      throw new Error("Failed to load modules");
+    }
+
+    const modules = await response.json();
+
+    modulesList.innerHTML = "";
+
+    modules.forEach(module => {
+
+      modulesList.innerHTML += `
+        <div class="module-option">
+
+          <label>
+
+            <input type="checkbox"
+                   value="${module.code}">
+
+            <strong>${module.code}</strong>
+            - ${module.name}
+
+          </label>
+
+        </div>
+      `;
+    });
+
+  } catch (error) {
+
+    console.error(error);
+
+    modulesList.innerHTML =
+      "<p>Error loading modules.</p>";
+  }
+}
+
+
+function closeModal() {
+
+  document.getElementById("moduleModal").style.display = "none";
+}
+
+
+// ======================================
+// SAVE LECTURER REGISTRATION
+// ======================================
+
+async function submitModuleRegistration() {
+
+  const selectedModules = [];
+
+  document.querySelectorAll(
+    '#modulesList input[type="checkbox"]:checked'
+  ).forEach(checkbox => {
+
+    selectedModules.push(checkbox.value);
+  });
+
+  if (selectedModules.length === 0) {
+
+    alert("Select at least one module.");
+
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      "https://automative-graiding-system.onrender.com/api/lecturerRegistrations/sync",
       {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(module)
+
+        body: JSON.stringify({
+          lecturerId: selectedLecturerId,
+          modules: selectedModules
+        })
       }
     );
 
     if (!response.ok) {
-      const error = await response.text();
-      throw new Error(error);
+
+      throw new Error("Registration failed");
+    }
+
+    alert("Lecturer registered successfully!");
+
+    closeModal();
+
+    loadLecturers();
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert("Error registering modules.");
+  }
+}
+
+
+// ======================================
+// CREATE MODULE MODAL
+// ======================================
+
+function openCreateModuleModal() {
+
+  document.getElementById(
+    "createModuleModal"
+  ).style.display = "block";
+}
+
+
+function closeCreateModuleModal() {
+
+  document.getElementById(
+    "createModuleModal"
+  ).style.display = "none";
+}
+
+
+// ======================================
+// CREATE MODULE
+// ======================================
+
+async function createModule() {
+
+  const code = document.getElementById("moduleCode")
+    .value
+    .trim();
+
+  const name = document.getElementById("moduleName")
+    .value
+    .trim();
+
+  const credits = parseInt(
+    document.getElementById("moduleCredits").value
+  );
+
+  if (!code || !name || !credits) {
+
+    alert("Please fill all fields.");
+
+    return;
+  }
+
+  try {
+
+    const response = await fetch(
+      "https://automative-graiding-system.onrender.com/api/module/createModule",
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+          code: code,
+          name: name,
+          credits: credits
+        })
+      }
+    );
+
+    if (!response.ok) {
+
+      throw new Error("Failed to create module");
     }
 
     alert("Module created successfully!");
 
     closeCreateModuleModal();
 
-    // optionally refresh if needed
-    // loadLecturers();
+    document.getElementById("moduleCode").value = "";
+
+    document.getElementById("moduleName").value = "";
+
+    document.getElementById("moduleCredits").value = "";
 
   } catch (error) {
+
     console.error(error);
-    alert("Error: " + error.message);
+
+    alert("Error creating module.");
   }
 }
-
-// =========================
-// MODAL CONTROL
-// =========================
-function openCreateModuleModal() {
-  document.getElementById("createModuleModal").style.display = "block";
-}
-
-function closeCreateModuleModal() {
-  document.getElementById("createModuleModal").style.display = "none";
-}
-
-// =========================
-// NAVIGATION
-// =========================
-function goBack() {
-  window.location.href = "admin-dashboard.html";
-}
-
-// =========================
-// INIT
-// =========================
-loadLecturers();
