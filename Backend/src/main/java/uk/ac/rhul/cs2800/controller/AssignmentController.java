@@ -33,7 +33,7 @@ public class AssignmentController {
   public ResponseEntity<?> createAssignment(@RequestParam String moduleCode,
       @RequestParam int credits, @RequestParam String deadline,
       @RequestParam String taskDescription, @RequestParam String markingCriteria,
-      @RequestParam MultipartFile file) {
+      @RequestParam(value = "file", required = false) MultipartFile file) {
 
     try {
 
