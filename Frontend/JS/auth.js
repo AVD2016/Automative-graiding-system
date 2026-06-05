@@ -38,11 +38,11 @@ loginForm.addEventListener("submit", async (e) => {
       localStorage.setItem("user", JSON.stringify(data));
 
       if (role === "student") {
-        window.location.href = "/student-dashboard.html";
+        window.location.href = "student-dashboard.html";
       } else if (role === "lecturer") {
-        window.location.href = "/lecturer-dashboard.html";
+        window.location.href = "lecturer-dashboard.html";
       } else if (role === "administrator") {
-        window.location.href = "/admin-dashboard.html";
+        window.location.href = "admin-dashboard.html";
       }
 
     } else {
