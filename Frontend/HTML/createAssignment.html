@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Create Assignment</title>
+
+  <link rel="stylesheet" href="../CSS/chatWidget.css">
+
+  <style>
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f4f6f9;
+      display: flex;
+      height: 100vh;
+    }
+
+    /* =========================
+       SIDEBAR
+    ========================= */
+
+    .sidebar {
+      width: 240px;
+      background-color: #1e293b;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding-top: 20px;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 22px;
+    }
+
+    .sidebar button {
+      background: none;
+      border: none;
+      color: white;
+      padding: 18px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 16px;
+      transition: 0.2s;
+    }
+
+    .sidebar button:hover {
+      background-color: #334155;
+    }
+
+    /* =========================
+       MAIN
+    ========================= */
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TOPBAR */
+
+    .topbar {
+      height: 70px;
+      background-color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 25px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .topbar-left img {
+      width: 45px;
+      height: 45px;
+    }
+
+    .topbar-left h1 {
+      font-size: 22px;
+      color: #1e293b;
+    }
+
+    .lecturer-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #1e293b;
+    }
+
+    /* =========================
+       CONTENT FORM
+    ========================= */
+
+    .content {
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .form-card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      max-width: 900px;
+    }
+
+    .form-card h2 {
+      margin-bottom: 20px;
+      color: #1e293b;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #1e293b;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .btn {
+      margin-top: 15px;
+      padding: 12px 18px;
+      border: none;
+      background-color: #2563eb;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #1d4ed8;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <h2>Lecturer Panel</h2>
+
+    <button onclick="openViewModules()">View Modules</button>
+    <button onclick="openCreateAssignment()">Create Assignment</button>
+    <button onclick="openMarkAssignment()">Mark Assignment</button>
+    <button onclick="logout()">Logout</button>
+
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+
+      <div class="topbar-left">
+        <img src="icon.png" alt="System Icon">
+        <h1>Automated Grading System</h1>
+      </div>
+
+      <div class="lecturer-name" id="lecturerName">
+        Lecturer
+      </div>
+
+    </div>
+
+    <!-- FORM -->
+    <div class="content">
+
+      <div class="form-card">
+
+        <h2>Create New Assignment</h2>
+
+        <form id="assignmentForm">
+
+          <!-- MODULE -->
+          <div class="form-group">
+            <label>Select Module</label>
+            <select id="moduleSelect"></select>
+          </div>
+
+          <!-- AVAILABLE CREDITS -->
+          <div class="form-group">
+            <label>Available Module Credits (after assignments)</label>
+            <input type="text" id="availableCredits" disabled>
+          </div>
+
+          <!-- ASSIGNMENT CREDITS -->
+          <div class="form-group">
+            <label>Assignment Credits</label>
+            <input type="number" id="assignmentCredits" min="1">
+          </div>
+
+          <!-- DEADLINE -->
+          <div class="form-group">
+            <label>Deadline</label>
+            <input type="datetime-local" id="deadline">
+          </div>
+
+          <!-- TASK -->
+          <div class="form-group">
+            <label>Task Description</label>
+            <textarea id="taskDescription"></textarea>
+          </div>
+
+          <!-- MARKING -->
+          <div class="form-group">
+            <label>Marking Criteria</label>
+            <textarea id="markingCriteria"></textarea>
+          </div>
+
+          <!-- PDF -->
+          <div class="form-group">
+            <label>Upload PDF (Assignment Brief)</label>
+            <input type="file" id="pdfFile" accept="application/pdf">
+          </div>
+
+          <button type="submit" class="btn">
+            Create Assignment
+          </button>
+
+        </form>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- CHAT -->
+  <div id="chatToggle" class="chat-toggle">
+    <img src="question.jpg" alt="Chat" />
+  </div>
+
+  <div id="chatWidget" class="chat-widget hidden">
+
+    <div class="chat-header">
+      <span>Support Chat</span>
+      <button onclick="toggleChat()">✕</button>
+    </div>
+
+    <div id="chatMessages" class="chat-messages"></div>
+
+    <div class="chat-input">
+      <input id="chatInput" type="text" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+
+  </div>
+
+  <!-- JS -->
+  <script src="../JS/lecturer-dashboard.js"></script>
+  <script src="../JS/createAssignment.js"></script>
+  <script src="../JS/chatWidget.js"></script>
+
+</body>
+
+</html>
