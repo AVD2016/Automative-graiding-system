@@ -1,103 +1,274 @@
-// =========================
-// LOAD LECTURER INFO
-// =========================
+<!DOCTYPE html>
+<html lang="en">
 
-function loadLecturerInfo() {
-  const lecturer = JSON.parse(localStorage.getItem("user"));
+<head>
 
-  if (!lecturer) {
-    window.location.href = "login.html";
-    return;
-  }
+  <meta charset="UTF-8" />
 
-  const fullName = `${lecturer.firstName} ${lecturer.lastName}`;
-  document.getElementById("lecturerName").textContent = fullName;
-}
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0"/>
 
-// =========================
-// VIEW MODULES
-// =========================
+  <title>Lecturer Dashboard</title>
 
-function openViewModules() {
-  window.location.href = "lecturer-modules.html";
-}
+  <link rel="stylesheet" href="../CSS/chatWidget.css">
 
-// =========================
-// CREATE ASSIGNMENT
-// =========================
+  <style>
 
-function openCreateAssignment() {
-  window.location.href = "create-assignment.html";
-}
-
-// =========================
-// MARK ASSIGNMENT
-// =========================
-
-function openMarkAssignment() {
-  window.location.href = "mark-assignment.html";
-}
-
-// =========================
-// LOGOUT
-// =========================
-
-function logout() {
-  localStorage.removeItem("user");
-  localStorage.removeItem("role");
-  window.location.href = "login.html";
-}
-
-// =========================
-// LOAD LATEST SUBMISSIONS (PLACEHOLDER)
-// =========================
-
-async function loadLatestSubmissions() {
-  const container = document.querySelector(".placeholder");
-
-  try {
-    const lecturer = JSON.parse(localStorage.getItem("user"));
-
-    if (!lecturer) return;
-
-    // Placeholder endpoint (you can replace later)
-    const res = await fetch(
-      `https://automative-graiding-system.onrender.com/api/submissions/latest/${lecturer.id}`
-    );
-
-    if (!res.ok) {
-      container.innerHTML = "No submissions available.";
-      return;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
     }
 
-    const submissions = await res.json();
-
-    if (!submissions || submissions.length === 0) {
-      container.innerHTML = "No submissions available.";
-      return;
+    body {
+      background-color: #f4f6f9;
+      display: flex;
+      height: 100vh;
     }
 
-    container.innerHTML = submissions
-      .map(
-        (s) => `
-        <div style="padding:10px; border-bottom:1px solid #eee;">
-          <strong>${s.assignmentTitle}</strong><br/>
-          Student: ${s.studentName}<br/>
-          Submitted: ${s.date}
+    /* =========================
+       SIDEBAR
+    ========================= */
+
+    .sidebar {
+      width: 240px;
+      background-color: #1e293b;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding-top: 20px;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 22px;
+    }
+
+    .sidebar button {
+      background: none;
+      border: none;
+      color: white;
+      padding: 18px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 16px;
+      transition: 0.2s;
+    }
+
+    .sidebar button:hover {
+      background-color: #334155;
+    }
+
+    /* =========================
+       MAIN AREA
+    ========================= */
+
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* =========================
+       TOPBAR
+    ========================= */
+
+    .topbar {
+      height: 70px;
+      background-color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 25px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .topbar-left img {
+      width: 45px;
+      height: 45px;
+    }
+
+    .topbar-left h1 {
+      font-size: 22px;
+      color: #1e293b;
+    }
+
+    .lecturer-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #1e293b;
+    }
+
+    /* =========================
+       CONTENT
+    ========================= */
+
+    .content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .submissions-card {
+      background-color: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .submissions-card h2 {
+      margin-bottom: 20px;
+      color: #1e293b;
+    }
+
+    .placeholder {
+      color: #64748b;
+      font-style: italic;
+      padding: 20px 0;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================= */
+
+    @media (max-width: 900px) {
+
+      .sidebar {
+        width: 180px;
+      }
+
+      .topbar-left h1 {
+        font-size: 18px;
+      }
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <!-- =========================
+       SIDEBAR
+  ========================== -->
+
+  <div class="sidebar">
+
+    <h2>Lecturer Panel</h2>
+
+    <button onclick="openViewModules()">
+      View Modules
+    </button>
+
+    <button onclick="openCreateAssignment()">
+      Create Assignment
+    </button>
+
+    <button onclick="openMarkAssignment()">
+      Mark Assignment
+    </button>
+
+    <button onclick="logout()">
+      Logout
+    </button>
+
+  </div>
+
+  <!-- =========================
+       MAIN
+  ========================== -->
+
+  <div class="main">
+
+    <!-- TOPBAR -->
+
+    <div class="topbar">
+
+      <div class="topbar-left">
+
+        <img src="icon.png" alt="System Icon">
+
+        <h1>Automated Grading System</h1>
+
+      </div>
+
+      <div class="lecturer-name" id="lecturerName">
+        Lecturer
+      </div>
+
+    </div>
+
+    <!-- CONTENT -->
+
+    <div class="content">
+
+      <div class="submissions-card">
+
+        <h2>Latest Submissions</h2>
+
+        <div class="placeholder">
+
+          Latest assignment submissions will appear here.
+
         </div>
-      `
-      )
-      .join("");
 
-  } catch (err) {
-    console.error(err);
-    container.innerHTML = "Failed to load submissions.";
-  }
-}
+      </div>
 
-// =========================
-// INIT
-// =========================
+    </div>
 
-loadLecturerInfo();
-loadLatestSubmissions();
+  </div>
+
+  <!-- =========================
+       CHAT BUTTON
+  ========================== -->
+
+  <div id="chatToggle" class="chat-toggle">
+    <img src="question.jpg" alt="Chat" />
+  </div>
+
+  <!-- =========================
+       CHAT WINDOW
+  ========================== -->
+
+  <div id="chatWidget" class="chat-widget hidden">
+
+    <div class="chat-header">
+
+      <span>Support Chat</span>
+
+      <button onclick="toggleChat()">✕</button>
+
+    </div>
+
+    <div id="chatMessages"
+         class="chat-messages"></div>
+
+    <div class="chat-input">
+
+      <input id="chatInput"
+             type="text"
+             placeholder="Type a message..." />
+
+      <button onclick="sendMessage()">
+        Send
+      </button>
+
+    </div>
+
+  </div>
+
+  <script src="../JS/lecturer-dashboard.js"></script>
+
+  <script src="../JS/chatWidget.js"></script>
+
+</body>
+
+</html>
