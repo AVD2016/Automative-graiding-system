@@ -15,5 +15,4 @@ import uk.ac.rhul.cs2800.model.Module;
  * @since 2025-10-24
  */
 public interface ModuleRepository extends CrudRepository<Module, String> {
-
 }

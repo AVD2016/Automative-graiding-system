@@ -1,7 +1,10 @@
 package uk.ac.rhul.cs2800.model;
 
+import java.util.List;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 /**
  * Represents a module in the student grade management system.
@@ -24,6 +27,9 @@ public class Module {
   private String name;
   private int credits;
   private boolean mnc;
+
+  @OneToMany(mappedBy = "module", cascade = CascadeType.ALL)
+  private List<Assignment> assignments;
 
   /**
    * Constructs an empty {@code Module} with default values.
@@ -111,4 +117,21 @@ public class Module {
     return this.mnc;
   }
 
+  public void addAssignment(Assignment assignment) {
+    assignments.add(assignment);
+    assignment.setModule(this);
+  }
+
+  public void removeAssignment(Assignment assignment) {
+    assignments.remove(assignment);
+    assignment.setModule(null);
+  }
+
+  public List<Assignment> getAssignments() {
+    return assignments;
+  }
+
+  public int getCredits() {
+    return credits;
+  }
 }
