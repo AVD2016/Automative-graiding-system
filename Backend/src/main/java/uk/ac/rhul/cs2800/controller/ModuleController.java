@@ -145,12 +145,25 @@ public class ModuleController {
 
       Module module = registration.getModule();
 
+
+      // calculate used credits
+      int usedCredits = 0;
+
+      if (module.getAssignments() != null) {
+        usedCredits = module.getAssignments().stream().mapToInt(a -> a.getCredits()).sum();
+      }
+
+      int totalCredits = module.getCredits();
+      int availableCredits = totalCredits - usedCredits;
+
       Map<String, Object> moduleData = new HashMap<>();
 
       moduleData.put("code", module.getCode());
       moduleData.put("name", module.getName());
-      moduleData.put("credits", module.getCredits());
-      moduleData.put("mnc", module.getMnc());
+
+      moduleData.put("totalCredits", totalCredits);
+      moduleData.put("usedCredits", usedCredits);
+      moduleData.put("availableCredits", availableCredits);
 
       response.add(moduleData);
     }
