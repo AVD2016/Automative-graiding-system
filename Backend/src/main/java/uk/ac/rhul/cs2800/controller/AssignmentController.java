@@ -48,7 +48,6 @@ public class AssignmentController {
         return ResponseEntity.badRequest().body("Not enough available module credits");
       }
 
-      // 3. Save PDF locally (simple version)
       String pdfPath = null;
 
       // ONLY save file if it exists
@@ -76,7 +75,7 @@ public class AssignmentController {
       assignment.setTaskDescription(taskDescription);
       assignment.setMarkingCriteria(markingCriteria);
       assignment.setDeadline(LocalDateTime.parse(deadline));
-      assignment.setPdfFilePath(destination.getPath());
+      assignment.setPdfFilePath(pdfPath);
 
       // 5. Link via module (IMPORTANT)
       module.addAssignment(assignment);
