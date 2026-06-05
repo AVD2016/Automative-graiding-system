@@ -10,15 +10,32 @@ let modules = [];
 // =========================
 
 document.addEventListener("DOMContentLoaded", () => {
+
+  // lecturer already stored during login
   lecturer = JSON.parse(localStorage.getItem("user"));
 
+  // SECURITY CHECK
   if (!lecturer) {
+
     window.location.href = "login.html";
+
     return;
   }
 
+  // DISPLAY LECTURER NAME
+  const lecturerNameElement =
+    document.getElementById("lecturerName");
+
+  if (lecturerNameElement) {
+
+    lecturerNameElement.textContent =
+      `${lecturer.firstName} ${lecturer.lastName}`;
+  }
+
+  // LOAD MODULES
   loadModules();
 
+  // EVENT LISTENERS
   document
     .getElementById("moduleSelect")
     .addEventListener("change", updateAvailableCredits);
@@ -28,101 +45,196 @@ document.addEventListener("DOMContentLoaded", () => {
     .addEventListener("submit", submitAssignment);
 });
 
+
 // =========================
 // LOAD MODULES
 // =========================
 
 async function loadModules() {
+
   try {
-    const res = await fetch(
+
+    const response = await fetch(
       `https://automative-graiding-system.onrender.com/api/module/getLecturerModules/${lecturer.id}`
     );
 
-    if (!res.ok) throw new Error("Failed to load modules");
+    if (!response.ok) {
 
-    modules = await res.json();
+      throw new Error("Failed to load modules");
+    }
 
-    const select = document.getElementById("moduleSelect");
+    modules = await response.json();
+
+    const select =
+      document.getElementById("moduleSelect");
+
     select.innerHTML = "";
 
-    modules.forEach((m) => {
+    // NO MODULES
+    if (modules.length === 0) {
+
+      select.innerHTML = `
+        <option value="">
+          No modules assigned
+        </option>
+      `;
+
+      return;
+    }
+
+    // POPULATE MODULES
+    modules.forEach(module => {
+
       const option = document.createElement("option");
 
-      // expected backend fields:
-      // code, name, totalCredits, usedCredits
-      const available = (m.totalCredits || 0) - (m.usedCredits || 0);
+      const totalCredits =
+        module.totalCredits || 0;
 
-      option.value = m.code;
-      option.textContent = `${m.code} - ${m.name} (Available: ${available})`;
+      const usedCredits =
+        module.usedCredits || 0;
 
-      option.dataset.available = available;
+      const availableCredits =
+        totalCredits - usedCredits;
+
+      option.value = module.code;
+
+      option.textContent =
+        `${module.code} - ${module.name} `
+        + `(Available Credits: ${availableCredits})`;
+
+      option.dataset.available =
+        availableCredits;
 
       select.appendChild(option);
     });
 
+    // UPDATE DISPLAY
     updateAvailableCredits();
-  } catch (err) {
-    console.error(err);
-    alert("Failed to load modules");
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert("Failed to load lecturer modules");
   }
 }
+
 
 // =========================
 // UPDATE AVAILABLE CREDITS
 // =========================
 
 function updateAvailableCredits() {
-  const select = document.getElementById("moduleSelect");
-  const selected = select.options[select.selectedIndex];
 
-  if (!selected) return;
+  const select =
+    document.getElementById("moduleSelect");
+
+  const selectedOption =
+    select.options[select.selectedIndex];
+
+  if (!selectedOption) {
+
+    return;
+  }
 
   document.getElementById("availableCredits").value =
-    selected.dataset.available || 0;
+    selectedOption.dataset.available || 0;
 }
+
 
 // =========================
 // SUBMIT ASSIGNMENT
 // =========================
 
-async function submitAssignment(e) {
-  e.preventDefault();
+async function submitAssignment(event) {
 
-  const moduleCode = document.getElementById("moduleSelect").value;
-  const credits = document.getElementById("assignmentCredits").value;
-  const deadline = document.getElementById("deadline").value;
-  const task = document.getElementById("taskDescription").value;
-  const marking = document.getElementById("markingCriteria").value;
-  const file = document.getElementById("pdfFile").files[0];
+  event.preventDefault();
 
-  // validation
-  if (!moduleCode || !credits || !deadline || !task || !marking) {
-    alert("Please fill all fields");
+  const moduleCode =
+    document.getElementById("moduleSelect").value;
+
+  const credits =
+    document.getElementById("assignmentCredits").value;
+
+  const deadline =
+    document.getElementById("deadline").value;
+
+  const taskDescription =
+    document.getElementById("taskDescription").value;
+
+  const markingCriteria =
+    document.getElementById("markingCriteria").value;
+
+  const pdfFile =
+    document.getElementById("pdfFile").files[0];
+
+  const availableCredits = parseInt(
+    document.getElementById("availableCredits").value
+  );
+
+  // VALIDATION
+  if (
+    !moduleCode ||
+    !credits ||
+    !deadline ||
+    !taskDescription ||
+    !markingCriteria
+  ) {
+
+    alert("Please fill all fields.");
+
     return;
   }
 
-  if (!file) {
-    alert("Please upload a PDF file");
+  // CREDIT VALIDATION
+  if (parseInt(credits) > availableCredits) {
+
+    alert(
+      `Assignment exceeds available credits `
+      + `(${availableCredits}).`
+    );
+
     return;
   }
 
-  if (file.type !== "application/pdf") {
-    alert("Only PDF files are allowed");
+  // FILE VALIDATION
+  if (!pdfFile) {
+
+    alert("Please upload a PDF file.");
+
+    return;
+  }
+
+  if (pdfFile.type !== "application/pdf") {
+
+    alert("Only PDF files are allowed.");
+
     return;
   }
 
   try {
+
     const formData = new FormData();
 
     formData.append("moduleCode", moduleCode);
-    formData.append("lecturerId", lecturer.id);
-    formData.append("credits", credits);
-    formData.append("deadline", deadline);
-    formData.append("taskDescription", task);
-    formData.append("markingCriteria", marking);
-    formData.append("file", file);
 
-    const res = await fetch(
+    formData.append("credits", credits);
+
+    formData.append("deadline", deadline);
+
+    formData.append(
+      "taskDescription",
+      taskDescription
+    );
+
+    formData.append(
+      "markingCriteria",
+      markingCriteria
+    );
+
+    formData.append("file", pdfFile);
+
+    const response = await fetch(
       "https://automative-graiding-system.onrender.com/api/assignment/create",
       {
         method: "POST",
@@ -130,38 +242,64 @@ async function submitAssignment(e) {
       }
     );
 
-    if (!res.ok) {
-      throw new Error("Failed to create assignment");
+    const text = await response.text();
+
+    if (!response.ok) {
+
+      throw new Error(text);
     }
 
     alert("Assignment created successfully!");
 
-    document.getElementById("assignmentForm").reset();
-    updateAvailableCredits();
-  } catch (err) {
-    console.error(err);
-    alert("Error creating assignment");
+    // RESET FORM
+    document
+      .getElementById("assignmentForm")
+      .reset();
+
+    // RELOAD MODULES
+    await loadModules();
+
+  } catch (error) {
+
+    console.error(error);
+
+    alert(error.message || "Error creating assignment.");
   }
 }
 
+
 // =========================
-// NAV FUNCTIONS (FROM SIDEBAR)
+// NAVIGATION
 // =========================
 
 function openViewModules() {
-  window.location.href = "lecturer-modules.html";
+
+  window.location.href =
+    "lecturer-modules.html";
 }
 
 function openCreateAssignment() {
-  window.location.href = "create-assignment.html";
+
+  window.location.href =
+    "create-assignment.html";
 }
 
 function openMarkAssignment() {
-  window.location.href = "mark-assignment.html";
+
+  window.location.href =
+    "mark-assignment.html";
 }
 
+
+// =========================
+// LOGOUT
+// =========================
+
 function logout() {
+
   localStorage.removeItem("user");
+
   localStorage.removeItem("role");
+
   window.location.href = "login.html";
 }
