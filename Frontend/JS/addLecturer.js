@@ -44,5 +44,5 @@ form.addEventListener("submit", async (e) => {
 });
 
 function goBack() {
-  window.location.href = "adminDashboard.html";
+  window.location.href = "admin-dashboard.html";
 }
