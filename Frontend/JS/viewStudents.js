@@ -145,22 +145,27 @@ async function openModuleModal(studentId) {
 
     modules.forEach(module => {
 
-      modulesList.innerHTML += `
-        <div class="module-option">
+  modulesList.innerHTML += `
+    <div class="module-option">
 
-          <label>
+      <label>
 
-            <input type="checkbox"
-                   value="${module.code}">
+        <input type="checkbox"
+               value="${module.code}"
+               ${module.registered ? "checked" : ""}>
 
-            <strong>${module.code}</strong>
-            - ${module.name}
+        <strong>${module.code}</strong>
+        - ${module.name}
 
-          </label>
+        ${module.registered
+          ? `<span class="registered-label">Already registered</span>`
+          : ""}
 
-        </div>
-      `;
-    });
+      </label>
+
+    </div>
+  `;
+});
 
   } catch (error) {
 
