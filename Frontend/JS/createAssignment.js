@@ -11,31 +11,23 @@ let modules = [];
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  // lecturer already stored during login
   lecturer = JSON.parse(localStorage.getItem("user"));
 
-  // SECURITY CHECK
   if (!lecturer) {
-
     window.location.href = "login.html";
-
     return;
   }
 
-  // DISPLAY LECTURER NAME
   const lecturerNameElement =
     document.getElementById("lecturerName");
 
   if (lecturerNameElement) {
-
     lecturerNameElement.textContent =
       `${lecturer.firstName} ${lecturer.lastName}`;
   }
 
-  // LOAD MODULES
   loadModules();
 
-  // EVENT LISTENERS
   document
     .getElementById("moduleSelect")
     .addEventListener("change", updateAvailableCredits);
@@ -59,7 +51,6 @@ async function loadModules() {
     );
 
     if (!response.ok) {
-
       throw new Error("Failed to load modules");
     }
 
@@ -70,51 +61,35 @@ async function loadModules() {
 
     select.innerHTML = "";
 
-    // NO MODULES
     if (modules.length === 0) {
-
-      select.innerHTML = `
-        <option value="">
-          No modules assigned
-        </option>
-      `;
-
+      select.innerHTML =
+        `<option value="">No modules assigned</option>`;
       return;
     }
 
-    // POPULATE MODULES
     modules.forEach(module => {
 
       const option = document.createElement("option");
 
-      const totalCredits =
-        module.totalCredits || 0;
-
-      const usedCredits =
-        module.usedCredits || 0;
-
-      const availableCredits =
-        totalCredits - usedCredits;
+      const totalCredits = module.totalCredits || 0;
+      const usedCredits = module.usedCredits || 0;
+      const availableCredits = totalCredits - usedCredits;
 
       option.value = module.code;
 
       option.textContent =
-        `${module.code} - ${module.name} `
-        + `(Available Credits: ${availableCredits})`;
+        `${module.code} - ${module.name} (Available Credits: ${availableCredits})`;
 
-      option.dataset.available =
-        availableCredits;
+      option.dataset.available = availableCredits;
 
       select.appendChild(option);
     });
 
-    // UPDATE DISPLAY
     updateAvailableCredits();
 
   } catch (error) {
 
     console.error(error);
-
     alert("Failed to load lecturer modules");
   }
 }
@@ -132,13 +107,17 @@ function updateAvailableCredits() {
   const selectedOption =
     select.options[select.selectedIndex];
 
-  if (!selectedOption) {
+  if (!selectedOption) return;
 
-    return;
-  }
+  const available =
+    parseInt(selectedOption.dataset.available || 0);
 
   document.getElementById("availableCredits").value =
-    selectedOption.dataset.available || 0;
+    available;
+
+  // optional UX improvement: enforce max
+  document.getElementById("assignmentCredits").max =
+    available;
 }
 
 
@@ -154,7 +133,7 @@ async function submitAssignment(event) {
     document.getElementById("moduleSelect").value;
 
   const credits =
-    document.getElementById("assignmentCredits").value;
+    parseInt(document.getElementById("assignmentCredits").value);
 
   const deadline =
     document.getElementById("deadline").value;
@@ -172,7 +151,10 @@ async function submitAssignment(event) {
     document.getElementById("availableCredits").value
   );
 
-  // VALIDATION
+  // =========================
+  // BASIC VALIDATION
+  // =========================
+
   if (
     !moduleCode ||
     !credits ||
@@ -180,59 +162,41 @@ async function submitAssignment(event) {
     !taskDescription ||
     !markingCriteria
   ) {
-
-    alert("Please fill all fields.");
-
+    alert("Please fill all required fields.");
     return;
   }
 
-  // CREDIT VALIDATION
-  if (parseInt(credits) > availableCredits) {
+  if (isNaN(credits) || credits <= 0) {
+    alert("Credits must be greater than 0.");
+    return;
+  }
 
+  if (credits > availableCredits) {
     alert(
-      `Assignment exceeds available credits `
-      + `(${availableCredits}).`
+      `Assignment exceeds available credits (${availableCredits}).`
     );
-
     return;
   }
 
-  // FILE VALIDATION
-  if (!pdfFile) {
-
-    alert("Please upload a PDF file.");
-
-    return;
-  }
-
-  if (pdfFile.type !== "application/pdf") {
-
-    alert("Only PDF files are allowed.");
-
-    return;
-  }
+  // =========================
+  // PDF OPTIONAL (FIXED)
+  // =========================
+  // NO validation required — file is optional
 
   try {
 
     const formData = new FormData();
 
     formData.append("moduleCode", moduleCode);
-
     formData.append("credits", credits);
-
     formData.append("deadline", deadline);
+    formData.append("taskDescription", taskDescription);
+    formData.append("markingCriteria", markingCriteria);
 
-    formData.append(
-      "taskDescription",
-      taskDescription
-    );
-
-    formData.append(
-      "markingCriteria",
-      markingCriteria
-    );
-
-    formData.append("file", pdfFile);
+    // only attach file if exists
+    if (pdfFile) {
+      formData.append("file", pdfFile);
+    }
 
     const response = await fetch(
       "https://automative-graiding-system.onrender.com/api/assignment/create",
@@ -245,24 +209,18 @@ async function submitAssignment(event) {
     const text = await response.text();
 
     if (!response.ok) {
-
       throw new Error(text);
     }
 
     alert("Assignment created successfully!");
 
-    // RESET FORM
-    document
-      .getElementById("assignmentForm")
-      .reset();
+    document.getElementById("assignmentForm").reset();
 
-    // RELOAD MODULES
     await loadModules();
 
   } catch (error) {
 
     console.error(error);
-
     alert(error.message || "Error creating assignment.");
   }
 }
@@ -273,21 +231,15 @@ async function submitAssignment(event) {
 // =========================
 
 function openViewModules() {
-
-  window.location.href =
-    "lecturer-modules.html";
+  window.location.href = "lecturer-modules.html";
 }
 
 function openCreateAssignment() {
-
-  window.location.href =
-    "create-assignment.html";
+  window.location.href = "create-assignment.html";
 }
 
 function openMarkAssignment() {
-
-  window.location.href =
-    "mark-assignment.html";
+  window.location.href = "mark-assignment.html";
 }
 
 
@@ -296,10 +248,7 @@ function openMarkAssignment() {
 // =========================
 
 function logout() {
-
   localStorage.removeItem("user");
-
   localStorage.removeItem("role");
-
   window.location.href = "login.html";
 }
