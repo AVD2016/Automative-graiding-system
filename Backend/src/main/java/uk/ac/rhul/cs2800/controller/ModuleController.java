@@ -123,6 +123,42 @@ public class ModuleController {
     return response;
   }
 
+  @GetMapping("/getLecturerModules/{lecturerId}")
+  public ResponseEntity<List<Map<String, Object>>> getLecturerModules(
+      @PathVariable int lecturerId) {
+
+    Optional<Lecturer> optionalLecturer = lecturerRepository.findById(lecturerId);
+
+    if (optionalLecturer.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ArrayList<>());
+    }
+
+    Lecturer lecturer = optionalLecturer.get();
+
+    List<Map<String, Object>> response = new ArrayList<>();
+
+    for (Registration registration : lecturer.getRegistered()) {
+
+      if (registration.getModule() == null) {
+        continue;
+      }
+
+      Module module = registration.getModule();
+
+      Map<String, Object> moduleData = new HashMap<>();
+
+      moduleData.put("code", module.getCode());
+      moduleData.put("name", module.getName());
+      moduleData.put("credits", module.getCredits());
+      moduleData.put("mnc", module.getMnc());
+
+      response.add(moduleData);
+    }
+
+    return ResponseEntity.ok(response);
+  }
+
+
   @PostMapping("/createModule")
   public ResponseEntity<?> createModule(@RequestBody Module module) {
 
