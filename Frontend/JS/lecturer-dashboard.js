@@ -1,131 +1,103 @@
+// =========================
+// LOAD LECTURER INFO
+// =========================
 
-window.addEventListener("DOMContentLoaded", () => {
+function loadLecturerInfo() {
+  const lecturer = JSON.parse(localStorage.getItem("user"));
 
-  loadLecturerInfo();
-  loadLatestSubmissions();
-
-});
-
-
-
-// LOAD LOGGED-IN LECTURER
-
-
-async function loadLecturerInfo() {
-
-  try {
-
-    // You should replace this with real auth/session endpoint
-    const response = await fetch(
-      "https://automative-graiding-system.onrender.com/api/lecturer/getCurrent"
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch lecturer");
-    }
-
-    const lecturer = await response.json();
-
-    document.getElementById("lecturerName").textContent =
-      `${lecturer.firstName} ${lecturer.lastName}`;
-
-  } catch (error) {
-
-    console.error(error);
-
-    document.getElementById("lecturerName").textContent =
-      "Lecturer";
+  if (!lecturer) {
+    window.location.href = "login.html";
+    return;
   }
+
+  const fullName = `${lecturer.firstName} ${lecturer.lastName}`;
+  document.getElementById("lecturerName").textContent = fullName;
 }
 
-// LOAD LATEST SUBMISSIONS
-
-async function loadLatestSubmissions() {
-
-  const content = document.querySelector(".submissions-card");
-
-  try {
-
-    // Replace with your real backend endpoint later
-    const response = await fetch(
-      "https://automative-graiding-system.onrender.com/api/submissions/latest"
-    );
-
-    if (!response.ok) {
-      return;
-    }
-
-    const submissions = await response.json();
-
-    // Remove placeholder if exists
-    const placeholder = document.querySelector(".placeholder");
-    if (placeholder) placeholder.remove();
-
-    if (!submissions || submissions.length === 0) {
-
-      content.innerHTML += `
-        <div class="placeholder">
-          No submissions available yet.
-        </div>
-      `;
-
-      return;
-    }
-
-    submissions.forEach(sub => {
-
-      content.innerHTML += `
-        <div style="
-          margin-bottom:15px;
-          padding:15px;
-          border:1px solid #e5e7eb;
-          border-radius:10px;
-        ">
-
-          <strong>${sub.assignmentTitle || "Assignment"}</strong><br>
-
-          <span>Student: ${sub.studentName || "Unknown"}</span><br>
-
-          <span>Module: ${sub.moduleCode || "N/A"}</span><br>
-
-          <span>Submitted: ${sub.submittedAt || "Unknown"}</span>
-
-        </div>
-      `;
-    });
-
-  } catch (error) {
-
-    console.error(error);
-  }
-}
-
-
-// SIDEBAR NAVIGATION
+// =========================
+// VIEW MODULES
+// =========================
 
 function openViewModules() {
-
-  window.location.href = "viewModules.html";
+  window.location.href = "lecturer-modules.html";
 }
 
+// =========================
+// CREATE ASSIGNMENT
+// =========================
 
 function openCreateAssignment() {
-
-  window.location.href = "createAssignment.html";
+  window.location.href = "create-assignment.html";
 }
 
+// =========================
+// MARK ASSIGNMENT
+// =========================
 
 function openMarkAssignment() {
-
-  window.location.href = "markAssignment.html";
+  window.location.href = "mark-assignment.html";
 }
 
-
+// =========================
 // LOGOUT
+// =========================
 
 function logout() {
-
-  localStorage.removeItem("token");
-
+  localStorage.removeItem("user");
+  localStorage.removeItem("role");
   window.location.href = "login.html";
 }
+
+// =========================
+// LOAD LATEST SUBMISSIONS (PLACEHOLDER)
+// =========================
+
+async function loadLatestSubmissions() {
+  const container = document.querySelector(".placeholder");
+
+  try {
+    const lecturer = JSON.parse(localStorage.getItem("user"));
+
+    if (!lecturer) return;
+
+    // Placeholder endpoint (you can replace later)
+    const res = await fetch(
+      `https://automative-graiding-system.onrender.com/api/submissions/latest/${lecturer.id}`
+    );
+
+    if (!res.ok) {
+      container.innerHTML = "No submissions available.";
+      return;
+    }
+
+    const submissions = await res.json();
+
+    if (!submissions || submissions.length === 0) {
+      container.innerHTML = "No submissions available.";
+      return;
+    }
+
+    container.innerHTML = submissions
+      .map(
+        (s) => `
+        <div style="padding:10px; border-bottom:1px solid #eee;">
+          <strong>${s.assignmentTitle}</strong><br/>
+          Student: ${s.studentName}<br/>
+          Submitted: ${s.date}
+        </div>
+      `
+      )
+      .join("");
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = "Failed to load submissions.";
+  }
+}
+
+// =========================
+// INIT
+// =========================
+
+loadLecturerInfo();
+loadLatestSubmissions();
