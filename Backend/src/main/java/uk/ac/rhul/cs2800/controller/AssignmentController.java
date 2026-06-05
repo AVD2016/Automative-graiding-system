@@ -49,17 +49,26 @@ public class AssignmentController {
       }
 
       // 3. Save PDF locally (simple version)
-      String uploadDir = "uploads/";
+      String pdfPath = null;
 
-      File dir = new File(uploadDir);
-      if (!dir.exists()) {
-        dir.mkdirs();
+      // ONLY save file if it exists
+      if (file != null && !file.isEmpty()) {
+
+        String uploadDir = "uploads/";
+
+        File dir = new File(uploadDir);
+        if (!dir.exists()) {
+          dir.mkdirs();
+        }
+
+        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+
+        File destination = new File(uploadDir + fileName);
+
+        file.transferTo(destination);
+
+        pdfPath = destination.getPath();
       }
-
-      String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-      File destination = new File(uploadDir + fileName);
-
-      file.transferTo(destination);
 
       // 4. Create assignment
       Assignment assignment = new Assignment();
