@@ -13,44 +13,49 @@ loginForm.addEventListener("submit", async (e) => {
   const password = document.getElementById("password").value;
 
   try {
-    const res = await fetch("https://automative-graiding-system.onrender.com/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        userType: role,
-        username: username,
-        password: password
-      })
-    });
 
-    const data = await res.json();
+    const res = await fetch(
+      "https://automative-graiding-system.onrender.com/api/auth/login",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          userType: role,
+          username: username,
+          password: password
+        })
+      }
+    );
 
     loading.style.display = "none";
 
-	if (res.status === 401) {
-  	message.textContent = "Invalid password";
-  	return;
-	}
-    if (res.ok) {
-      localStorage.setItem("role", role);
-      localStorage.setItem("user", JSON.stringify(data));
+    // ❗ FIRST read raw text safely
+    const text = await res.text();
 
-      if (role === "student") {
-        window.location.href = "student-dashboard.html";
-      } else if (role === "lecturer") {
-        window.location.href = "lecturer-dashboard.html";
-      } else if (role === "administrator") {
-        window.location.href = "admin-dashboard.html";
-      }
+    if (!res.ok) {
 
-    } else {
-  message.textContent = `Error: ${res.status}`;
-  return;
-}
+      message.textContent = text; // "Invalid username or password"
+      return;
+    }
+
+    // ONLY now parse JSON
+    const data = JSON.parse(text);
+
+    localStorage.setItem("role", role);
+    localStorage.setItem("user", JSON.stringify(data));
+
+    if (role === "student") {
+      window.location.href = "student-dashboard.html";
+    } else if (role === "lecturer") {
+      window.location.href = "lecturer-dashboard.html";
+    } else if (role === "administrator") {
+      window.location.href = "admin-dashboard.html";
+    }
 
   } catch (err) {
+
     loading.style.display = "none";
     message.textContent = "Server not reachable";
     console.error(err);
