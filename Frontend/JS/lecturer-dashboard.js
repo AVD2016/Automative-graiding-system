@@ -101,30 +101,26 @@ async function loadLatestSubmissions() {
 }
 
 
-// SIDEBAR NAVIGATION
+// Navigation
 
-function openViewModules() {
-
-  window.location.href = "viewModules.html";
+function openAddStudent() {
+  window.location.href = "addStudent.html";
 }
 
 
-function openCreateAssignment() {
-
-  window.location.href = "createAssignment.html";
+function openViewAllStudents() {
+  window.location.href = "viewStudents.html";
 }
-
-
-function openMarkAssignment() {
-
-  window.location.href = "markAssignments.html";
-}
-
-
 
 function logout() {
+  localStorage.clear();
+  window.location.href = "/index.html";
+}
 
-  localStorage.removeItem("token");
+function openAddNewLecturer(){
+window.location.href = "addLecturer.html";
+}
 
-  window.location.href = "login.html";
+function openViewLecturers(){
+  window.location.href = "viewLecturers.html"
 }

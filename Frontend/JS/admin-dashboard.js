@@ -15,6 +15,9 @@ function showStudentPanel() {
   alert("Open Student Management Window");
 }
 
+
+// Navigation
+
 function openAddStudent() {
   window.location.href = "addStudent.html";
 }
