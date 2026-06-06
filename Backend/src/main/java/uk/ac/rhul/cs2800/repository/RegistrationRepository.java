@@ -21,10 +21,10 @@ public interface RegistrationRepository extends CrudRepository<Registration, Lon
   int countByModule(Module module);
 
   @Query("""
-        select count(r)
-        from Registration r
-        where r.module = :module
-        and r.user instanceof Student
+          select count(r)
+          from Registration r
+          where r.module = :module
+          and r.user.class = Student
       """)
   int countStudentsByModule(@Param("module") Module module);
 }
