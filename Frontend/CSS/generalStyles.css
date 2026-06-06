@@ -92,15 +92,6 @@ body {
 
 /* ========================= CONTENT ========================= */
 
-.content {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 30px;
-  position: relative;
-  overflow: hidden;
-}
 
 /* background */
 .content::after {

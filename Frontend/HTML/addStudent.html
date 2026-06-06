@@ -9,6 +9,18 @@
   <link rel="stylesheet" href="../CSS/chatWidget.css">
   <link rel="stylesheet" href="../CSS/generalStyles.css">
 
+<styles>
+.content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 30px;
+  position: relative;
+  overflow: hidden;
+}
+<styles/>
+
 </head>
 
 <body>
@@ -35,7 +47,6 @@
         <h1>Automated Grading System</h1>
       </div>
 
-      <!-- ✅ FIXED: SAME LOGIC AS VIEWLECTURERS -->
       <div class="admin-name" id="adminName"></div>
 
     </div>
@@ -75,6 +86,27 @@
 
       </div>
 
+    </div>
+
+  </div>
+
+  <!-- CHAT -->
+  <div id="chatToggle" class="chat-toggle">
+    <img src="question.jpg" alt="Chat" />
+  </div>
+
+  <div id="chatWidget" class="chat-widget hidden">
+
+    <div class="chat-header">
+      <span>Support Chat</span>
+      <button onclick="toggleChat()">✕</button>
+    </div>
+
+    <div id="chatMessages" class="chat-messages"></div>
+
+    <div class="chat-input">
+      <input id="chatInput" type="text" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
     </div>
 
   </div>
