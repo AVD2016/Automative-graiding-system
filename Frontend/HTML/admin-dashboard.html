@@ -1,11 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
   <title>Administrator Dashboard</title>
+
   <link rel="stylesheet" href="../CSS/chatWidget.css">
-<style>
+
+  <style>
 
     * {
       margin: 0;
@@ -60,7 +65,7 @@
       flex-direction: column;
     }
 
-    /* TOP BAR */
+    /* TOPBAR */
 
     .topbar {
       height: 70px;
@@ -97,70 +102,35 @@
     /* CONTENT */
 
     .content {
+      flex: 1;
       padding: 30px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 25px;
-    }
-
-    .card {
-      background-color: white;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    }
-
-    .card h2 {
-      margin-bottom: 20px;
-      color: #1e293b;
-    }
-
-    .action-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
-    }
-
-    .action-buttons button {
-      padding: 14px;
-      border: none;
-      border-radius: 8px;
-      background-color: #2563eb;
-      color: white;
-      cursor: pointer;
-      font-size: 15px;
-      transition: 0.2s;
-    }
-
-    .action-buttons button:hover {
-      background-color: #1d4ed8;
-    }
-
-    @media (max-width: 900px) {
-      .content {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        width: 180px;
-      }
     }
 
   </style>
+
 </head>
 
 <body>
 
+  <!-- SIDEBAR -->
   <div class="sidebar">
 
     <h2>Admin Panel</h2>
 
-    <button onclick="showLecturerPanel()">
-      Lecturer Management
+    <button onclick="openViewLecturers()">
+      View All Lecturers
     </button>
 
-    <button>
-      Student Management
+    <button onclick="openAddNewLecturer()">
+      Add New Lecturer
+    </button>
+
+    <button onclick="openViewAllStudents()">
+      View All Students
+    </button>
+
+    <button onclick="openAddStudent()">
+      Add New Student
     </button>
 
     <button onclick="logout()">
@@ -169,8 +139,10 @@
 
   </div>
 
+  <!-- MAIN -->
   <div class="main">
 
+    <!-- TOPBAR -->
     <div class="topbar">
 
       <div class="topbar-left">
@@ -184,80 +156,35 @@
 
     </div>
 
-    <div class="content">
+    <!-- EMPTY CONTENT -->
+    <div class="content"></div>
 
-      <div class="card">
+  </div>
 
-        <h2>Lecturer Management</h2>
+  <!-- CHAT -->
+  <div id="chatToggle" class="chat-toggle">
+    <img src="question.jpg" alt="Chat" />
+  </div>
 
-        <div class="action-buttons">
+  <div id="chatWidget" class="chat-widget hidden">
 
-          <button onclick="openViewLecturers()">
-            View All Lecturers
-          </button>
+    <div class="chat-header">
+      <span>Support Chat</span>
+      <button onclick="toggleChat()">✕</button>
+    </div>
 
-          <button onclick="openAddNewLecturer()">
-            Add New Lecturer
-          </button>
+    <div id="chatMessages" class="chat-messages"></div>
 
-          <button>
-            Assign Lecturer To Module
-          </button>
-
-        </div>
-
-      </div>
-
-      <div class="card">
-
-        <h2>Student & Module Management</h2>
-
-        <div class="action-buttons">
-
-          <button onclick="openViewAllStudents()">
-            View All Students
-          </button>
-
-          <button onclick="openAddStudent()">
-            Add new Student
-          </button>
-
-          <button>
-            View Module Enrolments
-          </button>
-
-        </div>
-
-      </div>
-
+    <div class="chat-input">
+      <input id="chatInput" type="text" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
     </div>
 
   </div>
-   <!-- CHAT BUTTON -->
-<div id="chatToggle" class="chat-toggle">
-  <img src="question.jpg" alt="Chat" />
-</div>
 
-<!-- CHAT WINDOW -->
-<div id="chatWidget" class="chat-widget hidden">
-
-  <div class="chat-header">
-    <span>Support Chat</span>
-    <button onclick="toggleChat()">✕</button>
-  </div>
-
-  <div id="chatMessages" class="chat-messages"></div>
-
-  <div class="chat-input">
-    <input id="chatInput" type="text" placeholder="Type a message..." />
-    <button onclick="sendMessage()">Send</button>
-  </div>
-
-</div>
-    
-  <!-- External JS file -->
   <script src="../JS/admin-dashboard.js"></script>
   <script src="../JS/chatWidget.js"></script>
 
 </body>
+
 </html>

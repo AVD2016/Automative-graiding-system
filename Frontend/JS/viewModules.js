@@ -71,15 +71,15 @@ async function loadModules() {
 
 // NAV
 function openViewModules() {
-  window.location.href = "lecturer-modules.html";
+  window.location.href = "lecturerModules.html";
 }
 
 function openCreateAssignment() {
-  window.location.href = "create-assignment.html";
+  window.location.href = "createAssignment.html";
 }
 
 function openMarkAssignment() {
-  window.location.href = "mark-assignment.html";
+  window.location.href = "markAssignment.html";
 }
 
 function logout() {
