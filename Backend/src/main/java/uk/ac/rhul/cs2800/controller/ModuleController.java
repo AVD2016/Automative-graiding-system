@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -213,36 +216,28 @@ public class ModuleController {
 
     List<LecturerViewModulesDTO> result = new ArrayList<>();
 
-    // ONLY modules lecturer is registered on
-    for (Registration reg : lecturer.getRegistered()) {
+    // use SET logic to avoid duplicate modules
+    Set<Module> modules = lecturer.getRegistered().stream().map(Registration::getModule)
+        .filter(Objects::nonNull).collect(Collectors.toSet());
 
-      Module module = reg.getModule();
+    for (Module module : modules) {
 
-      if (module == null) {
-        continue;
-      }
+      // 1. coursework count
+      int courseworkCount = module.getAssignments() != null ? module.getAssignments().size() : 0;
 
-      int courseworkCount = (module.getAssignments() != null) ? module.getAssignments().size() : 0;
-
-      int assignedCredits = (module.getAssignments() != null)
+      // 2. assigned credits
+      int assignedCredits = module.getAssignments() != null
           ? module.getAssignments().stream().mapToInt(Assignment::getCredits).sum()
           : 0;
 
+      // 3. students enrolled (ONLY Student users)
       int studentsEnrolled = 0;
 
       if (module.getRegistrations() != null) {
-
-        studentsEnrolled = (int) module.getRegistrations().stream()
-            .filter(r -> r.getUser() instanceof Student).count();
-
-      } else {
-
-        studentsEnrolled = registrationRepository.countByModule(module);
+        studentsEnrolled = (int) module.getRegistrations().stream().map(Registration::getUser)
+            .filter(user -> user instanceof Student).count();
       }
 
-      // =========================
-      // DTO
-      // =========================
       LecturerViewModulesDTO dto = new LecturerViewModulesDTO(module.getCode(), module.getName(),
           module.getCredits(), assignedCredits, courseworkCount, studentsEnrolled);
 
