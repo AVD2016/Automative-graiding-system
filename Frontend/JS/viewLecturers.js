@@ -127,6 +127,10 @@ function openViewLecturers(){
   window.location.href = "viewLecturers.html"
 }
 
+function openDashboard(){
+  window.location.href = "admin-dashboard.html"
+}
+
 
 // ======================================
 // MODULE REGISTRATION

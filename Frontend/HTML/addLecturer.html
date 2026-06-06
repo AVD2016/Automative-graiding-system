@@ -23,9 +23,7 @@
       height: 100vh;
     }
 
-    /* =========================
-       SIDEBAR
-    ========================= */
+    /* ========================= SIDEBAR ========================= */
 
     .sidebar {
       width: 240px;
@@ -57,9 +55,7 @@
       background-color: #334155;
     }
 
-    /* =========================
-       MAIN
-    ========================= */
+    /* ========================= MAIN ========================= */
 
     .main {
       flex: 1;
@@ -67,9 +63,7 @@
       flex-direction: column;
     }
 
-    /* =========================
-       TOPBAR
-    ========================= */
+    /* ========================= TOPBAR ========================= */
 
     .topbar {
       height: 70px;
@@ -79,12 +73,15 @@
       align-items: center;
       padding: 0 25px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      z-index: 3;
     }
 
+    /* ICON + TITLE AS BUTTON */
     .topbar-left {
       display: flex;
       align-items: center;
       gap: 15px;
+      cursor: pointer;
     }
 
     .topbar-left img {
@@ -103,9 +100,7 @@
       color: #1e293b;
     }
 
-    /* =========================
-       CONTENT
-    ========================= */
+    /* ========================= CONTENT ========================= */
 
     .content {
       flex: 1;
@@ -113,14 +108,46 @@
       justify-content: center;
       align-items: flex-start;
       padding: 30px;
+
+      position: relative;
+      overflow: hidden;
     }
 
+    /* BACKGROUND LAYER */
+    .content::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+
+      background-image: url("Background.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+
+      z-index: 0;
+    }
+
+    /* DARK OVERLAY */
+    .content::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+
+      background: rgba(0,0,0,0.35);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* FORM ABOVE BACKGROUND */
     .form-card {
       width: 500px;
       background: white;
       padding: 30px;
       border-radius: 12px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+
+      position: relative;
+      z-index: 2;
     }
 
     .form-card h2 {
@@ -172,50 +199,33 @@
 
 <body>
 
-     <!-- SIDEBAR -->
+  <!-- SIDEBAR -->
   <div class="sidebar">
 
     <h2>Admin Panel</h2>
 
-    <button onclick="openViewLecturers()">
-      View All Lecturers
-    </button>
-
-    <button onclick="openAddNewLecturer()">
-      Add New Lecturer
-    </button>
-
-    <button onclick="openViewAllStudents()">
-      View All Students
-    </button>
-
-    <button onclick="openAddStudent()">
-      Add New Student
-    </button>
-
-    <button onclick="logout()">
-      Logout
-    </button>
+    <button onclick="openViewLecturers()">View All Lecturers</button>
+    <button onclick="openAddNewLecturer()">Add New Lecturer</button>
+    <button onclick="openViewAllStudents()">View All Students</button>
+    <button onclick="openAddStudent()">Add New Student</button>
+    <button onclick="logout()">Logout</button>
 
   </div>
 
-  <!-- =========================
-       MAIN
-  ========================== -->
-
+  <!-- MAIN -->
   <div class="main">
 
     <!-- TOPBAR -->
     <div class="topbar">
 
-      <div class="topbar-left">
+      <!-- ICON + TITLE BUTTON -->
+      <div class="topbar-left" onclick="openDashboard()">
         <img src="icon.png" alt="System Icon">
         <h1>Automated Grading System</h1>
       </div>
 
-      <div class="admin-name" id="adminName">
-        Administrator
-      </div>
+      <!-- USER NAME -->
+      <div class="admin-name" id="adminName"></div>
 
     </div>
 
@@ -285,6 +295,30 @@
 
   <script src="../JS/chatWidget.js"></script>
   <script src="../JS/addLecturer.js"></script>
+
+  <!-- LOGIC -->
+  <script>
+    function openDashboard() {
+      window.location.href = "admin-dashboard.html";
+    }
+
+    function goBack() {
+      window.location.href = "admin-dashboard.html";
+    }
+
+    function openViewLecturers() {}
+    function openAddNewLecturer() {}
+    function openViewAllStudents() {}
+    function openAddStudent() {}
+    function logout() {}
+
+    // DISPLAY LOGGED-IN USER
+    const first = localStorage.getItem("lecturerFirstName");
+    const last = localStorage.getItem("lecturerLastName");
+
+    document.getElementById("adminName").textContent =
+      (first && last) ? `${first} ${last}` : "Lecturer";
+  </script>
 
 </body>
 </html>
