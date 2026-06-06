@@ -103,27 +103,28 @@ async function loadLecturers() {
 
 document.addEventListener("DOMContentLoaded", loadLecturers);
 
-
-// NAVIGATION (ADMIN PAGES)
-
-function goBack() {
-  window.location.href = "admin-dashboard.html";
-}
-
-function openAddLecturer() {
-  window.location.href = "addLecturer.html";
-}
+// Navigation
 
 function openAddStudent() {
   window.location.href = "addStudent.html";
 }
 
-function openViewLecturers() {
-  window.location.href = "viewLecturers.html";
+
+function openViewAllStudents() {
+  window.location.href = "viewStudents.html";
 }
 
-function openViewStudents() {
-  window.location.href = "viewStudents.html";
+function logout() {
+  localStorage.clear();
+  window.location.href = "/index.html";
+}
+
+function openAddNewLecturer(){
+window.location.href = "addLecturer.html";
+}
+
+function openViewLecturers(){
+  window.location.href = "viewLecturers.html"
 }
 
 
