@@ -267,13 +267,10 @@
 
   <script src="../JS/viewStudents.js"></script>
   <script src="../JS/chatWidget.js"></script>
+  <script src="../JS/administratorNavigation.js"></script>
 
   <!-- LOGIC -->
   <script>
-    function openDashboard() {
-      window.location.href = "admin-dashboard.html";
-    }
-
     document.addEventListener("DOMContentLoaded", () => {
 
       const admin = JSON.parse(localStorage.getItem("user"));

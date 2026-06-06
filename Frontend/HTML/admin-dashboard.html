@@ -20,9 +20,10 @@
     }
 
     body {
-      background-color: #f4f6f9;
       display: flex;
       height: 100vh;
+      overflow: hidden;
+      background: #000;
     }
 
     /* SIDEBAR */
@@ -75,12 +76,15 @@
       align-items: center;
       padding: 0 25px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      z-index: 3;
     }
 
+    /* ICON + TITLE BUTTON */
     .topbar-left {
       display: flex;
       align-items: center;
       gap: 15px;
+      cursor: pointer;
     }
 
     .topbar-left img {
@@ -99,11 +103,43 @@
       color: #1e293b;
     }
 
-    /* CONTENT */
+    /* CONTENT WITH BACKGROUND */
 
     .content {
       flex: 1;
       padding: 30px;
+
+      position: relative;
+      overflow: hidden;
+    }
+
+    .content::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+
+      background-image: url("Background.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+
+      z-index: 0;
+    }
+
+    .content::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+
+      background: rgba(0,0,0,0.35);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* OPTIONAL: if content later becomes visible */
+    .content > * {
+      position: relative;
+      z-index: 2;
     }
 
   </style>
@@ -117,25 +153,11 @@
 
     <h2>Admin Panel</h2>
 
-    <button onclick="openViewLecturers()">
-      View All Lecturers
-    </button>
-
-    <button onclick="openAddNewLecturer()">
-      Add New Lecturer
-    </button>
-
-    <button onclick="openViewAllStudents()">
-      View All Students
-    </button>
-
-    <button onclick="openAddStudent()">
-      Add New Student
-    </button>
-
-    <button onclick="logout()">
-      Logout
-    </button>
+    <button onclick="openViewLecturers()">View All Lecturers</button>
+    <button onclick="openAddNewLecturer()">Add New Lecturer</button>
+    <button onclick="openViewAllStudents()">View All Students</button>
+    <button onclick="openAddStudent()">Add New Student</button>
+    <button onclick="logout()">Logout</button>
 
   </div>
 
@@ -145,18 +167,16 @@
     <!-- TOPBAR -->
     <div class="topbar">
 
-      <div class="topbar-left">
+      <div class="topbar-left" onclick="openDashboard()">
         <img src="icon.png" alt="System Icon">
         <h1>Automated Grading System</h1>
       </div>
 
-      <div class="admin-name" id="adminName">
-        Administrator
-      </div>
+      <div class="admin-name" id="adminName"></div>
 
     </div>
 
-    <!-- EMPTY CONTENT -->
+    <!-- CONTENT -->
     <div class="content"></div>
 
   </div>
@@ -184,6 +204,23 @@
 
   <script src="../JS/admin-dashboard.js"></script>
   <script src="../JS/chatWidget.js"></script>
+  <script src="../JS/administratorNavigation.js"></script>
+
+  <!-- LOGIC -->
+  <script>
+    function openDashboard() {
+      window.location.href = "admin-dashboard.html";
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+      const admin = JSON.parse(localStorage.getItem("user"));
+
+      document.getElementById("adminName").textContent =
+        admin ? `${admin.firstName} ${admin.lastName}` : "Administrator";
+
+    });
+  </script>
 
 </body>
 
