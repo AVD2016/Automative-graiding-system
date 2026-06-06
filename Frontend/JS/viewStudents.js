@@ -98,11 +98,26 @@ async function loadStudents() {
 }
 
 
-// BACK BUTTON
+// Navigation
 
 function goBack() {
-
   window.location.href = "admin-dashboard.html";
+}
+
+function openAddLecturer() {
+  window.location.href = "addLecturer.html";
+}
+
+function openAddStudent() {
+  window.location.href = "addStudent.html";
+}
+
+function openViewLecturers() {
+  window.location.href = "viewLecturers.html";
+}
+
+function openViewStudents() {
+  window.location.href = "viewStudents.html";
 }
 
 

@@ -83,6 +83,7 @@
       display: flex;
       align-items: center;
       gap: 15px;
+      cursor: pointer; /* important for UX */
     }
 
     .topbar-left img {
@@ -160,13 +161,15 @@
        SIDEBAR
   ========================== -->
 
-  <div class="sidebar">
+   <div class="sidebar">
 
     <h2>Admin Panel</h2>
 
     <button onclick="openAddStudent()">Add Student</button>
+
     <button onclick="openViewStudents()">View Students</button>
     <button onclick="openAddLecturer()">Add Lecturer</button>
+    <button onclick="openViewLecturers()">View Lecturers</button>
     <button onclick="logout()">Logout</button>
 
   </div>
@@ -180,9 +183,12 @@
     <!-- TOPBAR -->
     <div class="topbar">
 
-      <div class="topbar-left">
+      <!-- CLICKABLE ICON AREA -->
+      <div class="topbar-left" id="homeIcon">
+
         <img src="icon.png" alt="System Icon">
         <h1>Automated Grading System</h1>
+
       </div>
 
       <div class="admin-name" id="adminName">
@@ -250,13 +256,25 @@
   <script src="../JS/viewStudents.js"></script>
   <script src="../JS/chatWidget.js"></script>
 
+  <!-- =========================
+       INLINE SCRIPT
+  ========================== -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+
+      // Load admin name
       const admin = JSON.parse(localStorage.getItem("user"));
+
       if (admin) {
         document.getElementById("adminName").textContent =
           `${admin.firstName} ${admin.lastName}`;
       }
+
+      // ICON CLICK -> DASHBOARD
+      document.getElementById("homeIcon").addEventListener("click", () => {
+        window.location.href = "admin-dashboard.html";
+      });
+
     });
   </script>
 

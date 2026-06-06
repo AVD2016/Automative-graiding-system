@@ -30,7 +30,7 @@ function logout() {
 }
 
 function openAddNewLecturer(){
-window.location.href = "addNewLecturer.html";
+window.location.href = "addLecturer.html";
 }
 
 function openViewLecturers(){

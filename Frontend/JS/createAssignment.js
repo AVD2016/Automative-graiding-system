@@ -235,11 +235,11 @@ function openViewModules() {
 }
 
 function openCreateAssignment() {
-  window.location.href = "create-assignment.html";
+  window.location.href = "createAssignment.html";
 }
 
 function openMarkAssignment() {
-  window.location.href = "mark-assignment.html";
+  window.location.href = "markAssignment.html";
 }
 
 

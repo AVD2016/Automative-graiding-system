@@ -67,7 +67,9 @@
       flex-direction: column;
     }
 
-    /* TOPBAR */
+    /* =========================
+       TOPBAR
+    ========================= */
 
     .topbar {
       height: 70px;
@@ -107,10 +109,10 @@
 
     .content {
       flex: 1;
-      padding: 30px;
       display: flex;
       justify-content: center;
       align-items: flex-start;
+      padding: 30px;
     }
 
     .form-card {
@@ -170,17 +172,16 @@
 
 <body>
 
-  <!-- =========================
-       SIDEBAR
-  ========================== -->
-
+    <!-- SIDEBAR -->
   <div class="sidebar">
 
     <h2>Admin Panel</h2>
 
     <button onclick="openAddStudent()">Add Student</button>
+
     <button onclick="openViewStudents()">View Students</button>
     <button onclick="openAddLecturer()">Add Lecturer</button>
+    <button onclick="openViewLecturers()">View Lecturers</button>
     <button onclick="logout()">Logout</button>
 
   </div>
@@ -188,14 +189,13 @@
   <!-- =========================
        MAIN
   ========================== -->
-
   <div class="main">
 
     <!-- TOPBAR -->
     <div class="topbar">
 
       <div class="topbar-left">
-        <img src="icon.png" alt="System Icon">
+        <img src="icon.png" alt="System Icon" onclick="goHome()" style="cursor:pointer;">
         <h1>Automated Grading System</h1>
       </div>
 
@@ -272,19 +272,24 @@
 
   </div>
 
-  <!-- JS -->
+  <!-- =========================
+       JS
+  ========================== -->
   <script src="../JS/chatWidget.js"></script>
   <script src="../JS/addStudent.js"></script>
 
   <script>
-    // load admin name
+
+    // Load admin name
     document.addEventListener("DOMContentLoaded", () => {
       const admin = JSON.parse(localStorage.getItem("user"));
+
       if (admin) {
         document.getElementById("adminName").textContent =
           `${admin.firstName} ${admin.lastName}`;
       }
     });
+
   </script>
 
 </body>
