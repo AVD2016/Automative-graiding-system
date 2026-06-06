@@ -213,40 +213,35 @@ public class ModuleController {
 
     List<LecturerViewModulesDTO> result = new ArrayList<>();
 
+    // ONLY modules lecturer is registered on
     for (Registration reg : lecturer.getRegistered()) {
 
       Module module = reg.getModule();
-      if (module == null)
+
+      if (module == null) {
         continue;
+      }
 
-      // =========================
-      // 1. COURSEWORK COUNT
-      // =========================
-      int courseworkCount = module.getAssignments() != null ? module.getAssignments().size() : 0;
+      int courseworkCount = (module.getAssignments() != null) ? module.getAssignments().size() : 0;
 
-      // =========================
-      // 2. ASSIGNED CREDITS
-      // =========================
-      int assignedCredits = module.getAssignments() != null
+      int assignedCredits = (module.getAssignments() != null)
           ? module.getAssignments().stream().mapToInt(Assignment::getCredits).sum()
           : 0;
 
-      // =========================
-      // 3. STUDENTS ENROLLED
-      // =========================
       int studentsEnrolled = 0;
 
       if (module.getRegistrations() != null) {
 
         studentsEnrolled = (int) module.getRegistrations().stream()
-            .filter(registration -> registration.getUser() instanceof Student).count();
+            .filter(r -> r.getUser() instanceof Student).count();
+
       } else {
-        // fallback if no direct mapping exists
+
         studentsEnrolled = registrationRepository.countByModule(module);
       }
 
       // =========================
-      // BUILD DTO
+      // DTO
       // =========================
       LecturerViewModulesDTO dto = new LecturerViewModulesDTO(module.getCode(), module.getName(),
           module.getCredits(), assignedCredits, courseworkCount, studentsEnrolled);
