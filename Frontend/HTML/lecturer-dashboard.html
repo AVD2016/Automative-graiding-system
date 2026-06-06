@@ -4,11 +4,8 @@
 <head>
 
   <meta charset="UTF-8" />
-
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0"/>
-
-  <title>Lecturer Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>View Modules</title>
 
   <link rel="stylesheet" href="../CSS/chatWidget.css">
 
@@ -28,7 +25,7 @@
     }
 
     /* =========================
-       SIDEBAR
+       SIDEBAR (IDENTICAL)
     ========================= */
 
     .sidebar {
@@ -72,7 +69,7 @@
     }
 
     /* =========================
-       TOPBAR
+       TOPBAR (IDENTICAL)
     ========================= */
 
     .topbar {
@@ -108,7 +105,7 @@
     }
 
     /* =========================
-       CONTENT
+       CONTENT (TABLE ONLY)
     ========================= */
 
     .content {
@@ -117,37 +114,40 @@
       overflow-y: auto;
     }
 
-    .submissions-card {
-      background-color: white;
+    .table-card {
+      background: white;
       border-radius: 12px;
-      padding: 25px;
+      padding: 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     }
 
-    .submissions-card h2 {
-      margin-bottom: 20px;
-      color: #1e293b;
+    table {
+      width: 100%;
+      border-collapse: collapse;
     }
 
-    .placeholder {
+    th {
+      background: #1e293b;
+      color: white;
+      text-align: left;
+      padding: 12px;
+      font-size: 14px;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+
+    tr:hover {
+      background: #f8fafc;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
       color: #64748b;
-      font-style: italic;
-      padding: 20px 0;
-    }
-
-    /* =========================
-       RESPONSIVE
-    ========================= */
-
-    @media (max-width: 900px) {
-
-      .sidebar {
-        width: 180px;
-      }
-
-      .topbar-left h1 {
-        font-size: 18px;
-      }
     }
 
   </style>
@@ -157,28 +157,17 @@
 <body>
 
   <!-- =========================
-       SIDEBAR
+       SIDEBAR (UNCHANGED)
   ========================== -->
 
   <div class="sidebar">
 
     <h2>Lecturer Panel</h2>
 
-    <button onclick="openViewModules()">
-      View Modules
-    </button>
-
-    <button onclick="openCreateAssignment()">
-      Create Assignment
-    </button>
-
-    <button onclick="openMarkAssignment()">
-      Mark Assignment
-    </button>
-
-    <button onclick="logout()">
-      Logout
-    </button>
+    <button onclick="openViewModules()">View Modules</button>
+    <button onclick="openCreateAssignment()">Create Assignment</button>
+    <button onclick="openMarkAssignment()">Mark Assignment</button>
+    <button onclick="logout()">Logout</button>
 
   </div>
 
@@ -188,16 +177,12 @@
 
   <div class="main">
 
-    <!-- TOPBAR -->
-
+    <!-- TOPBAR (UNCHANGED) -->
     <div class="topbar">
 
       <div class="topbar-left">
-
         <img src="icon.png" alt="System Icon">
-
         <h1>Automated Grading System</h1>
-
       </div>
 
       <div class="lecturer-name" id="lecturerName">
@@ -207,18 +192,32 @@
     </div>
 
     <!-- CONTENT -->
-
     <div class="content">
 
-      <div class="submissions-card">
+      <div class="table-card">
 
-        <h2>Latest Submissions</h2>
+        <table>
 
-        <div class="placeholder">
+          <thead>
+            <tr>
+              <th>Module Code</th>
+              <th>Module Name</th>
+              <th>Module Credits</th>
+              <th>Assigned Credits</th>
+              <th>Coursework Count</th>
+              <th>Students Enrolled</th>
+            </tr>
+          </thead>
 
-          Latest assignment submissions will appear here.
+          <tbody id="modulesTableBody">
+            <tr>
+              <td colspan="6" class="loading">
+                Loading modules...
+              </td>
+            </tr>
+          </tbody>
 
-        </div>
+        </table>
 
       </div>
 
@@ -227,46 +226,31 @@
   </div>
 
   <!-- =========================
-       CHAT BUTTON
+       CHAT (UNCHANGED)
   ========================== -->
 
   <div id="chatToggle" class="chat-toggle">
     <img src="question.jpg" alt="Chat" />
   </div>
 
-  <!-- =========================
-       CHAT WINDOW
-  ========================== -->
-
   <div id="chatWidget" class="chat-widget hidden">
 
     <div class="chat-header">
-
       <span>Support Chat</span>
-
       <button onclick="toggleChat()">✕</button>
-
     </div>
 
-    <div id="chatMessages"
-         class="chat-messages"></div>
+    <div id="chatMessages" class="chat-messages"></div>
 
     <div class="chat-input">
-
-      <input id="chatInput"
-             type="text"
-             placeholder="Type a message..." />
-
-      <button onclick="sendMessage()">
-        Send
-      </button>
-
+      <input id="chatInput" type="text" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
     </div>
 
   </div>
 
-  <script src="../JS/lecturer-dashboard.js"></script>
-
+  <!-- JS -->
+  <script src="../JS/viewModules.js"></script>
   <script src="../JS/chatWidget.js"></script>
 
 </body>
