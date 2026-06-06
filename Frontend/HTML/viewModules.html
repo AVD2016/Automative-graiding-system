@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>View Modules</title>
+
+  <link rel="stylesheet" href="../CSS/chatWidget.css">
+
+  <style>
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      display: flex;
+      height: 100vh;
+      background-color: #f4f6f9;
+    }
+
+    /* =========================
+       SIDEBAR
+    ========================= */
+    .sidebar {
+      width: 240px;
+      background-color: #1e293b;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding-top: 20px;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 22px;
+    }
+
+    .sidebar button {
+      background: none;
+      border: none;
+      color: white;
+      padding: 18px;
+      text-align: left;
+      cursor: pointer;
+      font-size: 16px;
+      transition: 0.2s;
+    }
+
+    .sidebar button:hover {
+      background-color: #334155;
+    }
+
+    /* =========================
+       MAIN
+    ========================= */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      height: 70px;
+      background-color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 25px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .topbar-left img {
+      width: 45px;
+      height: 45px;
+    }
+
+    .topbar-left h1 {
+      font-size: 22px;
+      color: #1e293b;
+    }
+
+    .user-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #1e293b;
+    }
+
+    /* =========================
+       CONTENT
+    ========================= */
+    .content {
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .table-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1000px;
+    }
+
+    thead {
+      background-color: #1e293b;
+      color: white;
+    }
+
+    th, td {
+      padding: 14px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+
+    tbody tr:hover {
+      background-color: #f8fafc;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: #64748b;
+    }
+
+    /* SIDEBAR BUTTONS */
+    .active {
+      background-color: #334155;
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <h2>Lecturer Panel</h2>
+
+    <button onclick="openViewModules()" class="active">View Modules</button>
+    <button onclick="openCreateAssignment()">Create Assignment</button>
+    <button onclick="openMarkAssignment()">Mark Assignment</button>
+    <button onclick="logout()">Logout</button>
+
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+
+      <div class="topbar-left">
+        <img src="icon.png" alt="System Icon">
+        <h1>Automated Grading System</h1>
+      </div>
+
+      <div class="user-name" id="lecturerName">
+        Lecturer
+      </div>
+
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <div class="table-card">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Module Code</th>
+              <th>Module Name</th>
+              <th>Module Credits</th>
+              <th>Credits Assigned (Coursework)</th>
+              <th>Number of Coursework</th>
+              <th>Students Enrolled</th>
+            </tr>
+          </thead>
+
+          <tbody id="modulesTableBody">
+            <tr>
+              <td colspan="6" class="loading">
+                Loading modules...
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- CHAT -->
+  <div id="chatToggle" class="chat-toggle">
+    <img src="question.jpg" alt="Chat" />
+  </div>
+
+  <div id="chatWidget" class="chat-widget hidden">
+
+    <div class="chat-header">
+      <span>Support Chat</span>
+      <button onclick="toggleChat()">✕</button>
+    </div>
+
+    <div id="chatMessages" class="chat-messages"></div>
+
+    <div class="chat-input">
+      <input id="chatInput" type="text" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+
+  </div>
+
+  <!-- JS -->
+  <script src="../JS/viewModules.js"></script>
+  <script src="../JS/chatWidget.js"></script>
+
+</body>
+
+</html>

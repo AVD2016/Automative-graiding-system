@@ -32,6 +32,7 @@ public class Registration {
   private long id;
 
   /** The module associated with this registration. */
+  @JsonIgnore
   @ManyToOne
   @JoinColumn(name = "module_code")
   private Module module;

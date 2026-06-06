@@ -15,12 +15,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.ac.rhul.cs2800.dataObjects.LecturerViewModulesDTO;
+import uk.ac.rhul.cs2800.model.Assignment;
 import uk.ac.rhul.cs2800.model.Lecturer;
 import uk.ac.rhul.cs2800.model.Module;
 import uk.ac.rhul.cs2800.model.Registration;
 import uk.ac.rhul.cs2800.model.Student;
 import uk.ac.rhul.cs2800.repository.LecturerRepository;
 import uk.ac.rhul.cs2800.repository.ModuleRepository;
+import uk.ac.rhul.cs2800.repository.RegistrationRepository;
 import uk.ac.rhul.cs2800.repository.StudentRepository;
 
 @RestController
@@ -36,6 +39,9 @@ public class ModuleController {
 
   @Autowired
   LecturerRepository lecturerRepository;
+
+  @Autowired
+  RegistrationRepository registrationRepository;
 
   @GetMapping("/getAvailableModules/{studentId}")
   public List<Map<String, Object>> getAvailableModules(@PathVariable int studentId) {
@@ -172,6 +178,7 @@ public class ModuleController {
   }
 
 
+
   @PostMapping("/createModule")
   public ResponseEntity<?> createModule(@RequestBody Module module) {
 
@@ -189,5 +196,64 @@ public class ModuleController {
     Module savedModule = moduleRepository.save(module);
 
     return ResponseEntity.ok(savedModule);
+  }
+
+
+  @GetMapping("/overview/{lecturerId}")
+  public ResponseEntity<List<LecturerViewModulesDTO>> getModuleOverview(
+      @PathVariable int lecturerId) {
+
+    Optional<Lecturer> optionalLecturer = lecturerRepository.findById(lecturerId);
+
+    if (optionalLecturer.isEmpty()) {
+      return ResponseEntity.notFound().build();
+    }
+
+    Lecturer lecturer = optionalLecturer.get();
+
+    List<LecturerViewModulesDTO> result = new ArrayList<>();
+
+    for (Registration reg : lecturer.getRegistered()) {
+
+      Module module = reg.getModule();
+      if (module == null)
+        continue;
+
+      // =========================
+      // 1. COURSEWORK COUNT
+      // =========================
+      int courseworkCount = module.getAssignments() != null ? module.getAssignments().size() : 0;
+
+      // =========================
+      // 2. ASSIGNED CREDITS
+      // =========================
+      int assignedCredits = module.getAssignments() != null
+          ? module.getAssignments().stream().mapToInt(Assignment::getCredits).sum()
+          : 0;
+
+      // =========================
+      // 3. STUDENTS ENROLLED
+      // =========================
+      int studentsEnrolled = 0;
+
+      if (module.getRegistrations() != null) {
+
+        studentsEnrolled = (int) module.getRegistrations().stream()
+            .filter(registration -> registration.getUser() instanceof Student).count();
+      } else {
+        // fallback if no direct mapping exists
+        studentsEnrolled = registrationRepository.countByModule(module);
+      }
+
+      // =========================
+      // BUILD DTO
+      // =========================
+      LecturerViewModulesDTO dto = new LecturerViewModulesDTO(module.getCode(), module.getName(),
+          module.getCredits(), assignedCredits, courseworkCount, studentsEnrolled);
+
+      result.add(dto);
+    }
+
+    return ResponseEntity.ok(result);
   }
 }

@@ -1,5 +1,6 @@
 package uk.ac.rhul.cs2800.model;
 
+import java.util.ArrayList;
 import java.util.List;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -30,6 +31,9 @@ public class Module {
 
   @OneToMany(mappedBy = "module", cascade = CascadeType.ALL)
   private List<Assignment> assignments;
+
+  @OneToMany(mappedBy = "module", cascade = CascadeType.ALL)
+  private List<Registration> registrations = new ArrayList<>();
 
   /**
    * Constructs an empty {@code Module} with default values.
@@ -133,5 +137,9 @@ public class Module {
 
   public int getCredits() {
     return credits;
+  }
+
+  public List<Registration> getRegistrations() {
+    return registrations;
   }
 }

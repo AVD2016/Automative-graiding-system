@@ -1,6 +1,7 @@
 package uk.ac.rhul.cs2800.model;
 
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -30,6 +31,7 @@ public class Assignment {
 
   @ManyToOne
   @JoinColumn(name = "module_code", nullable = false)
+  @JsonIgnore
   private Module module;
 
 
