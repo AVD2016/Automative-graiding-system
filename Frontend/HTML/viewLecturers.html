@@ -41,7 +41,7 @@
       font-size: 22px;
     }
 
-    .sidebar button {
+    .sidebar > button {
       background: none;
       border: none;
       color: white;
@@ -52,7 +52,7 @@
       transition: 0.2s;
     }
 
-    .sidebar button:hover {
+    .sidebar > button:hover {
       background-color: #334155;
     }
 
@@ -100,6 +100,45 @@
       color: #1e293b;
     }
 
+    /* ========================= RIGHT TOPBAR ========================= */
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* ========================= BUTTONS (MATCH STUDENTS PAGE) ========================= */
+
+    .register-btn,
+    .create-module-btn,
+    .modal-btn {
+      background: #1e3a5f;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .register-btn:hover,
+    .create-module-btn:hover,
+    .modal-btn:hover {
+      background: #2b527f;
+      transform: translateY(-1px);
+    }
+
+    .create-module-wrapper {
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: flex-end;
+    }
+
     /* ========================= CONTENT ========================= */
 
     .content {
@@ -114,12 +153,10 @@
       content: "";
       position: absolute;
       inset: 0;
-
       background-image: url("Background.png");
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
-
       z-index: 0;
     }
 
@@ -127,36 +164,9 @@
       content: "";
       position: absolute;
       inset: 0;
-
       background: rgba(0,0,0,0.35);
       z-index: 1;
       pointer-events: none;
-    }
-
-    /* ========================= BUTTONS (ONLY ADDITION) ========================= */
-
-    .action-bar {
-      position: relative;
-      z-index: 2;
-      margin-bottom: 15px;
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-    }
-
-    .action-btn {
-      background: #1e3a5f;
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .action-btn:hover {
-      background: #2b527f;
     }
 
     /* ========================= TABLE ========================= */
@@ -197,13 +207,30 @@
       background-color: #f8fafc;
     }
 
-    .loading {
-      text-align: center;
-      padding: 20px;
-      color: #64748b;
+    /* ========================= MODULE BADGES ========================= */
+
+    .modules-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
-    /* ========================= MODALS ========================= */
+    .module-badge {
+      background: #e2e8f0;
+      color: #1e293b;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      width: fit-content;
+    }
+
+    .empty-modules {
+      color: #64748b;
+      font-style: italic;
+    }
+
+    /* ========================= MODAL ========================= */
 
     .modal {
       display: none;
@@ -222,8 +249,19 @@
       border-radius: 12px;
     }
 
-    .module-option {
-      padding: 10px 0;
+    .modal-content input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+    }
+
+    .modal-actions {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
     }
 
   </style>
@@ -255,20 +293,22 @@
         <h1>Automated Grading System</h1>
       </div>
 
-      <div class="admin-name" id="adminName"></div>
+      <div class="topbar-right">
+        <div class="admin-name" id="adminName"></div>
+      </div>
 
     </div>
 
-    <!-- ACTION BUTTONS (ADDED ONLY) -->
+    <!-- CONTENT -->
     <div class="content">
 
-      <div class="action-bar">
-        <button class="action-btn" onclick="openCreateModuleModal()">
+      <!-- CREATE MODULE BUTTON (RIGHT SIDE) -->
+      <div class="create-module-wrapper">
+        <button class="create-module-btn" onclick="openCreateModuleModal()">
           Create Module
         </button>
       </div>
 
-      <!-- TABLE -->
       <div class="table-container">
 
         <table>
@@ -299,28 +339,31 @@
   </div>
 
   <!-- REGISTER MODAL -->
-  <div id="moduleModal" class="modal">
+  <div class="modal" id="moduleModal">
     <div class="modal-content">
-      <h2>Register Lecturer to Modules</h2>
+      <h2>Register Lecturer For Modules</h2>
       <div id="modulesList"></div>
 
-      <button onclick="submitModuleRegistration()">Save</button>
-      <button onclick="closeModal()">Close</button>
+      <div class="modal-actions">
+        <button class="modal-btn" onclick="submitModuleRegistration()">Save</button>
+        <button class="modal-btn" onclick="closeModal()">Cancel</button>
+      </div>
     </div>
   </div>
 
   <!-- CREATE MODULE MODAL -->
-  <div id="createModuleModal" class="modal">
+  <div class="modal" id="createModuleModal">
     <div class="modal-content">
       <h2>Create Module</h2>
 
-      <input id="moduleCode" placeholder="Code">
-      <input id="moduleName" placeholder="Name">
-      <input id="moduleCredits" placeholder="Credits" type="number">
+      <input type="text" id="moduleCode" placeholder="Module Code">
+      <input type="text" id="moduleName" placeholder="Module Name">
+      <input type="number" id="moduleCredits" placeholder="Credits">
 
-      <button onclick="createModule()">Create</button>
-      <button onclick="closeCreateModuleModal()">Close</button>
-
+      <div class="modal-actions">
+        <button class="modal-btn" onclick="createModule()">Create</button>
+        <button class="modal-btn" onclick="closeCreateModuleModal()">Cancel</button>
+      </div>
     </div>
   </div>
 

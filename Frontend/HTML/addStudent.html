@@ -97,51 +97,38 @@
     }
 
     .content {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  padding: 30px;
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+    }
 
-  position: relative; /* IMPORTANT */
-  overflow: hidden;
-}
+    .content::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("Background.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      z-index: 0;
+    }
 
-/* background layer ONLY inside content area */
-.content::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  background-image: url("Background.png");
-  background-size: cover;        /* keeps correct scaling */
-  background-position: center;
-  background-repeat: no-repeat;
-
-  z-index: 0;
-}
-
-/* dark overlay (fixed, no layout shift issues) */
-.content::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  background: rgba(0,0,0,0.35);
-  z-index: 1;
-  pointer-events: none;
-}
+    .content::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 1;
+      pointer-events: none;
+    }
 
     .form-card {
       position: relative;
       z-index: 2;
-
       width: 500px;
       background: rgba(255,255,255,0.95);
       padding: 30px;
@@ -216,12 +203,11 @@
     <div class="topbar">
 
       <div class="topbar-left">
-        <!-- ONLY BUTTON CHANGE HERE -->
         <img src="icon.png" onclick="openDashboard()" style="cursor:pointer;">
         <h1>Automated Grading System</h1>
       </div>
 
-      <!-- FIX: name now populated dynamically -->
+      <!-- ✅ FIXED: SAME LOGIC AS VIEWLECTURERS -->
       <div class="admin-name" id="adminName"></div>
 
     </div>
@@ -269,14 +255,15 @@
   <script src="../JS/chatWidget.js"></script>
   <script src="../JS/administratorNavigation.js"></script>
 
-  <!-- ONLY NEW LOGIC -->
   <script>
-    // ADMIN NAME FIX (expects: "John Smith" stored in localStorage)
-    const first = localStorage.getItem("adminFirstName") || "";
-    const last = localStorage.getItem("adminLastName") || "";
+    document.addEventListener("DOMContentLoaded", () => {
 
-    document.getElementById("adminName").textContent =
-      (first || last) ? `${first} ${last}`.trim() : "Administrator";
+      const admin = JSON.parse(localStorage.getItem("user"));
+
+      document.getElementById("adminName").textContent =
+        admin ? `${admin.firstName} ${admin.lastName}` : "Administrator";
+
+    });
   </script>
 
 </body>
