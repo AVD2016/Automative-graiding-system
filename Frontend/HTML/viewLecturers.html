@@ -56,6 +56,44 @@
       background-color: #334155;
     }
 
+    /* ========================= ACTION BUTTONS ========================= */
+
+    .register-btn,
+    .create-module-btn,
+    .modal-btn {
+      background: #1e3a5f;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+
+    .register-btn:hover,
+    .create-module-btn:hover,
+    .modal-btn:hover {
+      background: #2b527f;
+      transform: translateY(-1px);
+    }
+
+    .register-btn:active,
+    .create-module-btn:active,
+    .modal-btn:active {
+      transform: translateY(0);
+    }
+
+    /* RIGHT ALIGN CREATE MODULE BUTTON */
+    .create-module-wrapper {
+      margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: flex-end;
+    }
+
     /* ========================= MAIN ========================= */
 
     .main {
@@ -100,53 +138,13 @@
       color: #1e293b;
     }
 
-    /* ========================= RIGHT TOPBAR ========================= */
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    /* ========================= BUTTONS (MATCH STUDENTS PAGE) ========================= */
-
-    .register-btn,
-    .create-module-btn,
-    .modal-btn {
-      background: #1e3a5f;
-      color: white;
-      border: none;
-      padding: 10px 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      transition: all 0.2s ease;
-    }
-
-    .register-btn:hover,
-    .create-module-btn:hover,
-    .modal-btn:hover {
-      background: #2b527f;
-      transform: translateY(-1px);
-    }
-
-    .create-module-wrapper {
-      margin-bottom: 20px;
-      position: relative;
-      z-index: 2;
-      display: flex;
-      justify-content: flex-end;
-    }
-
     /* ========================= CONTENT ========================= */
 
     .content {
       flex: 1;
       padding: 30px;
-      overflow-y: auto;
-      position: relative;
       overflow: hidden;
+      position: relative;
     }
 
     .content::after {
@@ -207,6 +205,12 @@
       background-color: #f8fafc;
     }
 
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #64748b;
+    }
+
     /* ========================= MODULE BADGES ========================= */
 
     .modules-cell {
@@ -230,7 +234,7 @@
       font-style: italic;
     }
 
-    /* ========================= MODAL ========================= */
+    /* ========================= MODAL (MATCH STUDENTS) ========================= */
 
     .modal {
       display: none;
@@ -249,19 +253,30 @@
       border-radius: 12px;
     }
 
-    .modal-content input {
-      width: 100%;
-      padding: 10px;
-      margin-top: 8px;
-      margin-bottom: 15px;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
+    .modal-content h2 {
+      margin-bottom: 20px;
+      color: #1e293b;
+    }
+
+    .module-option {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
     }
 
     .modal-actions {
       margin-top: 20px;
       display: flex;
       gap: 10px;
+    }
+
+    .modal-content input[type="text"],
+    .modal-content input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
     }
 
   </style>
@@ -271,7 +286,6 @@
 
   <!-- SIDEBAR -->
   <div class="sidebar">
-
     <h2>Admin Panel</h2>
 
     <button onclick="openViewLecturers()">View All Lecturers</button>
@@ -279,7 +293,6 @@
     <button onclick="openViewAllStudents()">View All Students</button>
     <button onclick="openAddStudent()">Add New Student</button>
     <button onclick="logout()">Logout</button>
-
   </div>
 
   <!-- MAIN -->
@@ -293,16 +306,14 @@
         <h1>Automated Grading System</h1>
       </div>
 
-      <div class="topbar-right">
-        <div class="admin-name" id="adminName"></div>
-      </div>
+      <div class="admin-name" id="adminName"></div>
 
     </div>
 
     <!-- CONTENT -->
     <div class="content">
 
-      <!-- CREATE MODULE BUTTON (RIGHT SIDE) -->
+      <!-- CREATE MODULE BUTTON (FIXED POSITION) -->
       <div class="create-module-wrapper">
         <button class="create-module-btn" onclick="openCreateModuleModal()">
           Create Module
@@ -342,10 +353,11 @@
   <div class="modal" id="moduleModal">
     <div class="modal-content">
       <h2>Register Lecturer For Modules</h2>
+
       <div id="modulesList"></div>
 
       <div class="modal-actions">
-        <button class="modal-btn" onclick="submitModuleRegistration()">Save</button>
+        <button class="modal-btn" onclick="submitModuleRegistration()">Save Registration</button>
         <button class="modal-btn" onclick="closeModal()">Cancel</button>
       </div>
     </div>
@@ -356,12 +368,17 @@
     <div class="modal-content">
       <h2>Create Module</h2>
 
-      <input type="text" id="moduleCode" placeholder="Module Code">
-      <input type="text" id="moduleName" placeholder="Module Name">
-      <input type="number" id="moduleCredits" placeholder="Credits">
+      <label>Module Code</label>
+      <input type="text" id="moduleCode">
+
+      <label>Module Name</label>
+      <input type="text" id="moduleName">
+
+      <label>Credits</label>
+      <input type="number" id="moduleCredits">
 
       <div class="modal-actions">
-        <button class="modal-btn" onclick="createModule()">Create</button>
+        <button class="modal-btn" onclick="createModule()">Create Module</button>
         <button class="modal-btn" onclick="closeCreateModuleModal()">Cancel</button>
       </div>
     </div>
