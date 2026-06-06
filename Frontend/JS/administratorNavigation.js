@@ -25,3 +25,12 @@ function openViewLecturers(){
 function openDashboard(){
   window.location.href = "admin-dashboard.html"
 }
+
+document.addEventListener("DOMContentLoaded", () => {
+
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      document.getElementById("adminName").textContent =
+        user ? `${user.firstName} ${user.lastName}` : "Lecturer";
+
+    });

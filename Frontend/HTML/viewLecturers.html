@@ -409,13 +409,5 @@
   <script src="../JS/chatWidget.js"></script>
   <script src="../JS/administratorNavigation.js"></script>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const admin = JSON.parse(localStorage.getItem("user"));
-      document.getElementById("adminName").textContent =
-        admin ? `${admin.firstName} ${admin.lastName}` : "Administrator";
-    });
-  </script>
-
 </body>
 </html>
