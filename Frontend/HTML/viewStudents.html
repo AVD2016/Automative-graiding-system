@@ -57,30 +57,44 @@
     }
 
     /* =========================
-   ACTION BUTTONS
-========================= */
+       ACTION BUTTONS
+    ========================= */
 
-td button {
-  background: #1e3a5f;
-  color: white;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 13px;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  margin-right: 8px;
-}
+    .register-btn,
+    .create-module-btn,
+    .modal-btn {
+      background: #1e3a5f;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
 
-td button:hover {
-  background: #2b527f;
-  transform: translateY(-1px);
-}
+    .register-btn:hover,
+    .create-module-btn:hover,
+    .modal-btn:hover {
+      background: #2b527f;
+      transform: translateY(-1px);
+    }
 
-td button:active {
-  transform: translateY(0);
-}
+    .register-btn:active,
+    .create-module-btn:active,
+    .modal-btn:active {
+      transform: translateY(0);
+    }
+
+   .create-module-wrapper {
+     margin-bottom: 20px;
+     position: relative;
+     z-index: 2;
+
+     display: flex;
+     justify-content: flex-end; /* moves button to the right */
+   }
 
     /* ========================= MAIN ========================= */
 
@@ -103,7 +117,6 @@ td button:active {
       z-index: 3;
     }
 
-    /* ICON + TITLE BUTTON */
     .topbar-left {
       display: flex;
       align-items: center;
@@ -127,13 +140,12 @@ td button:active {
       color: #1e293b;
     }
 
-    /* ========================= CONTENT (FIXED BACKGROUND) ========================= */
+    /* ========================= CONTENT ========================= */
 
     .content {
       flex: 1;
       padding: 30px;
       overflow-y: auto;
-
       position: relative;
       overflow: hidden;
     }
@@ -161,7 +173,8 @@ td button:active {
       pointer-events: none;
     }
 
-    /* TABLE CONTAINER ABOVE BACKGROUND */
+    /* ========================= TABLE ========================= */
+
     .table-container {
       background: white;
       border-radius: 12px;
@@ -205,6 +218,81 @@ td button:active {
       color: #64748b;
     }
 
+    /* ========================= MODULES ========================= */
+
+    .modules-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .module-badge {
+      background: #e2e8f0;
+      color: #1e293b;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      width: fit-content;
+    }
+
+    .empty-modules {
+      color: #64748b;
+      font-style: italic;
+    }
+
+    /* ========================= MODAL ========================= */
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+    }
+
+    .modal-content {
+      background: white;
+      width: 500px;
+      max-width: 90%;
+      margin: 80px auto;
+      padding: 25px;
+      border-radius: 12px;
+    }
+
+    .modal-content h2 {
+      margin-bottom: 20px;
+      color: #1e293b;
+    }
+
+    .module-option {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .registered-label {
+      margin-left: 10px;
+      color: green;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .modal-actions {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-content input[type="text"],
+    .modal-content input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-top: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+    }
+
   </style>
 </head>
 
@@ -241,6 +329,14 @@ td button:active {
     <!-- CONTENT -->
     <div class="content">
 
+      <!-- CREATE MODULE BUTTON -->
+      <div class="create-module-wrapper">
+        <button class="create-module-btn"
+                onclick="openCreateModuleModal()">
+          Create Module
+        </button>
+      </div>
+
       <div class="table-container">
 
         <table>
@@ -258,11 +354,74 @@ td button:active {
 
           <tbody id="studentsTableBody">
             <tr>
-              <td colspan="7" class="loading">Loading students...</td>
+              <td colspan="7" class="loading">
+                Loading students...
+              </td>
             </tr>
           </tbody>
 
         </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- REGISTER MODULE MODAL -->
+  <div class="modal" id="moduleModal">
+
+    <div class="modal-content">
+
+      <h2>Register Student For Modules</h2>
+
+      <div id="modulesList"></div>
+
+      <div class="modal-actions">
+
+        <button class="modal-btn"
+                onclick="submitModuleRegistration()">
+          Save Registration
+        </button>
+
+        <button class="modal-btn"
+                onclick="closeModal()">
+          Cancel
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- CREATE MODULE MODAL -->
+  <div class="modal" id="createModuleModal">
+
+    <div class="modal-content">
+
+      <h2>Create Module</h2>
+
+      <label>Module Code</label>
+      <input type="text" id="moduleCode">
+
+      <label>Module Name</label>
+      <input type="text" id="moduleName">
+
+      <label>Credits</label>
+      <input type="number" id="moduleCredits">
+
+      <div class="modal-actions">
+
+        <button class="modal-btn"
+                onclick="createModule()">
+          Create Module
+        </button>
+
+        <button class="modal-btn"
+                onclick="closeCreateModuleModal()">
+          Cancel
+        </button>
 
       </div>
 
