@@ -20,5 +20,27 @@ public class LecturerViewModulesDTO {
     this.studentsEnrolled = studentsEnrolled;
   }
 
-  // getters only (or Lombok @Data if you use it)
+  public String getCode() {
+    return code;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public int getCredits() {
+    return credits;
+  }
+
+  public int getAssignedCredits() {
+    return assignedCredits;
+  }
+
+  public int getCourseworkCount() {
+    return courseworkCount;
+  }
+
+  public int getStudentsEnrolled() {
+    return studentsEnrolled;
+  }
 }
