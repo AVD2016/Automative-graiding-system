@@ -26,11 +26,26 @@ function openDashboard(){
   window.location.href = "admin-dashboard.html"
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
-      const user = JSON.parse(localStorage.getItem("user"));
+  const administrator = JSON.parse(localStorage.getItem("user"));
+  const role = localStorage.getItem("role");
 
-      document.getElementById("adminName").textContent =
-        user ? `${user.firstName} ${user.lastName}` : "Lecturer";
+  // Redirect if not logged in
+  if (!administrator) {
+    window.location.href = "login.html";
+    return;
+  }
 
-    });
+  // Redirect if wrong role
+  if (role !== "administrator") {
+    window.location.href = "login.html";
+    return;
+  }
+
+  document.getElementById("administratorName").textContent =
+    `${administrator.firstName} ${administrator.lastName}`;
+
+  await loadModules();
+
+});

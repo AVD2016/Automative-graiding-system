@@ -4,108 +4,15 @@
 <head>
 
   <meta charset="UTF-8" />
-
   <meta name="viewport"
         content="width=device-width, initial-scale=1.0"/>
 
   <title>Lecturer Dashboard</title>
 
   <link rel="stylesheet" href="../CSS/chatWidget.css">
+  <link rel="stylesheet" href="../CSS/generalStyles.css">
 
   <style>
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      background-color: #f4f6f9;
-      display: flex;
-      height: 100vh;
-    }
-
-    /* =========================
-       SIDEBAR
-    ========================= */
-
-    .sidebar {
-      width: 240px;
-      background-color: #1e293b;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      padding-top: 20px;
-    }
-
-    .sidebar h2 {
-      text-align: center;
-      margin-bottom: 30px;
-      font-size: 22px;
-    }
-
-    .sidebar button {
-      background: none;
-      border: none;
-      color: white;
-      padding: 18px;
-      text-align: left;
-      cursor: pointer;
-      font-size: 16px;
-      transition: 0.2s;
-    }
-
-    .sidebar button:hover {
-      background-color: #334155;
-    }
-
-    /* =========================
-       MAIN AREA
-    ========================= */
-
-    .main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* =========================
-       TOPBAR
-    ========================= */
-
-    .topbar {
-      height: 70px;
-      background-color: white;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 25px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    .topbar-left {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-    }
-
-    .topbar-left img {
-      width: 45px;
-      height: 45px;
-    }
-
-    .topbar-left h1 {
-      font-size: 22px;
-      color: #1e293b;
-    }
-
-    .lecturer-name {
-      font-size: 16px;
-      font-weight: bold;
-      color: #1e293b;
-    }
 
     /* =========================
        CONTENT
@@ -115,9 +22,34 @@
       flex: 1;
       padding: 30px;
       overflow-y: auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .content::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("../Images/Background.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      z-index: 0;
+    }
+
+    .content::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 1;
+      pointer-events: none;
     }
 
     .submissions-card {
+      position: relative;
+      z-index: 2;
+
       background-color: white;
       border-radius: 12px;
       padding: 25px;
@@ -134,6 +66,7 @@
       font-style: italic;
       padding: 20px 0;
     }
+
 
     /* =========================
        RESPONSIVE
@@ -156,10 +89,7 @@
 
 <body>
 
-  <!-- =========================
-       SIDEBAR
-  ========================== -->
-
+  <!-- SIDEBAR -->
   <div class="sidebar">
 
     <h2>Lecturer Panel</h2>
@@ -182,17 +112,13 @@
 
   </div>
 
-  <!-- =========================
-       MAIN
-  ========================== -->
-
+  <!-- MAIN -->
   <div class="main">
 
     <!-- TOPBAR -->
-
     <div class="topbar">
 
-      <div class="topbar-left">
+      <div class="topbar-left" onclick="openDashboard()">
 
         <img src="icon.png" alt="System Icon">
 
@@ -200,14 +126,11 @@
 
       </div>
 
-      <div class="lecturer-name" id="lecturerName">
-        Lecturer
-      </div>
+      <div class="lecturer-name" id="lecturerName"></div>
 
     </div>
 
     <!-- CONTENT -->
-
     <div class="content">
 
       <div class="submissions-card">
@@ -226,17 +149,10 @@
 
   </div>
 
-  <!-- =========================
-       CHAT BUTTON
-  ========================== -->
-
+  <!-- CHAT -->
   <div id="chatToggle" class="chat-toggle">
     <img src="question.jpg" alt="Chat" />
   </div>
-
-  <!-- =========================
-       CHAT WINDOW
-  ========================== -->
 
   <div id="chatWidget" class="chat-widget hidden">
 
@@ -266,8 +182,10 @@
   </div>
 
   <script src="../JS/lecturer-dashboard.js"></script>
-
   <script src="../JS/chatWidget.js"></script>
+  <script src="../JS/lecturerNavigation.js"></script>
+
+
 
 </body>
 
