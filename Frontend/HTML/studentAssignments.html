@@ -387,9 +387,19 @@ input[type="file"] {
       <input type="file" id="submissionFile"/>
       <button class="action" onclick="submitAssignment()">Submit</button>
 
-      <button class="action danger" onclick="deleteSubmission()">
-        Delete Submission
-      </button>
+      <div class="upload-section">
+  <h4>Submit Assignment</h4>
+
+  <input type="file" id="submissionFile"/>
+  <button class="action" onclick="submitAssignment()">Submit</button>
+
+  <div id="deleteSubmissionSection">
+    <button class="action danger" onclick="deleteSubmission()">
+      Delete Submission
+    </button>
+  </div>
+
+</div>
     </div>
 
   </div>

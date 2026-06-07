@@ -276,3 +276,14 @@ window.onclick = function (event) {
     closeModal();
   }
 };
+
+const isSubmitted = currentAssignment.submitted === true;
+
+const deleteSection =
+  document.getElementById("deleteSubmissionSection");
+
+if (isSubmitted) {
+  deleteSection.style.display = "block";
+} else {
+  deleteSection.style.display = "none";
+}
