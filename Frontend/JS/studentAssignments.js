@@ -226,8 +226,11 @@ async function submitAssignment() {
       }
     );
 
-    if (!res.ok) throw new Error("Submission failed");
-
+    if (!res.ok) {
+  const errorText = await res.text();
+  console.error("Backend error response:", errorText);
+  throw new Error(errorText);
+}
     alert("Assignment submitted successfully");
 
     closeModal();
