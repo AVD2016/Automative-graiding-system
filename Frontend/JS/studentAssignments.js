@@ -138,7 +138,7 @@ function formatDate(dateStr) {
 
 async function openAssignment(id) {
   try {
-    const res = await fetch(`${API_BASE}/assignment/${id}`, {
+    const res = await fetch(`${API_BASE}/assignment/getAssignmentDetails/${id}`, {
       method: "GET",
       credentials: "include"
     });
