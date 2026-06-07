@@ -49,11 +49,6 @@
       margin-bottom: 25px;
     }
 
-    h2 {
-      margin-bottom: 15px;
-      color: #1e293b;
-    }
-
     /* ========================= TABLE ========================= */
 
     table {
@@ -264,25 +259,27 @@
     </div>
 
   </div>
+</div>
 
 <!-- CHAT -->
-  <div id="chatToggle" class="chat-toggle">
-    <img src="question.jpg" alt="Chat" />
+<div id="chatToggle" class="chat-toggle">
+  <img src="question.jpg" alt="Chat" />
+</div>
+
+<div id="chatWidget" class="chat-widget hidden">
+
+  <div class="chat-header">
+    <span>Support Chat</span>
+    <button onclick="toggleChat()">✕</button>
   </div>
 
-  <div id="chatWidget" class="chat-widget hidden">
+  <div id="chatMessages" class="chat-messages"></div>
 
-    <div class="chat-header">
-      <span>Support Chat</span>
-      <button onclick="toggleChat()">✕</button>
-    </div>
+  <div class="chat-input">
+    <input id="chatInput" type="text" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
 
-    <div id="chatMessages" class="chat-messages"></div>
-
-    <div class="chat-input">
-      <input id="chatInput" type="text" placeholder="Type a message..." />
-      <button onclick="sendMessage()">Send</button>
-    </div>
 </div>
 
   <script src="../JS/studentAssignments.js"></script>
