@@ -1,162 +1,177 @@
 /* =========================
-   GLOBAL RESET (IMPORTANT)
+   CHAT WIDGET POSITIONING
 ========================= */
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+.chat-widget {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
 
-body {
-  font-family: Arial, sans-serif;
-  background: #f4f6f9;
+  width: 320px;
+  max-height: 420px;
 
-  /* fixes “everything stuck left” issue */
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
-
-  min-height: 100vh;
-}
-
-/* =========================
-   CHAT WRAPPER (MISSING PIECE)
-========================= */
-
-.chat-container {
-  width: 100%;
-  max-width: 800px;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
 
   display: flex;
   flex-direction: column;
 
-  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+  overflow: hidden;
+  z-index: 9999;
+}
+
+/* hidden toggle */
+.hidden {
+  display: none;
 }
 
 /* =========================
-   INDIVIDUAL MESSAGES
+   HEADER
+========================= */
+
+.chat-header {
+  background: #2563eb;
+  color: white;
+
+  padding: 10px 12px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  font-weight: bold;
+}
+
+/* =========================
+   MESSAGES AREA
+========================= */
+
+.chat-messages {
+  flex: 1;
+
+  padding: 10px;
+  overflow-y: auto;
+
+  background: #f8fafc;
+}
+
+/* =========================
+   INPUT AREA
+========================= */
+
+.chat-input {
+  display: flex;
+  border-top: 1px solid #e2e8f0;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+
+  border: none;
+  outline: none;
+}
+
+.chat-input button {
+  padding: 10px 14px;
+
+  border: none;
+  background: #2563eb;
+  color: white;
+
+  cursor: pointer;
+}
+
+/* =========================
+   CHAT TOGGLE BUTTON
+========================= */
+
+.chat-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+
+  width: 50px;
+  height: 50px;
+
+  border-radius: 50%;
+  background: white;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+
+  cursor: pointer;
+  z-index: 10000;
+}
+
+.chat-toggle img {
+  width: 28px;
+  height: 28px;
+
+  /* keeps PNG clean */
+  object-fit: contain;
+}
+
+/* =========================
+   MESSAGES (YOUR ORIGINAL LOGIC)
 ========================= */
 
 .chat-message {
-  margin-bottom: 14px;
+  margin-bottom: 10px;
   display: flex;
-  flex-direction: column;
-  width: 100%;
 }
-
-/* =========================
-   USER MESSAGE
-========================= */
 
 .chat-message.user {
-  align-items: flex-end;
+  justify-content: flex-end;
 }
-
-.chat-message.user .message-bubble {
-  background: linear-gradient(135deg, #2563eb, #1d4ed8);
-  color: white;
-
-  border-bottom-right-radius: 6px;
-
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.18);
-}
-
-/* =========================
-   BOT MESSAGE
-========================= */
 
 .chat-message.bot {
-  align-items: flex-start;
-}
-
-.chat-message.bot .message-bubble {
-  background: white;
-  color: #1e293b;
-
-  border: 1px solid #e2e8f0;
-  border-bottom-left-radius: 6px;
-
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+  justify-content: flex-start;
 }
 
 /* =========================
-   MESSAGE BUBBLE
+   BUBBLES
 ========================= */
 
 .message-bubble {
-  max-width: 80%;
-  width: fit-content;
+  max-width: 75%;
 
-  padding: 12px 14px;
-
-  border-radius: 16px;
+  padding: 10px 12px;
+  border-radius: 14px;
 
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.4;
 
   word-wrap: break-word;
   overflow-wrap: break-word;
+}
 
-  animation: messageAppear 0.15s ease;
+/* USER */
+.chat-message.user .message-bubble {
+  background: #2563eb;
+  color: white;
+}
+
+/* BOT */
+.chat-message.bot .message-bubble {
+  background: #f1f5f9;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
 }
 
 /* =========================
-   TEXT LABEL
-========================= */
-
-.message-label {
-  font-size: 11px;
-  margin-bottom: 4px;
-
-  color: #64748b;
-
-  padding: 0 4px;
-
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-}
-
-/* =========================
-   IMAGE FIX (IMPORTANT)
+   IMAGE FIX (PNG SAFE)
 ========================= */
 
 .message-bubble img {
   max-width: 100%;
   height: auto;
-
   display: block;
-
   margin-top: 6px;
-
-  border-radius: 10px;
-
-  /* ensures PNG transparency renders correctly */
   background: transparent;
-}
-
-/* =========================
-   OPTIONAL: CHAT INPUT AREA
-========================= */
-
-.chat-input {
-  margin-top: 10px;
-  display: flex;
-}
-
-/* =========================
-   ANIMATION
-========================= */
-
-@keyframes messageAppear {
-  from {
-    opacity: 0;
-    transform: translateY(4px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
