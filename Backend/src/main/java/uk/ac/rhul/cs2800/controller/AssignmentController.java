@@ -2,6 +2,9 @@ package uk.ac.rhul.cs2800.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -214,48 +217,59 @@ public class AssignmentController {
     return ResponseEntity.ok(response);
   }
 
-  // Student submitting the assignment
   @PostMapping("/submit/{assignmentId}")
   public ResponseEntity<?> submitAssignment(@PathVariable int assignmentId,
       @RequestParam int studentId, @RequestParam("file") MultipartFile file) {
 
     try {
 
-      // 1. Load assignment
+      // 1. LOAD ASSIGNMENT
       Assignment assignment = assignmentRepository.findById(assignmentId)
           .orElseThrow(() -> new RuntimeException("Assignment not found"));
 
-      // 2. Load student
+      // 2. LOAD STUDENT
       Student student = studentRepository.findById(studentId)
           .orElseThrow(() -> new RuntimeException("Student not found"));
 
-      // 3. Save file to disk
-      String uploadDir = "uploads/";
-      File dir = new File(uploadDir);
-      if (!dir.exists())
-        dir.mkdirs();
 
+      // 3. SAFE UPLOAD DIRECTORY
+      Path uploadPath = Paths.get(System.getProperty("java.io.tmpdir"), "uploads");
+
+      if (!Files.exists(uploadPath)) {
+        Files.createDirectories(uploadPath);
+      }
+
+      // 4. SAFE FILE NAME
       String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-      File destination = new File(uploadDir + fileName);
-      file.transferTo(destination);
 
-      // 4. Create submission
+      Path destination = uploadPath.resolve(fileName);
+
+      // 5. SAVE FILE
+      file.transferTo(destination.toFile());
+
+      // 6. CREATE SUBMISSION
       AssignmentSubmission submission = new AssignmentSubmission();
       submission.setAssignment(assignment);
       submission.setStudent(student);
       submission.setSubmittedAt(LocalDateTime.now());
       submission.setMarked(false);
       submission.setMark(null);
-      submission.setPdfFiles(List.of(destination.getPath()));
 
-      // 5. Save
+      submission.setPdfFiles(List.of(destination.toString()));
+
+      // =========================
+      // 7. SAVE TO DB
+      // =========================
       assignmentSubmissionRepository.save(submission);
 
       return ResponseEntity.ok("Submission created");
 
     } catch (IOException e) {
-      return ResponseEntity.status(500).body("File upload failed");
+      e.printStackTrace();
+      return ResponseEntity.status(500).body("File upload failed: " + e.getMessage());
+
     } catch (Exception e) {
+      e.printStackTrace();
       return ResponseEntity.status(400).body(e.getMessage());
     }
   }
