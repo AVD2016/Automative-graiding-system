@@ -1,6 +1,6 @@
 package uk.ac.rhul.cs2800.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Inheritance;
@@ -20,7 +20,7 @@ public abstract class User {
   protected String username;
   protected String email;
 
-  @JsonIgnore
+  @Column(nullable = false)
   protected String password;
 
 
