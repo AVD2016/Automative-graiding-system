@@ -225,30 +225,3 @@ async function submitAssignment(event) {
   }
 }
 
-
-// =========================
-// NAVIGATION
-// =========================
-
-function openViewModules() {
-  window.location.href = "lecturer-modules.html";
-}
-
-function openCreateAssignment() {
-  window.location.href = "createAssignment.html";
-}
-
-function openMarkAssignment() {
-  window.location.href = "markAssignment.html";
-}
-
-
-// =========================
-// LOGOUT
-// =========================
-
-function logout() {
-  localStorage.removeItem("user");
-  localStorage.removeItem("role");
-  window.location.href = "login.html";
-}

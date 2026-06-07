@@ -68,22 +68,3 @@ async function loadModules() {
     `;
   }
 }
-
-// NAV
-function openViewModules() {
-  window.location.href = "lecturerModules.html";
-}
-
-function openCreateAssignment() {
-  window.location.href = "createAssignment.html";
-}
-
-function openMarkAssignment() {
-  window.location.href = "markAssignment.html";
-}
-
-function logout() {
-  localStorage.removeItem("user");
-  localStorage.removeItem("role");
-  window.location.href = "login.html";
-}

@@ -31,27 +31,31 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = "lecturer-dashboard.html";
     }
 
-//login check
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
 
   const lecturer = JSON.parse(localStorage.getItem("user"));
   const role = localStorage.getItem("role");
 
-  // Redirect if not logged in
+  // Not logged in
   if (!lecturer) {
     window.location.href = "login.html";
     return;
   }
 
-  // Redirect if logged in user is not a lecturer
+  // Wrong role (matches your auth file: "lecturer")
   if (role !== "lecturer") {
     window.location.href = "login.html";
     return;
   }
 
-  document.getElementById("lecturerName").textContent =
-    `${lecturer.firstName} ${lecturer.lastName}`;
+  // Safely set lecturer name
+  const nameEl = document.getElementById("lecturerName");
 
-  await loadModules();
+  if (nameEl) {
+    const first = lecturer.firstName ?? "";
+    const last = lecturer.lastName ?? "";
+
+    nameEl.textContent = `${first} ${last}`.trim() || "Lecturer";
+  }
 
 });
