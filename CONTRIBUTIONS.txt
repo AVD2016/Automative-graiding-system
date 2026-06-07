@@ -1,0 +1,75 @@
+# Contributing Guidelines
+
+Thank you for your interest in this project.
+
+This system is an Automated Grading System developed as an individual project. At this stage, development is primarily maintained by a single author, but the structure below defines how contributions would be handled if the project becomes collaborative in the future.
+
+
+## Project Overview
+
+This project consists of:
+
++ Frontend: HTML, CSS, JavaScript (deployed on Vercel)
++ Backend: Spring Boot REST API (deployed on Render)
++ Database: PostgreSQL
++ External Services: OpenRouter AI API
+
+
+## Code Structure
+
+Please maintain the existing structure:
+/frontend – UI (HTML/CSS/JS)
+/backend – Spring Boot application
+
+
++ Frontend communicates with backend via REST API only
++ Do not mix business logic into frontend
++ Keep backend logic separated into controllers, model classes, and repositories
+
+
+## Code Style Guidelines
+
+### Java (Backend)
++ Follow standard Java naming conventions
++ Use service-layer architecture
++ Keep controllers thin (no business logic inside controllers)
+= Use meaningful class and method names
+
+### JavaScript (Frontend)
++ Use `const` and `let` (avoid `var`)
++ Keep functions modular and reusable
++ Avoid inline HTML logic where possible
++ Use async/await for API calls
+
+### General
++ Maintain consistent indentation (2 or 4 spaces)
++ Keep files focused and modular
++ Avoid duplicated logic
+
+
+## Git Workflow 
+
+Collaboration:
+
++ `main` → production-ready code
++ `dev` → active development branch
++ Feature branches examples:
+  + `feature/login-system`
+  + `feature/grade-calculation`
+
+## Security & API Rules
+
++ Do not expose API keys in frontend code
++ All sensitive logic must remain in backend
++ Use environment variables for configuration (Render)
++ Do not hardcode database credentials
+
+
+## Licensing
+
+This project is licensed under the GNU Affero General Public License v3.0 (AGPLv3).
+
+By contributing, you agree that your contributions will be distributed under the same license.
+
+
+Thank you for respecting the project structure and design principles.

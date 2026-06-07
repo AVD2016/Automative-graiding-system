@@ -20,19 +20,6 @@ window.location.href = "markAssignments.html";
 
 document.addEventListener("DOMContentLoaded", () => {
 
-      const user = JSON.parse(localStorage.getItem("user"));
-
-      document.getElementById("lecturerName").textContent =
-        user ? `${user.firstName} ${user.lastName}` : "Lecturer";
-
-    });
-
-    function openDashboard() {
-      window.location.href = "lecturer-dashboard.html";
-    }
-
-document.addEventListener("DOMContentLoaded", () => {
-
   const lecturer = JSON.parse(localStorage.getItem("user"));
   const role = localStorage.getItem("role");
 

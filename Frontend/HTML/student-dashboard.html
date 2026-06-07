@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0"/>
+
+  <title>Student Dashboard</title>
+
+  <link rel="stylesheet" href="../CSS/chatWidget.css">
+  <link rel="stylesheet" href="../CSS/generalStyles.css">
+
+  <style>
+
+    /* =========================
+       CONTENT
+    ========================= */
+
+    .content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .content::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("../Images/Background.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      z-index: 0;
+    }
+
+    .content::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .dashboard-card {
+      position: relative;
+      z-index: 2;
+
+      background-color: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .dashboard-card h2 {
+      margin-bottom: 15px;
+      color: #1e293b;
+    }
+
+    .placeholder {
+      color: #64748b;
+      font-style: italic;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <h2>Student Panel</h2>
+    <button onclick="openStudentModules()">View Modules</button>
+    <button onclick="openStudentGrades()">Grades</button>
+    <button onclick="logout()">Logout</button>
+
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+
+      <div class="topbar-left" onclick="openDashboard()">
+
+        <img src="icon.png" alt="System Icon">
+
+        <h1>Automated Grading System</h1>
+
+      </div>
+
+      <div class="student-name" id="studentName">
+        Student
+      </div>
+
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <div class="dashboard-card">
+
+        <h2>Student Dashboard</h2>
+
+        <div class="placeholder">
+          Welcome. Your assignments calendar and notifications will appear here.
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- CHAT -->
+  <div id="chatToggle" class="chat-toggle">
+    <img src="question.jpg" alt="Chat" />
+  </div>
+
+  <div id="chatWidget" class="chat-widget hidden">
+
+    <div class="chat-header">
+      <span>Support Chat</span>
+      <button onclick="toggleChat()">✕</button>
+    </div>
+
+    <div id="chatMessages" class="chat-messages"></div>
+
+    <div class="chat-input">
+      <input id="chatInput" type="text" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+
+  </div>
+
+  <!-- JS -->
+  <script src="../JS/student-dashboard.js"></script>
+  <script src="../JS/chatWidget.js"></script>
+
+</body>
+
+</html>
