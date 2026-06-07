@@ -3,17 +3,29 @@ package uk.ac.rhul.cs2800.controller;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import uk.ac.rhul.cs2800.model.Assignment;
+import uk.ac.rhul.cs2800.model.AssignmentSubmission;
+import uk.ac.rhul.cs2800.model.Module;
+import uk.ac.rhul.cs2800.model.Registration;
+import uk.ac.rhul.cs2800.model.Student;
 import uk.ac.rhul.cs2800.repository.AssignmentRepository;
+import uk.ac.rhul.cs2800.repository.AssignmentSubmissionRepository;
 import uk.ac.rhul.cs2800.repository.ModuleRepository;
+import uk.ac.rhul.cs2800.repository.StudentRepository;
 
 @RestController
 @RequestMapping("/api/assignment")
@@ -26,9 +38,13 @@ public class AssignmentController {
   @Autowired
   private ModuleRepository moduleRepository;
 
-  // =========================
-  // CREATE ASSIGNMENT
-  // =========================
+  @Autowired
+  private StudentRepository studentRepository;
+
+  @Autowired
+  private AssignmentSubmissionRepository assignmentSubmissionRepository;
+
+  // CREATE ASSIGNMENT by lecturer
   @PostMapping("/create")
   public ResponseEntity<?> createAssignment(@RequestParam String moduleCode,
       @RequestParam int credits, @RequestParam String deadline,
@@ -91,4 +107,65 @@ public class AssignmentController {
       return ResponseEntity.status(400).body(e.getMessage());
     }
   }
+
+  @GetMapping("/student/getAssignments/{studentId}")
+  public ResponseEntity<?> getStudentAssignments(@PathVariable int studentId) {
+
+    // 1. Load student
+    Student student = studentRepository.findById(studentId)
+        .orElseThrow(() -> new RuntimeException("Student not found"));
+
+    // 2. Get modules student is registered on
+    List<Registration> registrations = student.getRegistered();
+
+    List<Module> modules = registrations.stream().map(Registration::getModule).toList();
+
+    // 3. Collect assignments
+    List<Assignment> assignments =
+        modules.stream().flatMap(module -> module.getAssignments().stream()).toList();
+
+    // 4. Build response with submission info
+    List<Map<String, Object>> response = assignments.stream().map(a -> {
+
+      Map<String, Object> map = new HashMap<>();
+
+      map.put("id", a.getId());
+      map.put("title", a.getTitle());
+      map.put("taskDescription", a.getTaskDescription());
+      map.put("markingCriteria", a.getMarkingCriteria());
+      map.put("credits", a.getCredits());
+      map.put("deadline", a.getDeadline());
+      map.put("pdfFilePath", a.getPdfFilePath());
+
+      map.put("moduleCode", a.getModule().getCode());
+      map.put("moduleName", a.getModule().getName());
+
+      // =========================
+      // SUBMISSION LOGIC (NEW)
+      // =========================
+
+      Optional<AssignmentSubmission> submissionOpt =
+          assignmentSubmissionRepository.findByStudentIdAndAssignmentId(studentId, a.getId());
+
+      if (submissionOpt.isPresent()) {
+
+        AssignmentSubmission submission = submissionOpt.get();
+
+        map.put("submitted", true);
+        map.put("submittedDate", submission.getSubmittedAt());
+        map.put("mark", submission.getMark());
+
+      } else {
+
+        map.put("submitted", false);
+        map.put("submittedDate", null);
+        map.put("mark", null);
+      }
+
+      return map;
+    }).toList();
+
+    return ResponseEntity.ok(response);
+  }
+
 }
