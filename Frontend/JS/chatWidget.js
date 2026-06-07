@@ -45,25 +45,45 @@ function loadChatHistory() {
 // ============================
 
 async function sendMessage() {
-  const input = document.getElementById("chatInput");
-  const messages = document.getElementById("chatMessages");
+
+  const input =
+    document.getElementById("chatInput");
+
+  const messages =
+    document.getElementById("chatMessages");
 
   if (!input || !messages) return;
 
   const text = input.value.trim();
+
   if (!text) return;
 
   const userId = getUserId();
 
-  // USER MESSAGE
-  const userMsg = `<div><b>You:</b> ${text}</div>`;
+  /* =========================
+     USER MESSAGE
+  ========================= */
+
+  const userMsg = `
+    <div class="chat-message user">
+      <div class="message-label">You</div>
+      <div class="message-bubble">
+        ${text}
+      </div>
+    </div>
+  `;
+
   messages.innerHTML += userMsg;
+
   saveChatMessage(userMsg);
 
   input.value = "";
-  messages.scrollTop = messages.scrollHeight;
+
+  messages.scrollTop =
+    messages.scrollHeight;
 
   try {
+
     const response = await fetch(
       "https://automative-graiding-system.onrender.com/api/chat/send",
       {
@@ -79,19 +99,45 @@ async function sendMessage() {
     );
 
     const data = await response.json();
-    const reply = data.reply || "No response";
 
-    const botMsg = `<div><b>Bot:</b> ${reply}</div>`;
+    const reply =
+      data.reply || "No response";
+
+    /* =========================
+       BOT MESSAGE
+    ========================= */
+
+    const botMsg = `
+      <div class="chat-message bot">
+        <div class="message-label">Bot</div>
+        <div class="message-bubble">
+          ${reply}
+        </div>
+      </div>
+    `;
+
     messages.innerHTML += botMsg;
+
     saveChatMessage(botMsg);
 
-    messages.scrollTop = messages.scrollHeight;
+    messages.scrollTop =
+      messages.scrollHeight;
 
   } catch (error) {
+
     console.error(error);
 
-    const errorMsg = `<div><b>Bot:</b> Error contacting server</div>`;
+    const errorMsg = `
+      <div class="chat-message bot">
+        <div class="message-label">Bot</div>
+        <div class="message-bubble">
+          Error contacting server
+        </div>
+      </div>
+    `;
+
     messages.innerHTML += errorMsg;
+
     saveChatMessage(errorMsg);
   }
 }
