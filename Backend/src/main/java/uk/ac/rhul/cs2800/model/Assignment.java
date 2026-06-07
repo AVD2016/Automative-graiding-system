@@ -15,7 +15,7 @@ public class Assignment {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private int id;
 
   private String title;
 
@@ -38,11 +38,11 @@ public class Assignment {
   private String pdfFilePath;
 
 
-  public Long getId() {
+  public int getId() {
     return id;
   }
 
-  public void setId(Long id) {
+  public void setId(int id) {
     this.id = id;
   }
 

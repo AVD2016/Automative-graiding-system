@@ -20,7 +20,7 @@ public class AssignmentSubmission {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private int id;
 
   // Student who submitted
   @ManyToOne
@@ -47,6 +47,9 @@ public class AssignmentSubmission {
   @Column(name = "file_path")
   private List<String> pdfFiles = new ArrayList<>();
 
+  private int suggestedGrade;
+  private String feedbackForAssignment;
+
   /* =========================
      CONSTRUCTORS
   ========================= */
@@ -61,7 +64,7 @@ public class AssignmentSubmission {
     this.mark = null;
   }
 
-  public Long getId() {
+  public int getId() {
     return id;
   }
 

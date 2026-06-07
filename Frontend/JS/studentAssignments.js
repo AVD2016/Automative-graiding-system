@@ -209,12 +209,16 @@ async function submitAssignment() {
 
   if (!currentAssignment) return;
 
+  const student = JSON.parse(localStorage.getItem("user"));
+
   try {
     const formData = new FormData();
+
     formData.append("file", file);
+    formData.append("studentId", student.id);
 
     const res = await fetch(
-      `${API_BASE}/assignment/${currentAssignment.id}/submit`,
+      `${API_BASE}/assignment/submit/${currentAssignment.id}`,
       {
         method: "POST",
         credentials: "include",
