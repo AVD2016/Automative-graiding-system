@@ -3,6 +3,7 @@ package uk.ac.rhul.cs2800.controller;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -166,6 +167,49 @@ public class AssignmentController {
 
       return map;
     }).toList();
+
+    return ResponseEntity.ok(response);
+  }
+
+  // get details on a assignment
+  @GetMapping("/getAssignmentDetails/{id}")
+  public ResponseEntity<?> getAssignmentDetails(@PathVariable int id) {
+
+    Assignment assignment = assignmentRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Assignment not found"));
+
+    Map<String, Object> response = new HashMap<>();
+
+    // =========================
+    // BASIC INFO
+    // =========================
+    response.put("id", assignment.getId());
+    response.put("title", assignment.getTitle());
+
+    // frontend expects "description"
+    response.put("description", assignment.getTaskDescription());
+
+    response.put("markingCriteria", assignment.getMarkingCriteria());
+    response.put("credits", assignment.getCredits());
+    response.put("deadline", assignment.getDeadline());
+
+    // =========================
+    // FILES (adapt single file → list)
+    // =========================
+    List<Map<String, Object>> files = new ArrayList<>();
+
+    if (assignment.getPdfFilePath() != null) {
+
+      Map<String, Object> file = new HashMap<>();
+      file.put("name", "Assignment PDF");
+
+      // If you later serve static files, this should be a URL
+      file.put("url", "/files/" + new File(assignment.getPdfFilePath()).getName());
+
+      files.add(file);
+    }
+
+    response.put("files", files);
 
     return ResponseEntity.ok(response);
   }
