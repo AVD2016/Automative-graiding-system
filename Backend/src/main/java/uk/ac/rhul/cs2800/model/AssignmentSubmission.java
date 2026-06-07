@@ -72,6 +72,22 @@ public class AssignmentSubmission {
     return student;
   }
 
+  public int getSuggestedGrade() {
+    return suggestedGrade;
+  }
+
+  public String getFeedbackForAssignment() {
+    return feedbackForAssignment;
+  }
+
+  public void setSuggestedGrade(int suggestedGrade) {
+    this.suggestedGrade = suggestedGrade;
+  }
+
+  public void setFeedbackForAssignment(String feedbackForAssignment) {
+    this.feedbackForAssignment = feedbackForAssignment;
+  }
+
   public void setStudent(Student student) {
     this.student = student;
   }
