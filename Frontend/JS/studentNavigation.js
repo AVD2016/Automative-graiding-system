@@ -15,6 +15,10 @@ function openDashboard(){
 window.location.href = "lecturer-dashboard.html";
 }
 
+function openAssignments(){
+window.location.href = "studentAssignments.html";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 
   const student = JSON.parse(localStorage.getItem("user"));
