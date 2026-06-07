@@ -14,13 +14,18 @@ document.addEventListener("DOMContentLoaded", () => {
 /* =========================
    LOAD ASSIGNMENTS
 ========================= */
+const student = JSON.parse(localStorage.getItem("user"));
 
 async function loadAssignments() {
   try {
-    const res = await fetch(`${API_BASE}/assignment/student/getAssignments`, {
-      method: "GET",
-      credentials: "include" // important if using session auth
-    });
+
+    const res = await fetch(
+      `${API_BASE}/assignment/student/getAssignments/${student.id}`,
+      {
+        method: "GET",
+        credentials: "include"
+      }
+    );
 
     if (!res.ok) throw new Error("Failed to fetch assignments");
 
