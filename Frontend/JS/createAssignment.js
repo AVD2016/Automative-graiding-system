@@ -132,6 +132,9 @@ async function submitAssignment(event) {
   const moduleCode =
     document.getElementById("moduleSelect").value;
 
+  const title =
+    document.getElementById("assignmentTitle").value;
+
   const credits =
     parseInt(document.getElementById("assignmentCredits").value);
 
@@ -157,6 +160,7 @@ async function submitAssignment(event) {
 
   if (
     !moduleCode ||
+    !title ||
     !credits ||
     !deadline ||
     !taskDescription ||
@@ -165,6 +169,7 @@ async function submitAssignment(event) {
     alert("Please fill all required fields.");
     return;
   }
+
 
   if (isNaN(credits) || credits <= 0) {
     alert("Credits must be greater than 0.");
@@ -188,6 +193,7 @@ async function submitAssignment(event) {
     const formData = new FormData();
 
     formData.append("moduleCode", moduleCode);
+    formData.append("title", title);
     formData.append("credits", credits);
     formData.append("deadline", deadline);
     formData.append("taskDescription", taskDescription);

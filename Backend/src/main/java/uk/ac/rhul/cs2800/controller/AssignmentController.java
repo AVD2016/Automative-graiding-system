@@ -47,6 +47,7 @@ public class AssignmentController {
   // CREATE ASSIGNMENT by lecturer
   @PostMapping("/create")
   public ResponseEntity<?> createAssignment(@RequestParam String moduleCode,
+      @RequestParam String title,
       @RequestParam int credits, @RequestParam String deadline,
       @RequestParam String taskDescription, @RequestParam String markingCriteria,
       @RequestParam(value = "file", required = false) MultipartFile file) {
@@ -87,6 +88,7 @@ public class AssignmentController {
 
       // 4. Create assignment
       Assignment assignment = new Assignment();
+      assignment.setTitle(title); // ✅ ADD THIS
       assignment.setCredits(credits);
       assignment.setTaskDescription(taskDescription);
       assignment.setMarkingCriteria(markingCriteria);
