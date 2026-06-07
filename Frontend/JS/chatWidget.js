@@ -64,14 +64,13 @@ async function sendMessage() {
      USER MESSAGE
   ========================= */
 
-  const userMsg = `
-    <div class="chat-message user">
-      <div class="message-label">You</div>
-      <div class="message-bubble">
-        ${text}
-      </div>
+const userMsg = `
+  <div class="chat-message user">
+    <div class="message-bubble">
+      ${text}
     </div>
-  `;
+  </div>
+`;
 
   messages.innerHTML += userMsg;
 
@@ -108,13 +107,12 @@ async function sendMessage() {
     ========================= */
 
     const botMsg = `
-      <div class="chat-message bot">
-        <div class="message-label">Bot</div>
-        <div class="message-bubble">
-          ${reply}
-        </div>
-      </div>
-    `;
+  <div class="chat-message bot">
+    <div class="message-bubble">
+      ${reply}
+    </div>
+  </div>
+`;
 
     messages.innerHTML += botMsg;
 
@@ -128,13 +126,12 @@ async function sendMessage() {
     console.error(error);
 
     const errorMsg = `
-      <div class="chat-message bot">
-        <div class="message-label">Bot</div>
-        <div class="message-bubble">
-          Error contacting server
-        </div>
-      </div>
-    `;
+  <div class="chat-message bot">
+    <div class="message-bubble">
+      Error contacting server
+    </div>
+  </div>
+`;
 
     messages.innerHTML += errorMsg;
 

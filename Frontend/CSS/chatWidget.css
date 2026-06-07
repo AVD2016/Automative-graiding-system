@@ -230,3 +230,64 @@
 .chat-close:hover {
   color: #111827;
 }
+
+/* =========================
+   MODERN MESSAGE LAYOUT
+========================= */
+
+.chat-message {
+  margin-bottom: 10px;
+  display: flex;
+}
+
+/* alignment already fine but make cleaner */
+.chat-message.user {
+  justify-content: flex-end;
+}
+
+.chat-message.bot {
+  justify-content: flex-start;
+}
+
+/* =========================
+   MODERN BUBBLES (REFINED)
+========================= */
+
+.message-bubble {
+  max-width: 75%;
+
+  padding: 10px 12px;
+  border-radius: 16px;
+
+  font-size: 14px;
+  line-height: 1.5;
+
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+
+  transition: transform 0.15s ease;
+}
+
+/* USER (clean modern gradient) */
+.chat-message.user .message-bubble {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+
+  border-bottom-right-radius: 6px;
+}
+
+/* BOT (clean neutral) */
+.chat-message.bot .message-bubble {
+  background: #ffffff;
+  color: #111827;
+
+  border: 1px solid #e5e7eb;
+  border-bottom-left-radius: 6px;
+}
+
+/* subtle hover effect */
+.message-bubble:hover {
+  transform: translateY(-1px);
+}
