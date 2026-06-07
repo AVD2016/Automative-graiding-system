@@ -1,8 +1,8 @@
 /* =========================
-   CHAT WINDOW ONLY
+   CHAT WIDGET ROOT ONLY
 ========================= */
 
-.chat-widget {
+#chatWidget.chat-widget {
   position: fixed;
   bottom: 80px;
   right: 20px;
@@ -23,16 +23,16 @@
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }
 
-/* hidden state */
+/* hidden toggle */
 .hidden {
   display: none;
 }
 
 /* =========================
-   HEADER (MINIMAL)
+   ONLY INSIDE CHAT WIDGET
 ========================= */
 
-.chat-header {
+#chatWidget .chat-header {
   padding: 10px 12px;
 
   background: #ffffff;
@@ -47,41 +47,37 @@
   color: #111827;
 }
 
-/* =========================
-   MESSAGES AREA
-========================= */
-
-.chat-messages {
+#chatWidget .chat-messages {
   flex: 1;
 
   padding: 10px;
-
   overflow-y: auto;
+
   background: #fafafa;
 }
 
 /* =========================
-   MESSAGE WRAPPER
+   MESSAGES
 ========================= */
 
-.chat-message {
+#chatWidget .chat-message {
   margin: 8px 0;
   display: flex;
 }
 
-.chat-message.user {
+#chatWidget .chat-message.user {
   justify-content: flex-end;
 }
 
-.chat-message.bot {
+#chatWidget .chat-message.bot {
   justify-content: flex-start;
 }
 
 /* =========================
-   MESSAGE BUBBLES (MINIMAL)
+   BUBBLES
 ========================= */
 
-.message-bubble {
+#chatWidget .message-bubble {
   max-width: 78%;
 
   padding: 9px 11px;
@@ -93,18 +89,16 @@
 
   word-wrap: break-word;
   overflow-wrap: break-word;
-
-  box-shadow: none;
 }
 
-/* user bubble */
-.chat-message.user .message-bubble {
+/* user */
+#chatWidget .chat-message.user .message-bubble {
   background: #2563eb;
   color: #ffffff;
 }
 
-/* bot bubble */
-.chat-message.bot .message-bubble {
+/* bot */
+#chatWidget .chat-message.bot .message-bubble {
   background: #ffffff;
   color: #111827;
 
@@ -112,17 +106,17 @@
 }
 
 /* =========================
-   INPUT AREA (CLEAN)
+   INPUT AREA
 ========================= */
 
-.chat-input {
+#chatWidget .chat-input {
   display: flex;
 
   border-top: 1px solid #e5e7eb;
   background: #ffffff;
 }
 
-.chat-input input {
+#chatWidget .chat-input input {
   flex: 1;
 
   padding: 10px;
@@ -131,14 +125,9 @@
   outline: none;
 
   font-size: 13px;
-  color: #111827;
 }
 
-.chat-input input::placeholder {
-  color: #9ca3af;
-}
-
-.chat-input button {
+#chatWidget .chat-input button {
   padding: 10px 14px;
 
   border: none;
@@ -146,15 +135,14 @@
   color: #ffffff;
 
   cursor: pointer;
-
   font-size: 13px;
 }
 
 /* =========================
-   IMAGE FIX (CLEAN + SAFE)
+   IMAGE FIX ONLY
 ========================= */
 
-.message-bubble img {
+#chatWidget .message-bubble img {
   max-width: 100%;
   height: auto;
 
@@ -162,6 +150,5 @@
   margin-top: 6px;
 
   border-radius: 8px;
-
   background: transparent;
 }
