@@ -48,26 +48,34 @@
 
   </div>
 
-  <!-- CHAT -->
-  <div id="chatToggle" class="chat-toggle">
-    <img src="../Images/chat.png" alt="Chat" />
-  </div>
+<!-- CHAT TOGGLE (UNCHANGED) -->
+<div id="chatToggle" class="chat-toggle">
+  <img src="../Images/chat.png" alt="Chat" />
+</div>
 
-  <div id="chatWidget" class="chat-widget hidden">
+<!-- CHAT -->
+<div id="chatWidget" class="chat-widget hidden">
 
-    <div class="chat-header">
-      <span>Support Chat</span>
-      <button onclick="toggleChat()">✕</button>
+  <!-- HEADER (MODERN STYLE) -->
+  <div class="chat-header">
+    <div class="chat-title">
+      <div class="chat-dot"></div>
+      <span>Support</span>
     </div>
 
-    <div id="chatMessages" class="chat-messages"></div>
-
-    <div class="chat-input">
-      <input id="chatInput" type="text" placeholder="Type a message..." />
-      <button onclick="sendMessage()">Send</button>
-    </div>
-
+    <button class="chat-close" onclick="toggleChat()">✕</button>
   </div>
+
+  <!-- MESSAGES -->
+  <div id="chatMessages" class="chat-messages"></div>
+
+  <!-- INPUT -->
+  <div class="chat-input">
+    <input id="chatInput" type="text" placeholder="Message..." />
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+</div>
 
   <script src="../JS/admin-dashboard.js"></script>
   <script src="../JS/chatWidget.js"></script>
