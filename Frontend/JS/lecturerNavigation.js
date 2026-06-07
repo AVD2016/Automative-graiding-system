@@ -18,6 +18,10 @@ function openMarkAssignment(){
 window.location.href = "markAssignments.html";
 }
 
+function openDashboard(){
+window.location.href = "lecturer-dashboard.html";
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 
   const lecturer = JSON.parse(localStorage.getItem("user"));

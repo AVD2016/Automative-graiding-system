@@ -49,7 +49,7 @@ public class LoginController {
 
         Student student = optionalStudent.get();
 
-        if (!student.getPassword().equals(password)) {
+        if (student.getPassword() == null || !student.getPassword().equals(password)) {
           return ResponseEntity.status(401).body("Invalid username or password");
         }
 
@@ -65,7 +65,7 @@ public class LoginController {
 
         Lecturer lecturer = optionalLecturer.get();
 
-        if (!lecturer.getPassword().equals(password)) {
+        if (lecturer.getPassword() == null || !lecturer.getPassword().equals(password)) {
           return ResponseEntity.status(401).body("Invalid username or password");
         }
 
@@ -82,7 +82,7 @@ public class LoginController {
 
         Administrator admin = optionalAdmin.get();
 
-        if (!admin.getPassword().equals(password)) {
+        if (admin.getPassword() == null || !admin.getPassword().equals(password)) {
           return ResponseEntity.status(401).body("Invalid username or password");
         }
 
