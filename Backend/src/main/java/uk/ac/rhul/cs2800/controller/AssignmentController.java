@@ -444,9 +444,7 @@ public class AssignmentController {
       headers.setContentType(MediaType.APPLICATION_JSON);
       headers.setBearerAuth(apiKey);
 
-      String safePrompt = prompt.replace("\\", "\\\\")
-                                .replace("\"", "\\\"")
-                                .replace("\n", "\\n");
+      String safePrompt = prompt.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
 
       String body = """
           {
@@ -463,11 +461,7 @@ public class AssignmentController {
       HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
       ResponseEntity<String> response = restTemplate.exchange(
-          "https://openrouter.ai/api/v1/chat/completions",
-          HttpMethod.POST,
-          entity,
-          String.class
-      );
+          "https://openrouter.ai/api/v1/chat/completions", HttpMethod.POST, entity, String.class);
 
       // 🔥 ADD THIS (CRITICAL)
       log.info("LLM STATUS: {}", response.getStatusCode());
@@ -475,9 +469,7 @@ public class AssignmentController {
 
       if (!response.getStatusCode().is2xxSuccessful()) {
         throw new RuntimeException(
-            "LLM ERROR status=" + response.getStatusCode()
-            + " body=" + response.getBody()
-        );
+            "LLM ERROR status=" + response.getStatusCode() + " body=" + response.getBody());
       }
 
       return response.getBody();
@@ -487,4 +479,35 @@ public class AssignmentController {
       throw new RuntimeException(e);
     }
   }
+
+// build promt helper method
+private String buildPrompt(Assignment assignment, String submissionText, LocalDateTime submittedAt,
+    LocalDateTime deadline) {
+
+  return """
+      You are an academic grader.
+      TASK DESCRIPTION:
+      %s
+      MARKING CRITERIA:
+      %s
+      DEADLINE:
+      %s
+      SUBMISSION TIME:
+      %s
+      STUDENT SUBMISSION:
+      %s  
+      INSTRUCTIONS:
+      - Grade the work fairly using the marking criteria.
+      - Apply late penalties 0–24 hours late: -10% penalty, more than 24 hours late: grade = 0
+      - Provide feedback for the professor. Return STRICT JSON only. Do NOT use markdown.
+      - Do NOT include explanation outside JSON.
+
+      REQUIRED RESPONSE FORMAT:
+      {
+        "feedback": "string",
+        "grade": 0
+      }
+      """.formatted(assignment.getTaskDescription(), assignment.getMarkingCriteria(), deadline,
+      submittedAt, submissionText);
+}
 }
