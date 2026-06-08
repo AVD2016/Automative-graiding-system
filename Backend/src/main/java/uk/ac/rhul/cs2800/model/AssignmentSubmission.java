@@ -48,6 +48,8 @@ public class AssignmentSubmission {
   private List<String> pdfFiles = new ArrayList<>();
 
   private int suggestedGrade;
+
+  @Column(columnDefinition = "TEXT")
   private String feedbackForAssignment;
 
   /* =========================

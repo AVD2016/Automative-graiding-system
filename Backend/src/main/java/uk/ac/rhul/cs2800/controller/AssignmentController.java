@@ -294,7 +294,11 @@ public class AssignmentController {
       assignmentSubmissionRepository.save(submission);
 
       // fire-and-forget (does NOT block response)
-      createReviewAsync(submission.getId());
+      try {
+        createReviewAsync(submission.getId());
+      } catch (Exception ignored) {
+        ignored.printStackTrace();
+      }
 
       return ResponseEntity.ok("Submission created");
 
@@ -467,8 +471,7 @@ private String buildPrompt(Assignment assignment, String submissionText) {
       %s
 
       INSTRUCTIONS:
-      - Grade the work fairly.
-      - Provide constructive academic feedback.
+      Grade the work fairly. Provide constructive feedback for the professor about the assignment.
       - Return STRICT JSON only.
       - Do NOT use markdown.
       - Do NOT include explanation outside JSON.
