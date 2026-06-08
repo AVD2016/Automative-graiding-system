@@ -502,7 +502,7 @@ private String buildPrompt(Assignment assignment, String submissionText, LocalDa
       %s  
       INSTRUCTIONS:
       - Grade the work fairly using the marking criteria.
-      - Apply late penalties 0–24 hours late: -10% penalty, more than 24 hours late: grade = 0
+      - Apply late penalties 0–24 hours late: -10 percent penalty, more than 24 hours late: grade = 0
       - Provide feedback for the professor. Return STRICT JSON only. Do NOT use markdown.
       - Do NOT include explanation outside JSON.
 
