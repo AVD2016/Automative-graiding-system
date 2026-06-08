@@ -237,20 +237,16 @@ async function toggleSubmissions(
 function renderSubmissions(submissions) {
 
   const container =
-    document.querySelector(
-      ".submission-container"
-    );
+    document.querySelector(".submission-container");
 
   if (!container) return;
 
   if (!submissions || submissions.length === 0) {
-
     container.innerHTML = `
       <div class="submission-empty">
         No submissions found
       </div>
     `;
-
     return;
   }
 
@@ -258,20 +254,22 @@ function renderSubmissions(submissions) {
     <table class="submission-table">
 
       <thead>
-
         <tr>
           <th>Student Name</th>
           <th>Submitted At</th>
-          <th>Status</th>
+          <th>Mark</th>
           <th>Action</th>
         </tr>
-
       </thead>
 
       <tbody>
   `;
 
   submissions.forEach(submission => {
+
+    const hasMark =
+      submission.mark !== null &&
+      submission.mark !== undefined;
 
     html += `
       <tr>
@@ -284,29 +282,21 @@ function renderSubmissions(submissions) {
           ${formatDateTime(submission.submittedAt)}
         </td>
 
-        <td class="${
-          submission.marked
-            ? "marked"
-            : "unmarked"
-        }">
-
+        <td class="${hasMark ? "marked" : "unmarked"}">
           ${
-            submission.marked
+            hasMark
               ? submission.mark
-              : "To be marked"
+              : "Not marked"
           }
-
         </td>
 
         <td>
-
           <button
             class="view-btn"
             onclick="event.stopPropagation(); openSubmissionModal(${submission.id})"
           >
             View Submission
           </button>
-
         </td>
 
       </tr>
@@ -315,7 +305,6 @@ function renderSubmissions(submissions) {
 
   html += `
       </tbody>
-
     </table>
   `;
 

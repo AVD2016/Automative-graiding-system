@@ -36,6 +36,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.ac.rhul.cs2800.dataObjects.AssignmentLecturerDTO;
+import uk.ac.rhul.cs2800.dataObjects.AssignmentSubmissionLecturerDTO;
 import uk.ac.rhul.cs2800.model.Assignment;
 import uk.ac.rhul.cs2800.model.AssignmentSubmission;
 import uk.ac.rhul.cs2800.model.Lecturer;
@@ -410,7 +411,6 @@ public class AssignmentController {
 
       submission.setFeedbackForAssignment(feedback);
       submission.setSuggestedGrade(grade);
-      submission.setMarked(true);
 
       assignmentSubmissionRepository.saveAndFlush(submission);
 
@@ -565,6 +565,29 @@ public ResponseEntity<?> getLecturerAssignments(@PathVariable int lecturerId) {
 
     e.printStackTrace();
 
+    return ResponseEntity.badRequest().body(e.getMessage());
+  }
+}
+
+@GetMapping("/getSubmissions/{assignmentId}")
+public ResponseEntity<?> getSubmissions(@PathVariable int assignmentId) {
+
+  try {
+
+    List<AssignmentSubmission> submissions =
+        assignmentSubmissionRepository.findByAssignmentId(assignmentId);
+
+    List<AssignmentSubmissionLecturerDTO> result = new ArrayList<>();
+
+    for (AssignmentSubmission submission : submissions) {
+      result.add(new AssignmentSubmissionLecturerDTO(submission));
+    }
+
+    return ResponseEntity.ok(result);
+
+  } catch (Exception e) {
+
+    e.printStackTrace();
     return ResponseEntity.badRequest().body(e.getMessage());
   }
 }
