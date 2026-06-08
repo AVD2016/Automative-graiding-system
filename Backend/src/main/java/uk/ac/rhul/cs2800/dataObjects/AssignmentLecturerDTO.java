@@ -1,6 +1,7 @@
 package uk.ac.rhul.cs2800.dataObjects;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import uk.ac.rhul.cs2800.model.Assignment;
 import uk.ac.rhul.cs2800.model.AssignmentSubmission;
@@ -25,21 +26,33 @@ public class AssignmentLecturerDTO {
 
   public AssignmentLecturerDTO(Assignment assignment, List<AssignmentSubmission> submissions) {
 
+    if (assignment == null) {
+      throw new IllegalArgumentException("Assignment cannot be null");
+    }
+
     this.id = assignment.getId();
 
-    this.title = assignment.getTitle();
+    this.title = assignment.getTitle() != null ? assignment.getTitle() : "Untitled";
 
-    this.moduleCode = assignment.getModule().getCode();
+    this.moduleCode = (assignment.getModule() != null && assignment.getModule().getCode() != null)
+        ? assignment.getModule().getCode()
+        : "N/A";
 
-    this.moduleName = assignment.getModule().getName();
+    this.moduleName = (assignment.getModule() != null && assignment.getModule().getName() != null)
+        ? assignment.getModule().getName()
+        : "N/A";
 
     this.deadline = assignment.getDeadline();
+
+    if (submissions == null) {
+      submissions = new ArrayList<>();
+    }
 
     this.numberOfSubmissions = submissions.size();
 
     this.numberOfUnmarkedSubmissions =
         (int) submissions.stream()
-            .filter(s -> !s.isMarked())
+            .filter(s -> s != null && !s.isMarked())
             .count();
   }
 
