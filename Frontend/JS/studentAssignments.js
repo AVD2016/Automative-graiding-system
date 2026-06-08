@@ -1,4 +1,5 @@
 const API_BASE = "https://automative-graiding-system.onrender.com/api";
+let requestInProgress = false;
 
 let assignments = [];
 let currentAssignment = null;
@@ -316,7 +317,19 @@ function renderFiles(files) {
 
 async function submitAssignment() {
 
-  const file = document.getElementById("submissionFile").files[0];
+  // =========================
+  // HARD LOCK CHECK
+  // =========================
+  if (requestInProgress) {
+    console.warn("Request already in progress");
+    return;
+  }
+
+  const fileInput = document.getElementById("submissionFile");
+  const file = fileInput.files[0];
+
+  const submitBtn = document.getElementById("submitBtn");
+  const loadingEl = document.getElementById("submitLoading");
 
   if (!file) {
     alert("Select a file first");
@@ -324,6 +337,13 @@ async function submitAssignment() {
   }
 
   if (!currentAssignment) return;
+
+  // LOCK ON
+  requestInProgress = true;
+
+  submitBtn.disabled = true;
+  submitBtn.style.opacity = "0.6";
+  loadingEl.style.display = "block";
 
   try {
 
@@ -342,21 +362,28 @@ async function submitAssignment() {
 
     if (!res.ok) {
       const errorText = await res.text();
-      console.error("Backend error:", errorText);
       throw new Error(errorText);
     }
 
     alert("Assignment submitted successfully");
 
     closeModal();
-
-    document.getElementById("submissionFile").value = "";
-
+    fileInput.value = "";
     await loadAssignments();
 
   } catch (err) {
+
     console.error(err);
     alert("Failed to submit assignment");
+
+  } finally {
+
+    // UNLOCK ALWAYS
+    requestInProgress = false;
+
+    submitBtn.disabled = false;
+    submitBtn.style.opacity = "1";
+    loadingEl.style.display = "none";
   }
 }
 
@@ -366,10 +393,28 @@ async function submitAssignment() {
 
 async function deleteSubmission() {
 
+  // =========================
+  // HARD LOCK CHECK
+  // =========================
+  if (requestInProgress) {
+    console.warn("Request already in progress");
+    return;
+  }
+
   if (!currentAssignment) return;
 
   const confirmed = confirm("Delete submission?");
   if (!confirmed) return;
+
+  const deleteBtn = document.querySelector("#deleteSubmissionSection .action");
+
+  // LOCK ON
+  requestInProgress = true;
+
+  if (deleteBtn) {
+    deleteBtn.disabled = true;
+    deleteBtn.style.opacity = "0.6";
+  }
 
   try {
 
@@ -383,7 +428,6 @@ async function deleteSubmission() {
 
     if (!res.ok) {
       const errorText = await res.text();
-      console.error("Delete error:", errorText);
       throw new Error(errorText);
     }
 
@@ -393,8 +437,19 @@ async function deleteSubmission() {
     await loadAssignments();
 
   } catch (err) {
+
     console.error(err);
     alert("Failed to delete submission");
+
+  } finally {
+
+    // UNLOCK ALWAYS
+    requestInProgress = false;
+
+    if (deleteBtn) {
+      deleteBtn.disabled = false;
+      deleteBtn.style.opacity = "1";
+    }
   }
 }
 
