@@ -249,68 +249,6 @@ async function openAssignment(id, submitted = false) {
   }
 }
 
-    renderFiles(
-      currentAssignment.files || []
-    );
-
-    /* =========================
-       TOGGLE SUBMIT / DELETE
-    ========================= */
-
-    const submitSection =
-      document.getElementById("submitSection");
-
-    const deleteSection =
-      document.getElementById(
-        "deleteSubmissionSection"
-      );
-
-    const submissionTitle =
-      document.getElementById(
-        "submissionTitle"
-      );
-
-    const isSubmitted =
-      currentAssignment.submitted === true;
-
-    if (isSubmitted) {
-
-      submitSection.style.display =
-        "none";
-
-      deleteSection.style.display =
-        "block";
-
-      submissionTitle.innerText =
-        "Submission Options";
-
-    } else {
-
-      submitSection.style.display =
-        "block";
-
-      deleteSection.style.display =
-        "none";
-
-      submissionTitle.innerText =
-        "Submit Assignment";
-    }
-
-    /* =========================
-       OPEN MODAL
-    ========================= */
-
-    document.getElementById(
-      "assignmentModal"
-    ).style.display = "flex";
-
-  } catch (err) {
-
-    console.error(err);
-
-    alert("Failed to load assignment");
-  }
-}
 
 /* =========================
    CLOSE MODAL
