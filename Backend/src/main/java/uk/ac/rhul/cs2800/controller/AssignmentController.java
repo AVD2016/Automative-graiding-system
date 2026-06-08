@@ -480,41 +480,47 @@ public class AssignmentController {
 }
 
 // build promt helper method
-private String buildPrompt(Assignment assignment, String submissionText, LocalDateTime submittedAt,
-    LocalDateTime deadline) {
+private String callLLM(String prompt) {
 
-  return """
-      You are an academic grader.
+  try {
+    RestTemplate restTemplate = new RestTemplate();
 
-      TASK DESCRIPTION:
-      %s
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.setBearerAuth(apiKey);
 
-      MARKING CRITERIA:
-      %s
+    String safePrompt = prompt.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
 
-      DEADLINE:
-      %s
+    String body = """
+        {
+          "model": "openrouter/owl-alpha",
+          "messages": [
+            {
+              "role": "user",
+              "content": "%s"
+            }
+          ]
+        }
+        """.formatted(safePrompt);
 
-      SUBMISSION TIME:
-      %s
+    HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
-      STUDENT SUBMISSION:
-      %s
+    ResponseEntity<String> response = restTemplate.exchange(
+        "https://openrouter.ai/api/v1/chat/completions", HttpMethod.POST, entity, String.class);
 
-      INSTRUCTIONS:
-      - Grade the work fairly using the marking criteria.
-      - Apply late penalties 0–24 hours late: -10% penalty, more than 24 hours late: grade = 0
-      - Provide constructive feedback for the professor.
-      - Return STRICT JSON only.
-      - Do NOT use markdown.
-      - Do NOT include explanation outside JSON.
+    log.info("LLM STATUS: {}", response.getStatusCode());
+    log.info("LLM BODY: {}", response.getBody());
 
-      REQUIRED RESPONSE FORMAT:
-      {
-        "feedback": "string",
-        "grade": 0
+    if (!response.getStatusCode().is2xxSuccessful()) {
+      throw new RuntimeException(
+          "LLM ERROR status=" + response.getStatusCode() + " body=" + response.getBody());
       }
-      """.formatted(assignment.getTaskDescription(), assignment.getMarkingCriteria(), deadline,
-      submittedAt, submissionText);
+
+    return response.getBody();
+
+  } catch (Exception e) {
+    log.error("LLM request FAILED FULL TRACE", e);
+    throw new RuntimeException(e);
+  }
 }
 }
