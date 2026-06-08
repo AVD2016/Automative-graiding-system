@@ -236,6 +236,99 @@
   color: #16a34a; /* green */
   font-weight: bold;
 }
+
+/* =========================
+   MODAL SECTIONS
+========================= */
+
+.modal-section {
+  margin-top: 18px;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.modal-section h3 {
+  margin-bottom: 10px;
+  font-size: 15px;
+  color: #1e293b;
+}
+
+/* =========================
+   TEXT STYLING
+========================= */
+
+.modal-section p {
+  margin: 6px 0;
+  font-size: 14px;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.modal-section strong {
+  color: #1e293b;
+}
+
+/* =========================
+   FILE DOWNLOAD LINK
+========================= */
+
+#submissionFileLink {
+  display: inline-block;
+  margin-top: 6px;
+
+  padding: 10px 12px;
+  background: #2563eb;
+  color: white;
+
+  border-radius: 8px;
+  text-decoration: none;
+
+  font-size: 14px;
+  transition: 0.15s;
+}
+
+#submissionFileLink:hover {
+  background: #1d4ed8;
+}
+
+/* =========================
+   INPUTS (LECTURER SECTION)
+========================= */
+
+#lecturerFeedback,
+#finalMark {
+  margin-top: 6px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+/* =========================
+   LAYOUT IMPROVEMENT
+========================= */
+
+.modal-content hr {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* =========================
+   BUTTON ALIGNMENT
+========================= */
+
+.modal-content button {
+  font-size: 14px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.modal-content button:hover {
+  opacity: 0.9;
+}
   </style>
 
 </head>
@@ -321,26 +414,131 @@
   </div>
 
   <!-- =========================
-       MODAL
-  ========================== -->
+     MODAL
+========================= -->
 
-  <div id="submissionModal" class="modal">
+<div id="submissionModal" class="modal">
 
-    <div class="modal-content">
+  <div class="modal-content">
 
-      <span class="close" onclick="closeModal()">×</span>
+    <span class="close" onclick="closeModal()">×</span>
 
-      <h2 id="modalTitle">Submission</h2>
+    <h2 id="modalTitle">Submission</h2>
 
-      <div class="modal-placeholder">
+    <!-- =========================
+         ASSIGNMENT DETAILS (READ ONLY)
+    ========================== -->
 
-        Modal content will be added later.
+    <div class="modal-section">
 
-      </div>
+      <h3>Assignment Details</h3>
+
+      <p><strong>Title:</strong> <span id="assignmentTitle"></span></p>
+
+      <p><strong>Description:</strong></p>
+      <p id="assignmentDescription"></p>
+
+      <p><strong>Marking Criteria:</strong></p>
+      <p id="assignmentCriteria"></p>
+
+      <p><strong>Deadline:</strong> <span id="assignmentDeadline"></span></p>
+
+      <p><strong>Submitted At:</strong> <span id="submissionDate"></span></p>
+
+    </div>
+
+    <hr style="margin: 16px 0;" />
+
+    <!-- =========================
+         FILE DOWNLOAD
+    ========================== -->
+
+    <div class="modal-section">
+
+      <h3>Submitted File</h3>
+
+      <a id="submissionFileLink" href="#" target="_blank">
+        Download Submitted PDF
+      </a>
+
+    </div>
+
+    <hr style="margin: 16px 0;" />
+
+    <!-- =========================
+         ANALYSIS (READ ONLY)
+    ========================== -->
+
+    <div class="modal-section">
+
+      <h3>AI Analysis</h3>
+
+      <p><strong>Feedback:</strong></p>
+      <p id="analysisFeedback"></p>
+
+      <p><strong>Proposed Grade:</strong></p>
+      <p id="proposedGrade"></p>
+
+    </div>
+
+    <hr style="margin: 16px 0;" />
+
+    <!-- =========================
+         LECTURER INPUT (EDITABLE)
+    ========================== -->
+
+    <div class="modal-section">
+
+      <h3>Lecturer Review</h3>
+
+      <label for="lecturerFeedback"><strong>Feedback:</strong></label>
+      <textarea
+        id="lecturerFeedback"
+        rows="4"
+        style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;"
+        placeholder="Write feedback here..."
+      ></textarea>
+
+      <label for="finalMark" style="margin-top:12px; display:block;">
+        <strong>Final Mark:</strong>
+      </label>
+
+      <input
+        type="text"
+        id="finalMark"
+        style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;"
+        placeholder="Enter mark (e.g. 72, A-, 85%)"
+      />
+
+    </div>
+
+    <!-- =========================
+         ACTION BUTTONS
+    ========================== -->
+
+    <div style="margin-top: 20px; display:flex; gap:10px; justify-content:flex-end;">
+
+      <button
+        class="view-btn"
+        style="background:#16a34a;"
+        onclick="saveMarking()"
+      >
+        Save Mark
+      </button>
+
+      <button
+        class="view-btn"
+        style="background:#64748b;"
+        onclick="closeModal()"
+      >
+        Close
+      </button>
 
     </div>
 
   </div>
+
+</div>
 
   <!-- =========================
        CHAT
