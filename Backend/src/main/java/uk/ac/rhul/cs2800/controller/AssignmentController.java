@@ -11,8 +11,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -20,7 +27,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.ac.rhul.cs2800.model.Assignment;
 import uk.ac.rhul.cs2800.model.AssignmentSubmission;
 import uk.ac.rhul.cs2800.model.Module;
@@ -47,6 +57,9 @@ public class AssignmentController {
 
   @Autowired
   private AssignmentSubmissionRepository assignmentSubmissionRepository;
+
+  @Value("${HelpChatAPIKey}")
+  private String apiKey;
 
   // CREATE ASSIGNMENT by lecturer
   @PostMapping("/create")
@@ -262,6 +275,9 @@ public class AssignmentController {
       // =========================
       assignmentSubmissionRepository.save(submission);
 
+      // fire-and-forget (does NOT block response)
+      createReviewAsync(submission.getId());
+
       return ResponseEntity.ok("Submission created");
 
     } catch (IOException e) {
@@ -274,4 +290,89 @@ public class AssignmentController {
     }
   }
 
+  // method to request the review by LLM
+  @Async
+  public void createReviewAsync(int submissionId) {
+
+    try {
+
+      AssignmentSubmission submission = assignmentSubmissionRepository.findById(submissionId)
+          .orElseThrow(() -> new RuntimeException("Submission not found"));
+
+      Assignment assignment = submission.getAssignment();
+
+      String submissionText = extractTextFromPdf(submission.getPdfFiles().get(0));
+
+      String prompt = """
+          You are an academic grader.
+
+          TASK DESCRIPTION:
+          %s
+
+          MARKING CRITERIA:
+          %s
+
+          STUDENT SUBMISSION:
+          %s
+
+          Return JSON:
+          {
+            "feedback": "...",
+            "grade": 0-100
+          }
+          """.formatted(assignment.getTaskDescription(), assignment.getMarkingCriteria(),
+          submissionText);
+
+      RestTemplate restTemplate = new RestTemplate();
+
+      HttpHeaders headers = new HttpHeaders();
+      headers.setContentType(MediaType.APPLICATION_JSON);
+      headers.setBearerAuth(apiKey);
+
+      String requestBody = """
+          {
+            "model": "openrouter/owl-alpha",
+            "messages": [
+              { "role": "user", "content": "%s" }
+            ]
+          }
+          """.formatted(prompt.replace("\"", "\\\"").replace("\n", "\\n"));
+
+      HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+
+      ResponseEntity<String> response = restTemplate.exchange(
+          "https://openrouter.ai/api/v1/chat/completions", HttpMethod.POST, entity, String.class);
+
+      ObjectMapper mapper = new ObjectMapper();
+      JsonNode root = mapper.readTree(response.getBody());
+
+      String content = root.path("choices").get(0).path("message").path("content").asText();
+
+      // VERY IMPORTANT: parse JSON output safely
+      JsonNode result = mapper.readTree(content);
+
+      String feedback = result.path("feedback").asText();
+      int grade = result.path("grade").asInt();
+
+      submission.setFeedbackForAssignment(feedback);
+      submission.setSuggestedGrade(grade);
+      submission.setMarked(true);
+
+      assignmentSubmissionRepository.save(submission);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  // method for extracting text from pdf
+  private String extractTextFromPdf(String filePath) {
+    try {
+      Tika tika = new Tika();
+      return tika.parseToString(new File(filePath));
+    } catch (Exception e) {
+      e.printStackTrace();
+      return "";
+    }
+  }
 }
