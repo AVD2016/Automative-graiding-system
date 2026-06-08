@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -236,6 +237,28 @@ public class AssignmentController {
     return ResponseEntity.ok(response);
   }
 
+
+  @DeleteMapping("/deleteSubmission/{assignmentId}")
+  public ResponseEntity<?> deleteSubmission(@PathVariable int assignmentId,
+      @RequestParam int studentId) {
+
+    try {
+
+      AssignmentSubmission submission =
+          assignmentSubmissionRepository.findByStudentIdAndAssignmentId(studentId, assignmentId)
+              .orElseThrow(() -> new RuntimeException("Submission not found for studentId="
+                  + studentId + ", assignmentId=" + assignmentId));
+
+      assignmentSubmissionRepository.delete(submission);
+
+      return ResponseEntity.ok("Submission deleted");
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.status(400).body(e.getMessage());
+    }
+  }
+
   // submit assignment Student
   @PostMapping("/submit/{assignmentId}")
   public ResponseEntity<?> submitAssignment(@PathVariable int assignmentId,
@@ -338,7 +361,8 @@ public class AssignmentController {
         throw new RuntimeException("Empty PDF text for submissionId=" + submissionId);
       }
 
-      String prompt = buildPrompt(assignment, submissionText);
+      String prompt = buildPrompt(assignment, submissionText, submission.getSubmittedAt(),
+          assignment.getDeadline());
 
       log.info("Sending LLM request submissionId={}", submissionId);
 
@@ -456,7 +480,8 @@ public class AssignmentController {
 }
 
 // build promt helper method
-private String buildPrompt(Assignment assignment, String submissionText) {
+private String buildPrompt(Assignment assignment, String submissionText, LocalDateTime submittedAt,
+    LocalDateTime deadline) {
 
   return """
       You are an academic grader.
@@ -467,11 +492,19 @@ private String buildPrompt(Assignment assignment, String submissionText) {
       MARKING CRITERIA:
       %s
 
+      DEADLINE:
+      %s
+
+      SUBMISSION TIME:
+      %s
+
       STUDENT SUBMISSION:
       %s
 
       INSTRUCTIONS:
-      Grade the work fairly. Provide constructive feedback for the professor about the assignment.
+      - Grade the work fairly using the marking criteria.
+      - Apply late penalties 0–24 hours late: -10% penalty, more than 24 hours late: grade = 0
+      - Provide constructive feedback for the professor.
       - Return STRICT JSON only.
       - Do NOT use markdown.
       - Do NOT include explanation outside JSON.
@@ -481,7 +514,7 @@ private String buildPrompt(Assignment assignment, String submissionText) {
         "feedback": "string",
         "grade": 0
       }
-      """.formatted(assignment.getTaskDescription(), assignment.getMarkingCriteria(),
-      submissionText);
+      """.formatted(assignment.getTaskDescription(), assignment.getMarkingCriteria(), deadline,
+      submittedAt, submissionText);
 }
 }

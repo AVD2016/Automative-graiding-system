@@ -366,22 +366,15 @@ async function submitAssignment() {
 
 async function deleteSubmission() {
 
-  if (!currentAssignment) {
-    return;
-  }
+  if (!currentAssignment) return;
 
-  const confirmed = confirm(
-    "Delete submission?"
-  );
-
-  if (!confirmed) {
-    return;
-  }
+  const confirmed = confirm("Delete submission?");
+  if (!confirmed) return;
 
   try {
 
     const res = await fetch(
-      `${API_BASE}/assignment/${currentAssignment.id}/submission`,
+      `${API_BASE}/assignment/deleteSubmission/${currentAssignment.id}?studentId=${student.id}`,
       {
         method: "DELETE",
         credentials: "include"
@@ -389,28 +382,18 @@ async function deleteSubmission() {
     );
 
     if (!res.ok) {
-
-      const errorText =
-        await res.text();
-
-      console.error(
-        "Delete error:",
-        errorText
-      );
-
+      const errorText = await res.text();
+      console.error("Delete error:", errorText);
       throw new Error(errorText);
     }
 
     alert("Submission deleted");
 
     closeModal();
-
     await loadAssignments();
 
   } catch (err) {
-
     console.error(err);
-
     alert("Failed to delete submission");
   }
 }
