@@ -2,8 +2,10 @@
 <html lang="en">
 
 <head>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
   <title>Mark Assignments</title>
 
   <link rel="stylesheet" href="../CSS/chatWidget.css">
@@ -12,47 +14,230 @@
   <style>
 
     /* =========================
-       CONTENT (EMPTY PLACEHOLDER)
+       CONTENT
     ========================= */
 
     .content {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      flex: 1;
       padding: 30px;
+      overflow-y: auto;
       position: relative;
     }
 
-    .mark-card {
-      position: relative;
-      z-index: 2;
-
-      width: 100%;
-      max-width: 1000px;
-
-      background: rgba(255,255,255,0.95);
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    }
-
-    .mark-card h2 {
-      margin-bottom: 20px;
+    .lecturer-name {
+      font-size: 16px;
+      font-weight: bold;
       color: #1e293b;
     }
 
-    .placeholder {
+    /* =========================
+       TABLE CARD
+    ========================= */
+
+    .table-card {
+      position: relative;
+      z-index: 2;
+
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    /* =========================
+       MAIN TABLE
+    ========================= */
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: #1e293b;
+      color: white;
+      text-align: left;
+      padding: 12px;
+      font-size: 14px;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+
+    tr.assignment-row {
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    tr.assignment-row:hover {
+      background: #f8fafc;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
       color: #64748b;
-      font-style: italic;
-      padding: 20px 0;
+    }
+
+    /* =========================
+       DROPDOWN SUBMISSION TABLE
+    ========================= */
+
+    .submission-wrapper {
+      padding: 0;
+      background: #f8fafc;
+    }
+
+    .submission-container {
+      padding: 18px;
+    }
+
+    .submission-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .submission-table th {
+      background: #334155;
+      font-size: 13px;
+    }
+
+    .submission-table td {
+      font-size: 13px;
+    }
+
+    .submission-empty {
+      padding: 16px;
+      text-align: center;
+      color: #64748b;
+    }
+
+    /* =========================
+       STATUS
+    ========================= */
+
+    .marked {
+      color: #16a34a;
+      font-weight: bold;
+    }
+
+    .unmarked {
+      color: #dc2626;
+      font-weight: bold;
+    }
+
+    /* =========================
+       BUTTON
+    ========================= */
+
+    .view-btn {
+      background: #2563eb;
+      color: white;
+
+      border: none;
+      border-radius: 8px;
+
+      padding: 8px 12px;
+
+      cursor: pointer;
+      transition: 0.15s;
+    }
+
+    .view-btn:hover {
+      background: #1d4ed8;
+    }
+
+    /* =========================
+       MODAL
+    ========================= */
+
+    .modal {
+      display: none;
+
+      position: fixed;
+      inset: 0;
+
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(4px);
+
+      z-index: 999;
+
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+
+      width: 92%;
+      max-width: 900px;
+      max-height: 90vh;
+
+      overflow-y: auto;
+
+      background: white;
+
+      border-radius: 14px;
+      padding: 24px;
+
+      position: relative;
+
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+
+    .close {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+
+      width: 34px;
+      height: 34px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 8px;
+
+      cursor: pointer;
+
+      font-size: 18px;
+      color: #475569;
+    }
+
+    .close:hover {
+      background: #f1f5f9;
+    }
+
+    .modal-placeholder {
+      margin-top: 20px;
+
+      background: #f8fafc;
+      border: 1px dashed #cbd5e1;
+
+      border-radius: 10px;
+      padding: 30px;
+
+      text-align: center;
+      color: #64748b;
     }
 
   </style>
+
 </head>
 
 <body>
 
-  <!-- SIDEBAR -->
+  <!-- =========================
+       SIDEBAR
+  ========================== -->
+
   <div class="sidebar">
 
     <h2>Lecturer Panel</h2>
@@ -64,15 +249,22 @@
 
   </div>
 
-  <!-- MAIN -->
+  <!-- =========================
+       MAIN
+  ========================== -->
+
   <div class="main">
 
     <!-- TOPBAR -->
+
     <div class="topbar">
 
-      <div class="topbar-left">
+      <div class="topbar-left" onclick="openDashboard()">
+
         <img src="icon.png" alt="System Icon">
+
         <h1>Automated Grading System</h1>
+
       </div>
 
       <div class="lecturer-name" id="lecturerName">
@@ -82,15 +274,37 @@
     </div>
 
     <!-- CONTENT -->
+
     <div class="content">
 
-      <div class="mark-card">
+      <div class="table-card">
 
-        <h2>Mark Assignments</h2>
+        <table>
 
-        <div class="placeholder">
-          Assignment marking interface will appear here.
-        </div>
+          <thead>
+
+            <tr>
+              <th>Module Code</th>
+              <th>Module Name</th>
+              <th>Assignment Title</th>
+              <th>Deadline</th>
+              <th>No. of Submissions</th>
+              <th>Unmarked Submissions</th>
+            </tr>
+
+          </thead>
+
+          <tbody id="assignmentsTableBody">
+
+            <tr>
+              <td colspan="6" class="loading">
+                Loading assignments...
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
 
       </div>
 
@@ -98,9 +312,34 @@
 
   </div>
 
-  <!-- CHAT -->
+  <!-- =========================
+       MODAL
+  ========================== -->
+
+  <div id="submissionModal" class="modal">
+
+    <div class="modal-content">
+
+      <span class="close" onclick="closeModal()">×</span>
+
+      <h2 id="modalTitle">Submission</h2>
+
+      <div class="modal-placeholder">
+
+        Modal content will be added later.
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- =========================
+       CHAT
+  ========================== -->
+
   <div id="chatToggle" class="chat-toggle">
-    <img src="question.jpg" alt="Chat" />
+    <img src="../Images/chat.png" alt="Chat" />
   </div>
 
   <div id="chatWidget" class="chat-widget hidden">
@@ -120,9 +359,10 @@
   </div>
 
   <!-- JS -->
-  <script src="../JS/lecturerNavigation.js"></script>
+
+  <script src="../JS/markAssignments.js"></script>
   <script src="../JS/chatWidget.js"></script>
-  <script src="../JS/markAssignment.js"></script>
+  <script src="../JS/lecturerNavigation.js"></script>
 
 </body>
 
