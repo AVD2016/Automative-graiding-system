@@ -284,7 +284,7 @@ public class AssignmentController {
         submission.setSubmittedAt(LocalDateTime.now());
         submission.setMarked(false);
         submission.setMark(null);
-      submission.setPdfFiles(List.of(destination.toString()));
+        submission.setPdfFiles(new ArrayList<>(List.of(destination.toString())));
       }
 
       // =========================
