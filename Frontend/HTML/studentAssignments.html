@@ -383,23 +383,29 @@ input[type="file"] {
     <div id="modalFiles"></div>
 
     <!-- SINGLE CLEAN SUBMISSION BLOCK -->
-    <div class="upload-section">
-      <h4>Submit Assignment</h4>
+<div class="upload-section">
 
-      <input type="file" id="submissionFile"/>
+  <h4 id="submissionTitle">Submit Assignment</h4>
 
-      <button class="action" onclick="submitAssignment()">
-        Submit
-      </button>
+  <div id="submitSection">
 
-      <!-- hidden by default -->
-      <div id="deleteSubmissionSection" style="display:none; margin-top:10px;">
-        <button class="action danger" onclick="deleteSubmission()">
-          Delete Submission
-        </button>
-      </div>
+    <input type="file" id="submissionFile"/>
 
-    </div>
+    <button class="action" onclick="submitAssignment()">
+      Submit
+    </button>
+
+  </div>
+
+  <div id="deleteSubmissionSection" style="display:none; margin-top:10px;">
+
+    <button class="action danger" onclick="deleteSubmission()">
+      Delete Submission
+    </button>
+
+  </div>
+
+</div>
 
   </div>
 </div>
