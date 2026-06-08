@@ -22,6 +22,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -448,5 +449,36 @@ public class AssignmentController {
       log.error("LLM request failed", e);
       throw new RuntimeException(e);
     }
+}
+
+// build promt helper method
+private String buildPrompt(Assignment assignment, String submissionText) {
+
+  return """
+      You are an academic grader.
+
+      TASK DESCRIPTION:
+      %s
+
+      MARKING CRITERIA:
+      %s
+
+      STUDENT SUBMISSION:
+      %s
+
+      INSTRUCTIONS:
+      - Grade the work fairly.
+      - Provide constructive academic feedback.
+      - Return STRICT JSON only.
+      - Do NOT use markdown.
+      - Do NOT include explanation outside JSON.
+
+      REQUIRED RESPONSE FORMAT:
+      {
+        "feedback": "string",
+        "grade": 0
+      }
+      """.formatted(assignment.getTaskDescription(), assignment.getMarkingCriteria(),
+      submissionText);
 }
 }
