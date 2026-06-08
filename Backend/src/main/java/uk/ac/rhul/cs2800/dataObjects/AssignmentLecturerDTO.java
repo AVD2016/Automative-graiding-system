@@ -1,6 +1,5 @@
 package uk.ac.rhul.cs2800.dataObjects;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import uk.ac.rhul.cs2800.model.Assignment;
@@ -16,7 +15,7 @@ public class AssignmentLecturerDTO {
 
   private String moduleName;
 
-  private LocalDateTime deadline;
+  private String deadline;
 
   private int numberOfSubmissions;
 
@@ -42,7 +41,7 @@ public class AssignmentLecturerDTO {
         ? assignment.getModule().getName()
         : "N/A";
 
-    this.deadline = assignment.getDeadline();
+    this.deadline = assignment.getDeadline() != null ? assignment.getDeadline().toString() : null;
 
     if (submissions == null) {
       submissions = new ArrayList<>();
@@ -88,11 +87,11 @@ public class AssignmentLecturerDTO {
     this.moduleName = moduleName;
   }
 
-  public LocalDateTime getDeadline() {
+  public String getDeadline() {
     return deadline;
   }
 
-  public void setDeadline(LocalDateTime deadline) {
+  public void setDeadline(String deadline) {
     this.deadline = deadline;
   }
 

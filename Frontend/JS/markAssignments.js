@@ -100,8 +100,8 @@ function renderAssignments(assignments) {
       <td>${assignment.moduleName}</td>
       <td>${assignment.title}</td>
       <td>${formatDate(assignment.deadline)}</td>
-      <td>${assignment.submissionCount}</td>
-      <td>${assignment.unmarkedCount}</td>
+      <td>${assignment.numberOfSubmissions}</td>
+      <td>${assignment.numberOfUnmarkedSubmissions}</td>
     `;
 
     row.addEventListener("click", () => {
