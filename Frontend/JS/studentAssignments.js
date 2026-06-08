@@ -100,12 +100,9 @@ function createUnsubmittedRow(a) {
     </td>
 
     <td>
-      <button
-        class="action"
-        onclick="openAssignment(${a.id})"
-      >
-        View Assignment
-      </button>
+   <button class="action" onclick="openAssignment(${a.id}, false)">
+     View Assignment
+   </button>
     </td>
   `;
 
@@ -137,12 +134,9 @@ function createSubmittedRow(a) {
     </td>
 
     <td>
-      <button
-        class="action"
-        onclick="openAssignment(${a.id})"
-      >
-        View Submission
-      </button>
+  <button class="action" onclick="openAssignment(${a.id}, true)">
+  View Submission
+</button>
     </td>
   `;
 
@@ -189,7 +183,7 @@ function formatDate(dateStr) {
    OPEN MODAL
 ========================= */
 
-async function openAssignment(id) {
+async function openAssignment(id, submitted = false) {
 
   try {
 
@@ -202,34 +196,58 @@ async function openAssignment(id) {
     );
 
     if (!res.ok) {
-      throw new Error(
-        "Failed to fetch assignment details"
-      );
+      throw new Error("Failed to fetch assignment details");
     }
 
-    currentAssignment =
-      await res.json();
+    currentAssignment = await res.json();
+
+    document.getElementById("modalTitle").innerText =
+      currentAssignment.title;
+
+    document.getElementById("modalDescription").innerText =
+      currentAssignment.description;
+
+    document.getElementById("modalCriteria").innerText =
+      currentAssignment.markingCriteria;
+
+    document.getElementById("modalCredits").innerText =
+      currentAssignment.credits;
+
+    document.getElementById("modalDeadline").innerText =
+      formatDate(currentAssignment.deadline);
+
+    renderFiles(currentAssignment.files || []);
 
     /* =========================
-       SET CONTENT
+       TOGGLE MODAL SECTIONS
     ========================= */
 
-    document.getElementById("modalTitle")
-      .innerText = currentAssignment.title;
+    const submitSection =
+      document.getElementById("submitSection");
 
-    document.getElementById("modalDescription")
-      .innerText = currentAssignment.description;
+    const deleteSection =
+      document.getElementById("deleteSubmissionSection");
 
-    document.getElementById("modalCriteria")
-      .innerText = currentAssignment.markingCriteria;
+    if (submitted) {
 
-    document.getElementById("modalCredits")
-      .innerText = currentAssignment.credits;
+      submitSection.style.display = "none";
+      deleteSection.style.display = "block";
 
-    document.getElementById("modalDeadline")
-      .innerText = formatDate(
-        currentAssignment.deadline
-      );
+    } else {
+
+      submitSection.style.display = "block";
+      deleteSection.style.display = "none";
+    }
+
+    document.getElementById("assignmentModal").style.display =
+      "flex";
+
+  } catch (err) {
+
+    console.error(err);
+    alert("Failed to load assignment");
+  }
+}
 
     renderFiles(
       currentAssignment.files || []
