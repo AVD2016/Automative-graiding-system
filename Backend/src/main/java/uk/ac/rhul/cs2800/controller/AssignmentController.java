@@ -557,6 +557,8 @@ public ResponseEntity<?> getLecturerAssignments(@PathVariable int lecturerId) {
       }
     }
 
+    System.out.println(new ObjectMapper().writeValueAsString(result));
+
     return ResponseEntity.ok(result);
 
   } catch (Exception e) {
