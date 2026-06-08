@@ -444,7 +444,9 @@ public class AssignmentController {
       headers.setContentType(MediaType.APPLICATION_JSON);
       headers.setBearerAuth(apiKey);
 
-      String safePrompt = prompt.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
+      String safePrompt = prompt.replace("\\", "\\\\")
+                                .replace("\"", "\\\"")
+                                .replace("\n", "\\n");
 
       String body = """
           {
@@ -461,66 +463,28 @@ public class AssignmentController {
       HttpEntity<String> entity = new HttpEntity<>(body, headers);
 
       ResponseEntity<String> response = restTemplate.exchange(
-          "https://openrouter.ai/api/v1/chat/completions", HttpMethod.POST, entity, String.class);
+          "https://openrouter.ai/api/v1/chat/completions",
+          HttpMethod.POST,
+          entity,
+          String.class
+      );
+
+      // 🔥 ADD THIS (CRITICAL)
+      log.info("LLM STATUS: {}", response.getStatusCode());
+      log.info("LLM BODY: {}", response.getBody());
 
       if (!response.getStatusCode().is2xxSuccessful()) {
-        throw new RuntimeException("LLM HTTP error: " + response.getStatusCode());
-      }
-
-      if (response.getBody() == null) {
-        throw new RuntimeException("LLM returned empty body");
+        throw new RuntimeException(
+            "LLM ERROR status=" + response.getStatusCode()
+            + " body=" + response.getBody()
+        );
       }
 
       return response.getBody();
 
     } catch (Exception e) {
-      log.error("LLM request failed", e);
+      log.error("LLM request FAILED FULL TRACE", e);
       throw new RuntimeException(e);
     }
-}
-
-// build promt helper method
-private String callLLM(String prompt) {
-
-  try {
-    RestTemplate restTemplate = new RestTemplate();
-
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    headers.setBearerAuth(apiKey);
-
-    String safePrompt = prompt.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
-
-    String body = """
-        {
-          "model": "openrouter/owl-alpha",
-          "messages": [
-            {
-              "role": "user",
-              "content": "%s"
-            }
-          ]
-        }
-        """.formatted(safePrompt);
-
-    HttpEntity<String> entity = new HttpEntity<>(body, headers);
-
-    ResponseEntity<String> response = restTemplate.exchange(
-        "https://openrouter.ai/api/v1/chat/completions", HttpMethod.POST, entity, String.class);
-
-    log.info("LLM STATUS: {}", response.getStatusCode());
-    log.info("LLM BODY: {}", response.getBody());
-
-    if (!response.getStatusCode().is2xxSuccessful()) {
-      throw new RuntimeException(
-          "LLM ERROR status=" + response.getStatusCode() + " body=" + response.getBody());
-      }
-
-    return response.getBody();
-
-  } catch (Exception e) {
-    log.error("LLM request FAILED FULL TRACE", e);
-    throw new RuntimeException(e);
   }
-}
 }
