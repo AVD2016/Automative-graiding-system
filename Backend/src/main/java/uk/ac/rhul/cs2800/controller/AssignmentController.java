@@ -309,54 +309,115 @@ public class AssignmentController {
 
   // method to request the review by LLM
   @Async
+  @Transactional
   public void createReviewAsync(int submissionId) {
 
-    try {
-      log.info("LLM review started for submissionId={}", submissionId);
+    log.info("LLM review START submissionId={}", submissionId);
 
+    try {
       AssignmentSubmission submission = assignmentSubmissionRepository.findById(submissionId)
           .orElseThrow(() -> new RuntimeException("Submission not found: " + submissionId));
 
       Assignment assignment = submission.getAssignment();
 
       if (submission.getPdfFiles() == null || submission.getPdfFiles().isEmpty()) {
-        throw new RuntimeException("No PDF attached to submissionId=" + submissionId);
+        throw new RuntimeException("No PDF file linked to submissionId=" + submissionId);
       }
 
-      String submissionText = extractTextFromPdf(submission.getPdfFiles().get(0));
+      String filePath = submission.getPdfFiles().get(0);
+      log.info("Extracting PDF for submissionId={}, file={}", submissionId, filePath);
+
+      String submissionText = extractTextFromPdf(filePath);
 
       if (submissionText == null || submissionText.isBlank()) {
-        throw new RuntimeException(
-            "PDF extraction failed or empty for submissionId=" + submissionId);
+        throw new RuntimeException("Empty PDF text for submissionId=" + submissionId);
       }
 
-      String prompt = """
-          You are an academic grader.
+      String prompt = buildPrompt(assignment, submissionText);
 
-          TASK DESCRIPTION:
-          %s
+      log.info("Sending LLM request submissionId={}", submissionId);
 
-          MARKING CRITERIA:
-          %s
+      String rawResponse = callLLM(prompt);
 
-          STUDENT SUBMISSION:
-          %s
+      log.info("LLM RAW response submissionId={} response={}", submissionId, rawResponse);
 
-          Return STRICT JSON only (no markdown, no extra text):
-          {
-            "feedback": "string",
-            "grade": 0
+      ObjectMapper mapper = new ObjectMapper();
+
+      JsonNode root = mapper.readTree(rawResponse);
+
+      JsonNode choices = root.path("choices");
+
+      if (!choices.isArray() || choices.isEmpty()) {
+        throw new RuntimeException("Invalid LLM response structure");
           }
-          """.formatted(assignment.getTaskDescription(), assignment.getMarkingCriteria(),
-          submissionText);
 
+      String content = choices.get(0).path("message").path("content").asText(null);
+
+      if (content == null || content.isBlank()) {
+        throw new RuntimeException("Empty LLM content");
+      }
+
+      content = content.replace("```json", "").replace("```", "").trim();
+
+      JsonNode result = mapper.readTree(content);
+
+      String feedback = result.path("feedback").asText(null);
+      int grade = result.path("grade").asInt(-1);
+
+      if (feedback == null || grade < 0) {
+        throw new RuntimeException("Invalid parsed LLM JSON: " + content);
+      }
+
+      submission.setFeedbackForAssignment(feedback);
+      submission.setSuggestedGrade(grade);
+      submission.setMarked(true);
+
+      assignmentSubmissionRepository.saveAndFlush(submission);
+
+      log.info("LLM review SUCCESS submissionId={} grade={}", submissionId, grade);
+
+      } catch (Exception e) {
+      log.error("LLM review FAILED submissionId={}", submissionId, e);
+      }
+  }
+
+  private String extractTextFromPdf(String filePath) {
+
+    try {
+      File file = new File(filePath);
+
+      if (!file.exists()) {
+        throw new RuntimeException("PDF not found: " + filePath);
+      }
+
+      Tika tika = new Tika();
+      String text = tika.parseToString(file);
+
+      if (text == null || text.isBlank()) {
+        throw new RuntimeException("Empty extracted PDF text: " + filePath);
+      }
+
+      return text;
+
+    } catch (Exception e) {
+      log.error("PDF extraction FAILED filePath={}", filePath, e);
+      throw new RuntimeException("PDF extraction failed", e);
+    }
+  }
+
+  // helper method for debuging
+  private String callLLM(String prompt) {
+
+    try {
       RestTemplate restTemplate = new RestTemplate();
 
       HttpHeaders headers = new HttpHeaders();
       headers.setContentType(MediaType.APPLICATION_JSON);
       headers.setBearerAuth(apiKey);
 
-      String requestBody = """
+      String safePrompt = prompt.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");
+
+      String body = """
           {
             "model": "openrouter/owl-alpha",
             "messages": [
@@ -366,83 +427,26 @@ public class AssignmentController {
               }
             ]
           }
-          """.formatted(prompt.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n"));
+          """.formatted(safePrompt);
 
-      ResponseEntity<String> response =
-          restTemplate.exchange("https://openrouter.ai/api/v1/chat/completions", HttpMethod.POST,
-              new HttpEntity<>(requestBody, headers), String.class);
+      HttpEntity<String> entity = new HttpEntity<>(body, headers);
+
+      ResponseEntity<String> response = restTemplate.exchange(
+          "https://openrouter.ai/api/v1/chat/completions", HttpMethod.POST, entity, String.class);
+
+      if (!response.getStatusCode().is2xxSuccessful()) {
+        throw new RuntimeException("LLM HTTP error: " + response.getStatusCode());
+      }
 
       if (response.getBody() == null) {
-        throw new RuntimeException("Empty response from LLM");
+        throw new RuntimeException("LLM returned empty body");
       }
 
-      ObjectMapper mapper = new ObjectMapper();
-      JsonNode root = mapper.readTree(response.getBody());
-
-      JsonNode choices = root.path("choices");
-
-      if (!choices.isArray() || choices.isEmpty()) {
-        throw new RuntimeException("Invalid LLM response structure: " + response.getBody());
-      }
-
-      String content = choices.get(0).path("message").path("content").asText();
-
-      if (content == null || content.isBlank()) {
-        throw new RuntimeException("LLM returned empty content");
-      }
-
-      // clean markdown wrappers if LLM adds them
-      content = content.replace("```json", "").replace("```", "").trim();
-
-      JsonNode result;
-      try {
-        result = mapper.readTree(content);
-      } catch (Exception e) {
-        throw new RuntimeException("Failed to parse LLM JSON: " + content, e);
-      }
-
-      String feedback = result.path("feedback").asText(null);
-      int grade = result.path("grade").asInt(-1);
-
-      if (feedback == null || grade < 0) {
-        throw new RuntimeException("Invalid LLM result: " + content);
-      }
-
-      submission.setFeedbackForAssignment(feedback);
-      submission.setSuggestedGrade(grade);
-      submission.setMarked(true);
-
-      assignmentSubmissionRepository.saveAndFlush(submission);
-
-      log.info("LLM review completed for submissionId={}, grade={}", submissionId, grade);
+      return response.getBody();
 
     } catch (Exception e) {
-      log.error("LLM review FAILED for submissionId={}", submissionId, e);
+      log.error("LLM request failed", e);
+      throw new RuntimeException(e);
     }
-  }
-
-  // method for extracting text from pdf
-  private String extractTextFromPdf(String filePath) {
-
-    try {
-      File file = new File(filePath);
-
-      if (!file.exists()) {
-        throw new RuntimeException("PDF file not found: " + filePath);
-      }
-
-      Tika tika = new Tika();
-      String text = tika.parseToString(file);
-
-      if (text == null || text.isBlank()) {
-        throw new RuntimeException("Extracted PDF text is empty: " + filePath);
-      }
-
-      return text;
-
-    } catch (Exception e) {
-      log.error("PDF extraction failed for filePath={}", filePath, e);
-      return "";
-    }
-  }
+}
 }
