@@ -256,15 +256,15 @@ async function openAssignment(id, submitted = false) {
 
 function closeModal() {
 
-  document.getElementById(
-    "assignmentModal"
-  ).style.display = "none";
+  document.getElementById("assignmentModal").style.display = "none";
 
   currentAssignment = null;
 
-  document.getElementById(
-    "submissionFile"
-  ).value = "";
+  document.getElementById("submissionFile").value = "";
+
+  // reset UI sections (prevents stale state bugs)
+  document.getElementById("submitSection").style.display = "none";
+  document.getElementById("deleteSubmissionSection").style.display = "none";
 }
 
 /* =========================
@@ -316,33 +316,20 @@ function renderFiles(files) {
 
 async function submitAssignment() {
 
-  const file =
-    document.getElementById(
-      "submissionFile"
-    ).files[0];
+  const file = document.getElementById("submissionFile").files[0];
 
   if (!file) {
-
     alert("Select a file first");
-
     return;
   }
 
-  if (!currentAssignment) {
-    return;
-  }
+  if (!currentAssignment) return;
 
   try {
 
-    const formData =
-      new FormData();
-
+    const formData = new FormData();
     formData.append("file", file);
-
-    formData.append(
-      "studentId",
-      student.id
-    );
+    formData.append("studentId", student.id);
 
     const res = await fetch(
       `${API_BASE}/assignment/submit/${currentAssignment.id}`,
@@ -354,30 +341,21 @@ async function submitAssignment() {
     );
 
     if (!res.ok) {
-
-      const errorText =
-        await res.text();
-
-      console.error(
-        "Backend error response:",
-        errorText
-      );
-
+      const errorText = await res.text();
+      console.error("Backend error:", errorText);
       throw new Error(errorText);
     }
 
-    alert(
-      "Assignment submitted successfully"
-    );
+    alert("Assignment submitted successfully");
 
     closeModal();
+
+    document.getElementById("submissionFile").value = "";
 
     await loadAssignments();
 
   } catch (err) {
-
     console.error(err);
-
     alert("Failed to submit assignment");
   }
 }

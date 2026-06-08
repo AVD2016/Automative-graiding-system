@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.tika.Tika;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -60,6 +62,8 @@ public class AssignmentController {
 
   @Value("${HelpChatAPIKey}")
   private String apiKey;
+
+  private static final Logger log = LoggerFactory.getLogger(AssignmentController.class);
 
   // CREATE ASSIGNMENT by lecturer
   @PostMapping("/create")
@@ -127,6 +131,7 @@ public class AssignmentController {
     }
   }
 
+  // get assignments for Student
   @GetMapping("/student/getAssignments/{studentId}")
   public ResponseEntity<?> getStudentAssignments(@PathVariable int studentId) {
 
@@ -230,6 +235,7 @@ public class AssignmentController {
     return ResponseEntity.ok(response);
   }
 
+  // submit assignment Student
   @PostMapping("/submit/{assignmentId}")
   public ResponseEntity<?> submitAssignment(@PathVariable int assignmentId,
       @RequestParam int studentId, @RequestParam("file") MultipartFile file) {
@@ -260,15 +266,26 @@ public class AssignmentController {
       // 5. SAVE FILE
       file.transferTo(destination.toFile());
 
-      // 6. CREATE SUBMISSION
-      AssignmentSubmission submission = new AssignmentSubmission();
-      submission.setAssignment(assignment);
-      submission.setStudent(student);
-      submission.setSubmittedAt(LocalDateTime.now());
-      submission.setMarked(false);
-      submission.setMark(null);
+      // 6. CHECK IF SUBMISSION ALREADY EXISTS
+      Optional<AssignmentSubmission> existingSubmission =
+          assignmentSubmissionRepository.findByStudentIdAndAssignmentId(studentId, assignmentId);
 
+      AssignmentSubmission submission;
+
+      if (existingSubmission.isPresent()) {
+
+        // OPTION A: BLOCK resubmission
+        return ResponseEntity.status(409).body("You have already submitted this assignment.");
+
+      } else {
+        submission = new AssignmentSubmission();
+        submission.setAssignment(assignment);
+        submission.setStudent(student);
+        submission.setSubmittedAt(LocalDateTime.now());
+        submission.setMarked(false);
+        submission.setMark(null);
       submission.setPdfFiles(List.of(destination.toString()));
+      }
 
       // =========================
       // 7. SAVE TO DB
@@ -295,13 +312,23 @@ public class AssignmentController {
   public void createReviewAsync(int submissionId) {
 
     try {
+      log.info("LLM review started for submissionId={}", submissionId);
 
       AssignmentSubmission submission = assignmentSubmissionRepository.findById(submissionId)
-          .orElseThrow(() -> new RuntimeException("Submission not found"));
+          .orElseThrow(() -> new RuntimeException("Submission not found: " + submissionId));
 
       Assignment assignment = submission.getAssignment();
 
+      if (submission.getPdfFiles() == null || submission.getPdfFiles().isEmpty()) {
+        throw new RuntimeException("No PDF attached to submissionId=" + submissionId);
+      }
+
       String submissionText = extractTextFromPdf(submission.getPdfFiles().get(0));
+
+      if (submissionText == null || submissionText.isBlank()) {
+        throw new RuntimeException(
+            "PDF extraction failed or empty for submissionId=" + submissionId);
+      }
 
       String prompt = """
           You are an academic grader.
@@ -315,10 +342,10 @@ public class AssignmentController {
           STUDENT SUBMISSION:
           %s
 
-          Return JSON:
+          Return STRICT JSON only (no markdown, no extra text):
           {
-            "feedback": "...",
-            "grade": 0-100
+            "feedback": "string",
+            "grade": 0
           }
           """.formatted(assignment.getTaskDescription(), assignment.getMarkingCriteria(),
           submissionText);
@@ -333,45 +360,88 @@ public class AssignmentController {
           {
             "model": "openrouter/owl-alpha",
             "messages": [
-              { "role": "user", "content": "%s" }
+              {
+                "role": "user",
+                "content": "%s"
+              }
             ]
           }
-          """.formatted(prompt.replace("\"", "\\\"").replace("\n", "\\n"));
+          """.formatted(prompt.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n"));
 
-      HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+      ResponseEntity<String> response =
+          restTemplate.exchange("https://openrouter.ai/api/v1/chat/completions", HttpMethod.POST,
+              new HttpEntity<>(requestBody, headers), String.class);
 
-      ResponseEntity<String> response = restTemplate.exchange(
-          "https://openrouter.ai/api/v1/chat/completions", HttpMethod.POST, entity, String.class);
+      if (response.getBody() == null) {
+        throw new RuntimeException("Empty response from LLM");
+      }
 
       ObjectMapper mapper = new ObjectMapper();
       JsonNode root = mapper.readTree(response.getBody());
 
-      String content = root.path("choices").get(0).path("message").path("content").asText();
+      JsonNode choices = root.path("choices");
 
-      // VERY IMPORTANT: parse JSON output safely
-      JsonNode result = mapper.readTree(content);
+      if (!choices.isArray() || choices.isEmpty()) {
+        throw new RuntimeException("Invalid LLM response structure: " + response.getBody());
+      }
 
-      String feedback = result.path("feedback").asText();
-      int grade = result.path("grade").asInt();
+      String content = choices.get(0).path("message").path("content").asText();
+
+      if (content == null || content.isBlank()) {
+        throw new RuntimeException("LLM returned empty content");
+      }
+
+      // clean markdown wrappers if LLM adds them
+      content = content.replace("```json", "").replace("```", "").trim();
+
+      JsonNode result;
+      try {
+        result = mapper.readTree(content);
+      } catch (Exception e) {
+        throw new RuntimeException("Failed to parse LLM JSON: " + content, e);
+      }
+
+      String feedback = result.path("feedback").asText(null);
+      int grade = result.path("grade").asInt(-1);
+
+      if (feedback == null || grade < 0) {
+        throw new RuntimeException("Invalid LLM result: " + content);
+      }
 
       submission.setFeedbackForAssignment(feedback);
       submission.setSuggestedGrade(grade);
       submission.setMarked(true);
 
-      assignmentSubmissionRepository.save(submission);
+      assignmentSubmissionRepository.saveAndFlush(submission);
+
+      log.info("LLM review completed for submissionId={}, grade={}", submissionId, grade);
 
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("LLM review FAILED for submissionId={}", submissionId, e);
     }
   }
 
   // method for extracting text from pdf
   private String extractTextFromPdf(String filePath) {
+
     try {
+      File file = new File(filePath);
+
+      if (!file.exists()) {
+        throw new RuntimeException("PDF file not found: " + filePath);
+      }
+
       Tika tika = new Tika();
-      return tika.parseToString(new File(filePath));
+      String text = tika.parseToString(file);
+
+      if (text == null || text.isBlank()) {
+        throw new RuntimeException("Extracted PDF text is empty: " + filePath);
+      }
+
+      return text;
+
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("PDF extraction failed for filePath={}", filePath, e);
       return "";
     }
   }
