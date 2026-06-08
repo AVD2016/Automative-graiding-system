@@ -366,6 +366,11 @@ public class AssignmentController {
 
       log.info("Sending LLM request submissionId={}", submissionId);
 
+      log.info("PROMPT LENGTH submissionId={} chars={}", submissionId, prompt.length());
+
+      log.debug("PROMPT PREVIEW submissionId={} preview={}", submissionId,
+          prompt.substring(0, Math.min(prompt.length(), 2000)));
+
       String rawResponse = callLLM(prompt);
 
       log.info("LLM RAW response submissionId={} response={}", submissionId, rawResponse);
@@ -463,7 +468,6 @@ public class AssignmentController {
       ResponseEntity<String> response = restTemplate.exchange(
           "https://openrouter.ai/api/v1/chat/completions", HttpMethod.POST, entity, String.class);
 
-      // 🔥 ADD THIS (CRITICAL)
       log.info("LLM STATUS: {}", response.getStatusCode());
       log.info("LLM BODY: {}", response.getBody());
 
