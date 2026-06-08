@@ -35,13 +35,16 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.ac.rhul.cs2800.dataObjects.AssignmentLecturerDTO;
 import uk.ac.rhul.cs2800.model.Assignment;
 import uk.ac.rhul.cs2800.model.AssignmentSubmission;
+import uk.ac.rhul.cs2800.model.Lecturer;
 import uk.ac.rhul.cs2800.model.Module;
 import uk.ac.rhul.cs2800.model.Registration;
 import uk.ac.rhul.cs2800.model.Student;
 import uk.ac.rhul.cs2800.repository.AssignmentRepository;
 import uk.ac.rhul.cs2800.repository.AssignmentSubmissionRepository;
+import uk.ac.rhul.cs2800.repository.LecturerRepository;
 import uk.ac.rhul.cs2800.repository.ModuleRepository;
 import uk.ac.rhul.cs2800.repository.StudentRepository;
 
@@ -61,6 +64,9 @@ public class AssignmentController {
 
   @Autowired
   private AssignmentSubmissionRepository assignmentSubmissionRepository;
+
+  @Autowired
+  private LecturerRepository lecturerRepository;
 
   @Value("${HelpChatAPIKey}")
   private String apiKey;
@@ -502,7 +508,7 @@ private String buildPrompt(Assignment assignment, String submissionText, LocalDa
       %s  
       INSTRUCTIONS:
       - Grade the work fairly using the marking criteria.
-      - Apply late penalties 0–24 hours late: -10 percent penalty, more than 24 hours late: grade = 0
+      - Apply late penalties 0–24 hours late: -10 percent penalty, more than 24 hours late: grade = 0. There is no need to mention anything about subission deadline if it was met.
       - Provide feedback for the professor. Return STRICT JSON only. Do NOT use markdown.
       - Do NOT include explanation outside JSON.
 
@@ -513,5 +519,51 @@ private String buildPrompt(Assignment assignment, String submissionText, LocalDa
       }
       """.formatted(assignment.getTaskDescription(), assignment.getMarkingCriteria(), deadline,
       submittedAt, submissionText);
+}
+
+// get assignments for Lecturer
+@GetMapping("/lecturer/getAssignments/{lecturerId}")
+public ResponseEntity<?> getLecturerAssignments(@PathVariable int lecturerId) {
+
+  try {
+
+    Lecturer lecturer = lecturerRepository.findById(lecturerId)
+        .orElseThrow(() -> new RuntimeException("Lecturer not found"));
+
+    List<AssignmentLecturerDTO> result = new ArrayList<>();
+
+    // 1. Lecturer → Registrations
+    List<Registration> registrations = lecturer.getRegistered();
+
+    for (Registration reg : registrations) {
+
+      Module module = reg.getModule();
+
+      if (module == null) {
+        continue;
+      }
+
+      // 2. Module → Assignments
+      List<Assignment> assignments = module.getAssignments();
+
+      for (Assignment assignment : assignments) {
+
+        List<AssignmentSubmission> submissions =
+            assignmentSubmissionRepository.findByAssignmentId(assignment.getId());
+
+        AssignmentLecturerDTO dto = new AssignmentLecturerDTO(assignment, submissions);
+
+        result.add(dto);
+      }
+    }
+
+    return ResponseEntity.ok(result);
+
+  } catch (Exception e) {
+
+    e.printStackTrace();
+
+    return ResponseEntity.badRequest().body(e.getMessage());
+  }
 }
 }
