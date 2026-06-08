@@ -317,19 +317,16 @@ function renderFiles(files) {
 
 async function submitAssignment() {
 
-  // =========================
-  // HARD LOCK CHECK
-  // =========================
   if (requestInProgress) {
     console.warn("Request already in progress");
     return;
   }
 
   const fileInput = document.getElementById("submissionFile");
-  const file = fileInput.files[0];
-
   const submitBtn = document.getElementById("submitBtn");
   const loadingEl = document.getElementById("submitLoading");
+
+  const file = fileInput?.files?.[0];
 
   if (!file) {
     alert("Select a file first");
@@ -338,12 +335,11 @@ async function submitAssignment() {
 
   if (!currentAssignment) return;
 
-  // LOCK ON
   requestInProgress = true;
 
-  submitBtn.disabled = true;
-  submitBtn.style.opacity = "0.6";
-  loadingEl.style.display = "block";
+  // SAFE UI LOCKING
+  if (submitBtn) submitBtn.disabled = true;
+  if (loadingEl) loadingEl.style.display = "block";
 
   try {
 
@@ -378,12 +374,10 @@ async function submitAssignment() {
 
   } finally {
 
-    // UNLOCK ALWAYS
     requestInProgress = false;
 
-    submitBtn.disabled = false;
-    submitBtn.style.opacity = "1";
-    loadingEl.style.display = "none";
+    if (submitBtn) submitBtn.disabled = false;
+    if (loadingEl) loadingEl.style.display = "none";
   }
 }
 
