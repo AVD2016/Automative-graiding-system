@@ -13,7 +13,7 @@ public class AssignmentSubmissionLecturerDTO {
 
   private boolean marked;
 
-  private String mark; // ✅ STRING ONLY
+  private String mark;
 
   public AssignmentSubmissionLecturerDTO() {}
 

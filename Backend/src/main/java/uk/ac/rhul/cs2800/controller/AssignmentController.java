@@ -203,7 +203,8 @@ public class AssignmentController {
 
   // get details on a assignment
   @GetMapping("/getAssignmentDetails/{id}")
-  public ResponseEntity<?> getAssignmentDetails(@PathVariable int id) {
+  public ResponseEntity<?> getAssignmentDetails(@PathVariable int id,
+      @RequestParam(required = false) Integer studentId) {
 
     Assignment assignment = assignmentRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("Assignment not found"));
@@ -214,22 +215,45 @@ public class AssignmentController {
     response.put("id", assignment.getId());
     response.put("title", assignment.getTitle());
 
-    // frontend expects "description"
     response.put("description", assignment.getTaskDescription());
 
     response.put("markingCriteria", assignment.getMarkingCriteria());
     response.put("credits", assignment.getCredits());
     response.put("deadline", assignment.getDeadline());
 
-    // FILES (adapt single file → list)
+    // leecturer Feedback
+
+    String lecturerFeedback = null;
+
+    if (studentId != null) {
+
+      Optional<AssignmentSubmission> submissionOpt =
+          assignmentSubmissionRepository.findByStudentIdAndAssignmentId(studentId, id);
+
+      if (submissionOpt.isPresent()) {
+
+        AssignmentSubmission submission = submissionOpt.get();
+
+        lecturerFeedback = submission.getLecturerFeedback();
+
+        response.put("mark", submission.getMark());
+        response.put("submittedAt", submission.getSubmittedAt());
+        response.put("marked", submission.isMarked());
+      }
+    }
+
+    response.put("lecturerFeedback", lecturerFeedback);
+
+    // files
+
     List<Map<String, Object>> files = new ArrayList<>();
 
     if (assignment.getPdfFilePath() != null) {
 
       Map<String, Object> file = new HashMap<>();
+
       file.put("name", "Assignment PDF");
 
-      // If you later serve static files, this should be a URL
       file.put("url", "/files/" + new File(assignment.getPdfFilePath()).getName());
 
       files.add(file);
@@ -657,6 +681,7 @@ public ResponseEntity<?> getSubmissionDetails(@PathVariable int submissionId) {
   }
 }
 
+// mark assignment by lecturer
   @PostMapping("/markSubmission/{submissionId}")
   public ResponseEntity<?> markSubmission(@PathVariable int submissionId,
       @RequestBody MarkSubmissionRequest request) {

@@ -183,13 +183,12 @@ function formatDate(dateStr) {
 /* =========================
    OPEN MODAL
 ========================= */
-
 async function openAssignment(id, submitted = false) {
 
   try {
 
     const res = await fetch(
-      `${API_BASE}/assignment/getAssignmentDetails/${id}`,
+      `${API_BASE}/assignment/getAssignmentDetails/${id}?studentId=${student.id}`,
       {
         method: "GET",
         credentials: "include"
@@ -219,25 +218,37 @@ async function openAssignment(id, submitted = false) {
 
     renderFiles(currentAssignment.files || []);
 
-    /* =========================
-       TOGGLE MODAL SECTIONS
-    ========================= */
-
     const submitSection =
       document.getElementById("submitSection");
 
     const deleteSection =
       document.getElementById("deleteSubmissionSection");
 
+    const feedbackSection =
+      document.getElementById("feedbackSection");
+
+    const feedbackText =
+      document.getElementById("lecturerFeedbackText");
+
     if (submitted) {
 
       submitSection.style.display = "none";
       deleteSection.style.display = "block";
 
+      // SHOW FEEDBACK ONLY FOR SUBMITTED
+      feedbackSection.style.display = "block";
+
+      feedbackText.innerText =
+        currentAssignment.lecturerFeedback ||
+        "No lecturer feedback available.";
+
     } else {
 
       submitSection.style.display = "block";
       deleteSection.style.display = "none";
+
+      // HIDE FEEDBACK FOR UNSUBMITTED
+      feedbackSection.style.display = "none";
     }
 
     document.getElementById("assignmentModal").style.display =
@@ -266,6 +277,8 @@ function closeModal() {
   // reset UI sections (prevents stale state bugs)
   document.getElementById("submitSection").style.display = "none";
   document.getElementById("deleteSubmissionSection").style.display = "none";
+  document.getElementById("feedbackSection").style.display = "none";
+  document.getElementById("lecturerFeedbackText").innerText = "";
 }
 
 /* =========================
