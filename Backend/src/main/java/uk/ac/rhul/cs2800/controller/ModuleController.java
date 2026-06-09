@@ -51,6 +51,7 @@ public class ModuleController {
   @Autowired
   private RegistrationRepository registrationRepository;
 
+  @Autowired
   private AssignmentSubmissionRepository assignmentSubmissionRepository;
 
   @GetMapping("/getAvailableModules/{studentId}")
