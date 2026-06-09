@@ -161,7 +161,9 @@ async function submitAssignment(event) {
   if (
     !moduleCode ||
     !title ||
-    !credits ||
+    credits === null ||
+    credits === undefined ||
+    isNaN(credits) ||
     !deadline ||
     !taskDescription ||
     !markingCriteria
@@ -172,7 +174,7 @@ async function submitAssignment(event) {
 
 
   if (isNaN(credits) || credits < 0) {
-    alert("Credits must be greater or equal to 0.");
+    alert("Credits must be greater than 0.");
     return;
   }
 
