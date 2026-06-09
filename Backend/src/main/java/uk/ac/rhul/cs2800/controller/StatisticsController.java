@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,13 +27,18 @@ import uk.ac.rhul.cs2800.repository.StudentRepository;
 @CrossOrigin(originPatterns = "https://*.vercel.app")
 public class StatisticsController {
 
-  LecturerRepository lecturerRepository;
-  AssignmentSubmissionRepository assignmentSubmissionRepository;
-  StudentRepository studentRepository;
+  @Autowired
+  private LecturerRepository lecturerRepository;
+  @Autowired
+  private AssignmentSubmissionRepository assignmentSubmissionRepository;
+  @Autowired
+  private StudentRepository studentRepository;
 
+  @Transactional
   @GetMapping("/lecturer/{lecturerId}")
   public ResponseEntity<?> getLecturerDashboard(@PathVariable int lecturerId) {
 
+    System.out.println("execution started!!!!!!!!!!");
     try {
 
       /*
