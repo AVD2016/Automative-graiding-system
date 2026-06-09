@@ -72,12 +72,11 @@ function renderModules(tableBody, data) {
 
   modules.forEach(entry => {
 
-    const module = entry.module;      // FIXED: backend wrapper DTO
+    const module = entry.module;
     const students = entry.students || [];
 
     const code = module.code;
 
-    /* MAIN ROW */
     const mainRow = document.createElement("tr");
     mainRow.style.cursor = "pointer";
     mainRow.onclick = () => toggleModule(code);
@@ -93,7 +92,6 @@ function renderModules(tableBody, data) {
 
     tableBody.appendChild(mainRow);
 
-    /* EXPAND ROW */
     const expandRow = document.createElement("tr");
     expandRow.id = `expand-${code}`;
     expandRow.style.display = "none";
@@ -134,26 +132,30 @@ function renderStudentTable(students) {
 
         ${students.map(s => {
 
-          // FIX: backend may send "name" OR "fullName"
-          const name =
-            s.name ??
-            s.fullName ??
-            `${s.firstName ?? ""} ${s.lastName ?? ""}`.trim();
-
+          const name = s.fullName ?? s.name ?? "Unknown";
           const email = s.email ?? "-";
 
-          let avg = s.avgGrade ?? 0;
+          // IMPORTANT: force numeric conversion
+          const avgRaw = Number(s.averageGrade);
 
-          // handle -1 and -2 states from backend
-          let avgDisplay = avg;
+          let avgDisplay;
 
-          if (avg === -1) avgDisplay = "No grades yet";
-          else if (avg === -2) avgDisplay = "Pending marking";
-          else avgDisplay = avg.toFixed(1);
+          if (avgRaw === -1) {
+            avgDisplay = "No grades yet";
+          } 
+          else if (avgRaw === -2) {
+            avgDisplay = "Pending marking";
+          } 
+          else if (isNaN(avgRaw)) {
+            avgDisplay = "0.0";
+          } 
+          else {
+            avgDisplay = avgRaw.toFixed(1);
+          }
 
           return `
             <tr>
-              <td>${name || "Unknown"}</td>
+              <td>${name}</td>
 
               <td>
                 <a class="email-link" href="mailto:${email}">
@@ -161,7 +163,7 @@ function renderStudentTable(students) {
                 </a>
               </td>
 
-              <td>${s.missedDeadlines ?? s.missedAssignments ?? 0}</td>
+              <td>${s.missedDeadlines ?? 0}</td>
 
               <td>${avgDisplay}</td>
             </tr>
