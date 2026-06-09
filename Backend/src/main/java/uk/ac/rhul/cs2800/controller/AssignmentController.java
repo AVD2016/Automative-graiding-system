@@ -86,58 +86,72 @@ public class AssignmentController {
 
     try {
 
-      // 1. Find module
-      uk.ac.rhul.cs2800.model.Module module = moduleRepository.findById(moduleCode)
+      Module module = moduleRepository.findById(moduleCode)
           .orElseThrow(() -> new RuntimeException("Module not found"));
 
-      // 2. Validate credit limit
       int usedCredits = module.getAssignments().stream().mapToInt(Assignment::getCredits).sum();
 
       if (usedCredits + credits > module.getCredits()) {
+
         return ResponseEntity.badRequest().body("Not enough available module credits");
       }
 
       String pdfPath = null;
 
-      // ONLY save file if it exists
       if (file != null && !file.isEmpty()) {
 
+        // uploads directory
         String uploadDir = "uploads/";
 
         File dir = new File(uploadDir);
+
         if (!dir.exists()) {
           dir.mkdirs();
         }
 
+        // unique filename
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
-        File destination = new File(uploadDir + fileName);
+        File destination = new File(dir, fileName);
 
+        // save file
         file.transferTo(destination);
 
-        pdfPath = destination.getPath();
+        // store path
+        pdfPath = destination.getAbsolutePath();
       }
 
-      // 4. Create assignment
       Assignment assignment = new Assignment();
+
       assignment.setTitle(title);
+
       assignment.setCredits(credits);
+
       assignment.setTaskDescription(taskDescription);
+
       assignment.setMarkingCriteria(markingCriteria);
+
       assignment.setDeadline(LocalDateTime.parse(deadline));
+
       assignment.setPdfFilePath(pdfPath);
 
-      // 5. Link via module (IMPORTANT)
       module.addAssignment(assignment);
 
-      // 6. Save (cascade handles assignment)
+      // save
       moduleRepository.save(module);
 
       return ResponseEntity.ok("Assignment created successfully");
 
     } catch (IOException e) {
-      return ResponseEntity.status(500).body("File upload failed");
+
+      e.printStackTrace();
+
+      return ResponseEntity.status(500).body("File upload failed: " + e.getMessage());
+
     } catch (Exception e) {
+
+      e.printStackTrace();
+
       return ResponseEntity.status(400).body(e.getMessage());
     }
   }
