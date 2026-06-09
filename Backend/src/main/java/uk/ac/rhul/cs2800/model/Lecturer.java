@@ -29,4 +29,8 @@ public class Lecturer extends User {
     this.registered = registered;
   }
 
+  public int getId() {
+    return id;
+  }
+
 }

@@ -22,7 +22,7 @@ import uk.ac.rhul.cs2800.repository.StudentRepository;
 
 @RestController
 @RequestMapping("/api/statistics")
-@CrossOrigin(originPatterns = "https://*.vercel.app") // allows frontend JS to call backend
+@CrossOrigin(originPatterns = "https://*.vercel.app")
 public class StatisticsController {
 
   LecturerRepository lecturerRepository;
