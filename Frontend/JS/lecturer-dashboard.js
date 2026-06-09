@@ -39,7 +39,7 @@ async function loadDashboard() {
     }
 
     const res = await fetch(
-      `${API_BASE}/statistics/${lecturerId}`,
+      `${API_BASE}/statistics/lecturer/${lecturerId}`,
       { credentials: "include" }
     );
 

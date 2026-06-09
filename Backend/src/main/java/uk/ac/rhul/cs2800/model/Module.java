@@ -48,6 +48,10 @@ public class Module {
     this.mnc = false;
   }
 
+  public void setAssignments(List<Assignment> assignments) {
+    this.assignments = assignments;
+  }
+
   /**
    * Constructs a {@code Module} with the specified code, name, and MNC flag.
    *
