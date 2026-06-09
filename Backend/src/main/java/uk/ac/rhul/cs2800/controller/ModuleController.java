@@ -207,7 +207,6 @@ public class ModuleController {
 
     return ResponseEntity.ok(savedModule);
   }
-
   @Transactional
   @GetMapping("/overview/{lecturerId}")
   public ResponseEntity<List<LecturerModuleExpandedDTO>> getModuleOverview(
@@ -258,11 +257,18 @@ public class ModuleController {
 
           List<Integer> marks = new ArrayList<>();
 
-          boolean hasPastDeadlineUnmarked = false;
-          boolean hasAnyGraded = false;
-          boolean allAssignmentsInFuture = true;
+          boolean hasAnyPastAssignment = false;
+          boolean hasUnmarkedPastDeadline = false;
+          boolean hasAnySubmission = false;
 
           for (Assignment assignment : module.getAssignments()) {
+
+            boolean isPastDeadline = assignment.getDeadline() != null
+                && assignment.getDeadline().isBefore(java.time.LocalDateTime.now());
+
+            if (isPastDeadline) {
+              hasAnyPastAssignment = true;
+            }
 
             List<AssignmentSubmission> subs =
                 assignmentSubmissionRepository.findByAssignmentId(assignment.getId());
@@ -270,60 +276,59 @@ public class ModuleController {
             AssignmentSubmission submission = subs.stream()
                 .filter(s -> s.getStudent().getId() == student.getId()).findFirst().orElse(null);
 
-            boolean isFutureDeadline = assignment.getDeadline() != null
-                && assignment.getDeadline().isAfter(java.time.LocalDateTime.now());
-
-            if (!isFutureDeadline) {
-              allAssignmentsInFuture = false;
-            }
-
-            boolean missed =
-                submission == null || submission.getSubmittedAt() == null
-                    || submission.getSubmittedAt().isAfter(assignment.getDeadline());
-
+            // =========================
+            // NO SUBMISSION
+            // =========================
             if (submission == null) {
-              // no submission at all
-              if (!isFutureDeadline) {
-                hasPastDeadlineUnmarked = true;
-              }
-              marks.add(0);
-              missedDeadlines++;
-            } else {
 
-              // submission exists
-              if (missed) {
+              if (isPastDeadline) {
+                marks.add(0); // penalty counts in average
                 missedDeadlines++;
               }
 
-              Integer mark = submission.getMark();
+              continue;
+            }
 
-              if (mark != null) {
-                hasAnyGraded = true;
-                marks.add(mark);
-              } else {
-                // submitted but not marked yet
-                if (!isFutureDeadline) {
-                  hasPastDeadlineUnmarked = true;
-                }
-                marks.add(0);
+            // =========================
+            // SUBMISSION EXISTS
+            // =========================
+            hasAnySubmission = true;
+
+            if (submission.getSubmittedAt() != null
+                && submission.getSubmittedAt().isAfter(assignment.getDeadline())) {
+              missedDeadlines++;
+            }
+
+            Integer mark = submission.getMark();
+
+            if (mark != null) {
+              marks.add(mark);
+            } else {
+              // submitted but not marked yet
+              marks.add(0);
+
+              if (isPastDeadline) {
+                hasUnmarkedPastDeadline = true;
               }
             }
           }
 
-          // AVG logic rules
-          double avgGrade;
+          // =========================
+          // AVG RULES
+          // =========================
+          double avg;
 
-          if (!hasAnyGraded && allAssignmentsInFuture) {
-            avgGrade = -1; // nothing due yet or nothing graded
-          } else if (hasPastDeadlineUnmarked) {
-            avgGrade = -2; // backlog: submissions waiting to be marked
+          if (!hasAnyPastAssignment && !hasAnySubmission) {
+            avg = -1; // nothing has happened yet
+          } else if (hasUnmarkedPastDeadline) {
+            avg = -2; // marking backlog exists
           } else {
-            avgGrade = marks.stream().mapToInt(i -> i).average().orElse(0);
+            avg = marks.stream().mapToInt(i -> i).average().orElse(0);
           }
 
           studentDTOs.add(new LecturerModuleStudentDTO(student.getId(),
               student.getFirstName() + " " + student.getLastName(), student.getEmail(),
-              missedDeadlines, avgGrade));
+              missedDeadlines, avg));
         }
       }
 
