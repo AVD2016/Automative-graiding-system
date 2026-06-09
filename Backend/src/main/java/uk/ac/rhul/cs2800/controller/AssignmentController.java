@@ -170,7 +170,6 @@ public class AssignmentController {
         map.put("moduleCode", a.getModule().getCode());
         map.put("moduleName", a.getModule().getName());
 
-        // ✅ FIXED FILE URL (NEW SYSTEM)
         String fileName = a.getPdfFilePath();
 
         if (fileName != null && !fileName.isBlank()) {
@@ -307,28 +306,32 @@ public class AssignmentController {
       Student student = studentRepository.findById(studentId)
           .orElseThrow(() -> new RuntimeException("Student not found"));
 
-      // 3. SAFE UPLOAD DIRECTORY (Render-safe temporary storage)
-      Path uploadPath = Paths.get(System.getProperty("java.io.tmpdir"), "uploads");
-
-      if (!Files.exists(uploadPath)) {
-        Files.createDirectories(uploadPath);
-      }
-
-      // 4. SAFE UNIQUE FILE NAME
-      String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-
-      Path destination = uploadPath.resolve(fileName);
-
-      // 5. SAVE FILE
-      file.transferTo(destination.toFile());
-
-      // 6. CHECK EXISTING SUBMISSION
+      // 3. CHECK EXISTING SUBMISSION
       Optional<AssignmentSubmission> existingSubmission =
           assignmentSubmissionRepository.findByStudentIdAndAssignmentId(studentId, assignmentId);
 
       if (existingSubmission.isPresent()) {
         return ResponseEntity.status(409).body("You have already submitted this assignment.");
       }
+
+      // 4. UPLOAD DIRECTORY
+      Path uploadPath = getUploadPath();
+
+      if (!Files.exists(uploadPath)) {
+        Files.createDirectories(uploadPath);
+      }
+
+      // 5. SAFE FILE NAME
+      String originalName = file.getOriginalFilename();
+      if (originalName == null || originalName.isBlank()) {
+        return ResponseEntity.badRequest().body("Invalid file name");
+      }
+
+      String fileName = System.currentTimeMillis() + "_" + originalName;
+      Path destination = uploadPath.resolve(fileName);
+
+      // 6. SAVE FILE
+      file.transferTo(destination.toFile());
 
       // 7. CREATE SUBMISSION
       AssignmentSubmission submission = new AssignmentSubmission();
@@ -338,17 +341,16 @@ public class AssignmentController {
       submission.setMarked(false);
       submission.setMark(null);
 
-      // 🔥 IMPORTANT FIX: store ONLY filename, NOT full path
-      submission.setPdfFiles(new ArrayList<>(List.of(fileName)));
+      submission.setPdfFiles(List.of(fileName));
 
       // 8. SAVE TO DB
       assignmentSubmissionRepository.save(submission);
 
-      // 9. async review (non-blocking)
+      // 9. async AI review
       try {
         createReviewAsync(submission.getId());
-      } catch (Exception ignored) {
-        ignored.printStackTrace();
+      } catch (Exception e) {
+        e.printStackTrace();
       }
 
       return ResponseEntity.ok("Submission created");
@@ -360,7 +362,7 @@ public class AssignmentController {
     } catch (Exception e) {
       e.printStackTrace();
       return ResponseEntity.status(400).body(e.getMessage());
-      }
+    }
   }
 
   // method to request the review by LLM
@@ -453,13 +455,19 @@ public class AssignmentController {
       }
   }
 
-  private String extractTextFromPdf(String filePath) {
+  private String extractTextFromPdf(String fileName) {
 
     try {
-      File file = new File(filePath);
+      if (fileName == null || fileName.isBlank()) {
+        throw new RuntimeException("PDF filename is null or empty");
+      }
 
-      if (!file.exists()) {
-        throw new RuntimeException("PDF not found: " + filePath);
+      Path filePath = getUploadPath().resolve(fileName).normalize();
+
+      File file = filePath.toFile();
+
+      if (!file.exists() || !file.isFile()) {
+        throw new RuntimeException("PDF not found at path: " + filePath);
       }
 
       Tika tika = new Tika();
@@ -472,7 +480,7 @@ public class AssignmentController {
       return text;
 
     } catch (Exception e) {
-      log.error("PDF extraction FAILED filePath={}", filePath, e);
+      log.error("PDF extraction FAILED fileName={}", fileName, e);
       throw new RuntimeException("PDF extraction failed", e);
     }
   }
@@ -625,6 +633,8 @@ public ResponseEntity<?> getSubmissions(@PathVariable int assignmentId) {
     return ResponseEntity.badRequest().body(e.getMessage());
   }
 }
+
+
 @GetMapping("/getSubmissionDetails/{submissionId}")
 public ResponseEntity<?> getSubmissionDetails(@PathVariable int submissionId) {
 
@@ -637,33 +647,42 @@ public ResponseEntity<?> getSubmissionDetails(@PathVariable int submissionId) {
 
     Map<String, Object> response = new HashMap<>();
 
+    // BASIC INFO
     response.put("id", submission.getId());
 
     response.put("submittedAt",
         submission.getSubmittedAt() != null ? submission.getSubmittedAt().toString() : null);
 
-    // assignment info
+    // ASSIGNMENT INFO
     response.put("assignmentTitle", assignment.getTitle());
     response.put("assignmentDescription", assignment.getTaskDescription());
     response.put("markingCriteria", assignment.getMarkingCriteria());
-
     response.put("assignmentDeadline",
         assignment.getDeadline() != null ? assignment.getDeadline().toString() : null);
 
-    // file download
+    // FILE DOWNLOAD (FIXED FOR NEW SYSTEM)
     if (submission.getPdfFiles() != null && !submission.getPdfFiles().isEmpty()) {
 
       String fileName = submission.getPdfFiles().get(0);
 
-      response.put("fileUrl", "/api/files/" + fileName);
+      if (fileName != null && !fileName.isBlank()) {
+
+        String fileUrl =
+            "https://automative-graiding-system.onrender.com/api/assignment/files/" + fileName;
+
+        response.put("fileUrl", fileUrl);
+
+      } else {
+        response.put("fileUrl", null);
+      }
 
     } else {
       response.put("fileUrl", null);
     }
 
+    // AI / LECTURER INFO
     response.put("analysisFeedback", submission.getFeedbackForAssignment());
     response.put("proposedGrade", submission.getSuggestedGrade());
-
     response.put("lecturerFeedback", submission.getLecturerFeedback());
     response.put("finalMark", submission.getMark());
 
@@ -672,7 +691,7 @@ public ResponseEntity<?> getSubmissionDetails(@PathVariable int submissionId) {
   } catch (Exception e) {
     e.printStackTrace();
     return ResponseEntity.badRequest().body(e.getMessage());
-    }
+  }
 }
 
 // mark assignment by lecturer
