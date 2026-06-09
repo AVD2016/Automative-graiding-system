@@ -4,7 +4,9 @@ let student = null;
 let dashboardData = null;
 let chart = null;
 
-/* ========================= INIT ========================= */
+/* =========================
+   INIT
+========================= */
 
 document.addEventListener("DOMContentLoaded", async () => {
 
@@ -21,7 +23,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadDashboard();
 });
 
-/* ========================= LOAD BACKEND ========================= */
+/* =========================
+   LOAD BACKEND
+========================= */
 
 async function loadDashboard() {
 
@@ -29,10 +33,14 @@ async function loadDashboard() {
 
     const res = await fetch(
       `${API_BASE}/statistics/student/${student.id}`,
-      { credentials: "include" }
+      {
+        credentials: "include"
+      }
     );
 
-    if (!res.ok) throw new Error("Failed to load student dashboard");
+    if (!res.ok) {
+      throw new Error("Failed to load dashboard");
+    }
 
     dashboardData = await res.json();
 
@@ -41,64 +49,101 @@ async function loadDashboard() {
     renderChart();
 
   } catch (err) {
+
     console.error(err);
+
     alert("Failed to load dashboard");
   }
 }
 
-/* ========================= CALENDAR ========================= */
+/* =========================
+   CALENDAR
+========================= */
 
 function renderCalendar() {
 
   const calendar = document.getElementById("calendar");
+
   if (!calendar) return;
 
   calendar.innerHTML = "";
 
   const today = new Date();
+
   const year = today.getFullYear();
   const month = today.getMonth();
 
-  const lastDay = new Date(year, month + 1, 0);
+  const firstDay = new Date(year, month, 1).getDay();
+  const lastDay = new Date(year, month + 1, 0).getDate();
 
-  for (let d = 1; d <= lastDay.getDate(); d++) {
+  /* =========================
+     EMPTY START CELLS
+  ========================= */
+
+  for (let i = 0; i < firstDay; i++) {
+
+    const empty = document.createElement("div");
+    empty.className = "empty-day";
+
+    calendar.appendChild(empty);
+  }
+
+  /* =========================
+     DAYS
+  ========================= */
+
+  for (let d = 1; d <= lastDay; d++) {
 
     const date = new Date(year, month, d);
+
     const iso = date.toISOString().split("T")[0];
 
     const items = (dashboardData.assignments || [])
       .filter(a => a.deadline?.startsWith(iso));
 
     const div = document.createElement("div");
+
     div.classList.add("day");
 
-    const now = new Date();
-
-    /* ========================= COLOR RULES ========================= */
+    /* =========================
+       STATUS COLORS
+    ========================= */
 
     let cls = "";
 
+    const oneWeekAhead = new Date(
+      today.getTime() + (7 * 24 * 60 * 60 * 1000)
+    );
+
     if (items.some(i => i.status === "MARKED")) {
+
       cls = "green";
 
     } else if (items.some(i => i.status === "SUBMITTED")) {
+
       cls = "grey";
 
     } else if (
       items.some(i =>
         i.status === "UNSUBMITTED" &&
-        new Date(i.deadline) < new Date(now.getTime() + 7 * 86400000)
+        new Date(i.deadline) <= oneWeekAhead
       )
     ) {
+
       cls = "red";
 
     } else if (items.length > 0) {
+
       cls = "orange";
     }
 
-    div.classList.add(cls);
+    if (cls) {
+      div.classList.add(cls);
+    }
 
-    div.innerHTML = `<div class="day-number">${d}</div>`;
+    div.innerHTML = `
+      <div class="day-number">${d}</div>
+    `;
 
     div.onclick = () => showDay(items, iso);
 
@@ -106,82 +151,197 @@ function renderCalendar() {
   }
 }
 
-/* ========================= DAY DETAILS ========================= */
+/* =========================
+   DAY DETAILS
+========================= */
 
 function showDay(items, date) {
 
   const panel = document.getElementById("selectedDay");
+
   if (!panel) return;
 
   if (!items.length) {
-    panel.innerHTML = `No assignments for <b>${date}</b>`;
+
+    panel.innerHTML = `
+      <div class="empty-selection">
+        No assignments for <b>${date}</b>
+      </div>
+    `;
+
     return;
   }
 
-  panel.innerHTML =
-    `<b>${date}</b><br><br>` +
-    items.map(i => `
-      <div>
-        <b>${i.title}</b> (${i.module})<br>
-        Credits: ${i.credits || 0}<br>
+  panel.innerHTML = `
+    <div class="selected-title">
+      Assignments for ${date}
+    </div>
+
+    ${items.map(i => `
+
+      <div class="assignment-item">
+
+        <div class="assignment-title">
+          ${i.title}
+        </div>
+
+        <div class="assignment-module">
+          ${i.module}
+        </div>
+
+        <div class="assignment-meta">
+          Credits: ${i.credits || 0}
+        </div>
+
         <span class="badge ${getBadge(i.status)}">
-          ${i.status}
+          ${formatStatus(i.status)}
         </span>
-      </div><br>
-    `).join("");
+
+      </div>
+
+    `).join("")}
+  `;
 }
 
 function getBadge(status) {
-  if (status === "MARKED") return "badge-green";
-  if (status === "SUBMITTED") return "badge-grey";
-  if (status === "UNSUBMITTED") return "badge-red";
+
+  if (status === "MARKED") {
+    return "badge-green";
+  }
+
+  if (status === "SUBMITTED") {
+    return "badge-grey";
+  }
+
+  if (status === "UNSUBMITTED") {
+    return "badge-red";
+  }
+
   return "badge-grey";
 }
 
-/* ========================= WARNINGS ========================= */
+function formatStatus(status) {
+
+  if (status === "MARKED") {
+    return "Marked";
+  }
+
+  if (status === "SUBMITTED") {
+    return "Pending Marking";
+  }
+
+  if (status === "UNSUBMITTED") {
+    return "Not Submitted";
+  }
+
+  return status;
+}
+
+/* =========================
+   WARNINGS
+========================= */
 
 function renderWarnings() {
 
   const box = document.getElementById("warnings");
+
   if (!box) return;
 
   const assignments = dashboardData.assignments || [];
 
-  const avg = dashboardData.avgGrade ?? 0;
+  const avg = Number(dashboardData.avgGrade || 0);
 
-  const missed = assignments.filter(a =>
+  const missedAssignments = assignments.filter(a =>
     a.status === "UNSUBMITTED" &&
     new Date(a.deadline) < new Date()
-  ).length;
+  );
 
-  const pending = assignments.filter(a =>
+  const pendingAssignments = assignments.filter(a =>
     a.status === "SUBMITTED"
-  ).length;
+  );
 
   const warnings = [];
 
+  /* =========================
+     LOW AVERAGE WARNING
+  ========================= */
+
   if (avg < 50) {
-    warnings.push(`⚠ Average below 50% (${avg.toFixed(1)}%)`);
+
+    warnings.push(`
+      <div class="warning-card critical">
+        <div class="warning-title">
+          Average Grade Warning
+        </div>
+
+        <div class="warning-text">
+          Your current average is
+          <b>${avg.toFixed(1)}%</b>.
+          You may be at risk of failing modules.
+        </div>
+      </div>
+    `);
   }
 
-  if (missed > 0) {
-    warnings.push(`❌ ${missed} overdue unsubmitted assignments`);
+  /* =========================
+     MISSED ASSIGNMENTS
+  ========================= */
+
+  if (missedAssignments.length > 0) {
+
+    warnings.push(`
+      <div class="warning-card danger">
+        <div class="warning-title">
+          Missed Deadlines
+        </div>
+
+        <div class="warning-text">
+          ${missedAssignments.length}
+          assignment(s) were not submitted before the deadline.
+        </div>
+      </div>
+    `);
   }
 
-  if (pending > 0) {
-    warnings.push(`⏳ ${pending} assignments pending marking`);
+  /* =========================
+     PENDING MARKING
+  ========================= */
+
+  if (pendingAssignments.length > 0) {
+
+    warnings.push(`
+      <div class="warning-card pending">
+        <div class="warning-title">
+          Pending Marking
+        </div>
+
+        <div class="warning-text">
+          ${pendingAssignments.length}
+          assignment(s) are waiting to be marked.
+        </div>
+      </div>
+    `);
   }
+
+  /* =========================
+     NO WARNINGS
+  ========================= */
 
   if (warnings.length === 0) {
-    warnings.push("All good 👍");
+
+    warnings.push(`
+      <div class="success-card">
+        Everything looks good 👍
+      </div>
+    `);
   }
 
-  box.innerHTML = warnings.map(w => `
-    <div class="warning">${w}</div>
-  `).join("");
+  box.innerHTML = warnings.join("");
 }
 
-/* ========================= PROGRESS CHART ========================= */
+/* =========================
+   PROGRESS CHART
+========================= */
 
 function renderChart() {
 
@@ -197,30 +357,70 @@ function renderChart() {
 
     const deadline = new Date(a.deadline);
 
+    const credits = Number(a.credits || 0);
+
     if (a.status === "MARKED") {
-      markedCredits += a.credits || 0;
+
+      markedCredits += credits;
 
     } else if (a.status === "SUBMITTED") {
-      pendingCredits += a.credits || 0;
 
-    } else if (deadline > now) {
-      futureCredits += a.credits || 0;
+      pendingCredits += credits;
+
+    } else if (
+      a.status === "UNSUBMITTED" &&
+      deadline > now
+    ) {
+
+      futureCredits += credits;
     }
   });
 
-  if (chart) chart.destroy();
+  if (chart) {
+    chart.destroy();
+  }
 
-  chart = new Chart(document.getElementById("progressChart"), {
-    type: "pie",
-    data: {
-      labels: ["Marked", "Pending Marking", "Future"],
-      datasets: [{
-        data: [
-          markedCredits,
-          pendingCredits,
-          futureCredits
-        ]
-      }]
+  chart = new Chart(
+    document.getElementById("progressChart"),
+    {
+      type: "pie",
+
+      data: {
+
+        labels: [
+          "Completed",
+          "Pending Marking",
+          "Future Work"
+        ],
+
+        datasets: [{
+          data: [
+            markedCredits,
+            pendingCredits,
+            futureCredits
+          ],
+
+          backgroundColor: [
+            "#22c55e",
+            "#94a3b8",
+            "#fb923c"
+          ],
+
+          borderWidth: 0
+        }]
+      },
+
+      options: {
+
+        responsive: true,
+
+        plugins: {
+
+          legend: {
+            position: "bottom"
+          }
+        }
+      }
     }
-  });
+  );
 }
