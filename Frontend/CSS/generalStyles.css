@@ -50,10 +50,59 @@ body {
 
 
 .main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+  position: relative;
+  z-index: 2;
+}
+/* =========================
+   BACKGROUND (SAFE SCOPED FIX)
+========================= */
+
+/* create background layer ONLY for this page */
+.main::before {
+  content: "";
+
+  position: fixed;   /* key: stays with camera */
+  top: 0;
+  left: 240px;       /* matches sidebar width so it doesn't cover it */
+
+  width: calc(100vw - 240px);
+  height: 100vh;
+
+  background-image: url("../Images/Background.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  z-index: 0;
+
+  pointer-events: none;
+}
+
+/* dark overlay */
+.main::after {
+  content: "";
+
+  position: fixed;
+  top: 0;
+  left: 240px;
+
+  width: calc(100vw - 240px);
+  height: 100vh;
+
+  background: rgba(0,0,0,0.35);
+
   z-index: 1;
+
+  pointer-events: none;
+}
+
+/* make sure content sits above background */
+.topbar,
+.content,
+.dashboard-grid,
+.card {
+  position: relative;
+  z-index: 3;
 }
 
 /* ========================= TOPBAR ========================= */
