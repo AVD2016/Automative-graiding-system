@@ -12,9 +12,221 @@
   <link rel="stylesheet" href="../CSS/generalStyles.css">
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="../JS/studentNavigation.js"></script>
-  <script src="../JS/chatWidget.js"></script>
-<script src="../JS/student-dashboard.js"></script>
 
-</body>
-</html>
+  <style>
+
+    /* ========================= CONTENT ========================= */
+
+    .content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .content::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: url("../Images/Background.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      z-index: 0;
+    }
+
+    .content::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .dashboard-grid {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .card h2 {
+      margin-bottom: 15px;
+      color: #1e293b;
+    }
+
+    /* ========================= CALENDAR ========================= */
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+    }
+
+    .day {
+      background: #f1f5f9;
+      border-radius: 6px;
+      padding: 8px;
+      min-height: 60px;
+      font-size: 12px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .day:hover {
+      outline: 2px solid #94a3b8;
+    }
+
+    .day-number {
+      font-weight: bold;
+      font-size: 12px;
+    }
+
+    .green { background: #bbf7d0; }
+    .grey { background: #e2e8f0; }
+    .red { background: #fecaca; }
+    .orange { background: #fed7aa; }
+
+    /* ========================= SIDE PANEL ========================= */
+
+    .details {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #334155;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 6px;
+      font-size: 11px;
+      border-radius: 6px;
+      margin-top: 4px;
+    }
+
+    .badge-red { background: #ef4444; color: white; }
+    .badge-green { background: #16a34a; color: white; }
+    .badge-grey { background: #64748b; color: white; }
+
+    /* ========================= WARNINGS ========================= */
+
+    .warning {
+      background: #fff7ed;
+      border-left: 4px solid #f97316;
+      padding: 10px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    /* ========================= CHART ========================= */
+
+    canvas {
+      width: 100% !important;
+      max-height: 250px;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h2>Student Panel</h2>
+  <button onclick="openViewModules()">View Modules</button>
+  <button onclick="openGrades()">Grades</button>
+  <button onclick="openAssignments()">Assignments</button>
+  <button onclick="logout()">Logout</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+
+    <div class="topbar-left" onclick="openDashboard()">
+      <img src="icon.png">
+      <h1>Automated Grading System</h1>
+    </div>
+
+    <div class="student-name" id="studentName">Student</div>
+
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <div class="dashboard-grid">
+
+      <!-- CALENDAR -->
+      <div class="card">
+
+        <h2>Assignments Calendar</h2>
+
+        <div id="calendar" class="calendar"></div>
+
+        <div id="selectedDay" class="details">
+          Click a date to view assignments
+        </div>
+
+      </div>
+
+      <!-- WARNINGS -->
+      <div class="card">
+
+        <h2>Warnings</h2>
+
+        <div id="warnings"></div>
+
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="card">
+
+        <h2>Year Progress</h2>
+
+        <canvas id="progressChart"></canvas>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- CHAT -->
+<div id="chatToggle" class="chat-toggle">
+  <img src="../Images/chat.png">
+</div>
+
+<div id="chatWidget" class="chat-widget hidden">
+
+  <div class="chat-header">
+    <span>Support Chat</span>
+    <button onclick="toggleChat()">✕</button>
+  </div>
+
+  <div id="chatMessages" class="chat-messages"></div>
+
+  <div class="chat-input">
+    <input id="chatInput" type="text">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="chatWidget.js"></script>
+<script src="lecturerNavigation.js"></script>
+<script src="lecturer-dashboard.js"></script>
