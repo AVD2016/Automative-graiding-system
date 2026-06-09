@@ -171,8 +171,8 @@ async function submitAssignment(event) {
   }
 
 
-  if (isNaN(credits) || credits <= 0) {
-    alert("Credits must be greater than 0.");
+  if (isNaN(credits) || credits < 0) {
+    alert("Credits must be greater or equal to 0.");
     return;
   }
 
