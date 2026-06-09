@@ -30,10 +30,10 @@ async function loadModules() {
       <tr><td colspan="6">Loading...</td></tr>
     `;
 
-    const res = await fetch(
-      'https://automative-graiding-system.onrender.com/api/module/overview/${lecturer.id}',
-      { credentials: "include" }
-    );
+   const res = await fetch(
+     `https://automative-graiding-system.onrender.com/api/module/overview/${lecturer.id}`,
+     { credentials: "include" }
+   );
 
     if (!res.ok) {
       throw new Error("Failed to load modules");
@@ -53,15 +53,11 @@ async function loadModules() {
   }
 }
 
-/* =========================
-   RENDER MODULE TABLE
-========================= */
-
 function renderModules(tableBody, data) {
 
   tableBody.innerHTML = "";
 
-  const modules = data.modules || [];
+  const modules = data || [];
 
   if (!modules.length) {
     tableBody.innerHTML = `
@@ -70,18 +66,15 @@ function renderModules(tableBody, data) {
     return;
   }
 
-  modules.forEach(module => {
+  modules.forEach(entry => {
+
+    const module = entry.module;
+    const students = entry.students || [];
 
     const code = module.code;
 
-    /* =========================
-       MAIN ROW (CLICKABLE)
-    ========================= */
-
     const mainRow = document.createElement("tr");
-
     mainRow.style.cursor = "pointer";
-
     mainRow.onclick = () => toggleModule(code);
 
     mainRow.innerHTML = `
@@ -95,18 +88,13 @@ function renderModules(tableBody, data) {
 
     tableBody.appendChild(mainRow);
 
-    /* =========================
-       EXPAND ROW (STUDENTS)
-    ========================= */
-
     const expandRow = document.createElement("tr");
-
     expandRow.id = `expand-${code}`;
     expandRow.style.display = "none";
 
     expandRow.innerHTML = `
       <td colspan="6">
-        ${renderStudentTable(module.students || [])}
+        ${renderStudentTable(students)}
       </td>
     `;
 
