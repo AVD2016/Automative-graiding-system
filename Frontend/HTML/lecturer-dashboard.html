@@ -4,8 +4,9 @@
 <head>
 
   <meta charset="UTF-8" />
+
   <meta name="viewport"
-        content="width=device-width, initial-scale=1.0"/>
+        content="width=device-width, initial-scale=1.0" />
 
   <title>Lecturer Dashboard</title>
 
@@ -18,61 +19,281 @@
        CONTENT
     ========================= */
 
-.content {
-  flex: 1;
-  padding: 30px;
-  position: relative;
+    .content {
 
-  /* IMPORTANT: allow scrolling inside dashboard */
-  overflow-y: auto;
-  overflow-x: hidden;
-}
+      flex: 1;
 
-.content::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: url("../Images/Background.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  z-index: 0;
-}
+      position: relative;
 
-.content::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  z-index: 1;
-  pointer-events: none;
-}
+      padding: 30px;
 
-    .submissions-card {
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    /* =========================
+       DASHBOARD GRID
+    ========================= */
+
+    .dashboard-grid {
+
       position: relative;
       z-index: 2;
 
-      background-color: white;
-      border-radius: 12px;
-      padding: 25px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      display: grid;
+
+      grid-template-columns: 1fr 1fr 1fr;
+
+      gap: 20px;
+
+      padding-bottom: 40px;
     }
 
-    .submissions-card h2 {
-      margin-bottom: 20px;
-      color: #1e293b;
+    /* =========================
+       CARDS
+    ========================= */
+
+    .card {
+
+      position: relative;
+      z-index: 2;
+
+      background: rgba(255,255,255,0.96);
+
+      border-radius: 12px;
+
+      padding: 20px;
+
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+
+      backdrop-filter: blur(2px);
     }
+
+    .card h2 {
+
+      margin-bottom: 18px;
+
+      color: #1e293b;
+
+      font-size: 22px;
+    }
+
+    .full-width {
+      grid-column: 1 / -1;
+    }
+
+    /* =========================
+       ACTIVITY FEED
+    ========================= */
+
+    .feed-item {
+
+      padding: 14px 0;
+
+      border-bottom: 1px solid #e2e8f0;
+
+      color: #1e293b;
+
+      font-size: 14px;
+
+      line-height: 1.5;
+    }
+
+    .feed-item:last-child {
+      border-bottom: none;
+    }
+
+    .feed-time {
+
+      color: #64748b;
+
+      font-size: 12px;
+
+      margin-top: 5px;
+    }
+
+    /* =========================
+       RISK STUDENTS
+    ========================= */
+
+    .risk-item {
+
+      padding: 14px 0;
+
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .risk-item:last-child {
+      border-bottom: none;
+    }
+
+    .risk-name {
+
+      font-weight: bold;
+
+      color: #1e293b;
+
+      margin-bottom: 5px;
+    }
+
+    .risk-email {
+
+      color: #64748b;
+
+      font-size: 13px;
+
+      margin-bottom: 6px;
+    }
+
+    .badge-red {
+
+      color: #dc2626;
+
+      font-weight: bold;
+    }
+
+    .badge-orange {
+
+      color: #ea580c;
+
+      font-weight: bold;
+    }
+
+    .badge-yellow {
+
+      color: #ca8a04;
+
+      font-weight: bold;
+    }
+
+    /* =========================
+       MODULE OVERVIEW
+    ========================= */
+
+    #moduleSelector {
+
+      width: 100%;
+
+      padding: 10px;
+
+      border-radius: 8px;
+
+      border: 1px solid #cbd5e1;
+
+      margin-bottom: 20px;
+
+      font-size: 14px;
+    }
+
+    .module-summary {
+
+      margin-top: 15px;
+
+      color: #334155;
+
+      font-weight: bold;
+
+      text-align: center;
+    }
+
+    canvas {
+
+      width: 100% !important;
+
+      max-height: 260px;
+
+      margin-top: 20px;
+    }
+
+    /* =========================
+       MARKING QUEUE
+    ========================= */
+
+    .timeline {
+
+      display: flex;
+
+      gap: 16px;
+
+      overflow-x: auto;
+
+      padding: 10px 0;
+    }
+
+    .timeline::-webkit-scrollbar {
+
+      height: 8px;
+    }
+
+    .timeline::-webkit-scrollbar-thumb {
+
+      background: #94a3b8;
+
+      border-radius: 10px;
+    }
+
+    .timeline-item {
+
+      min-width: 240px;
+
+      background: #f8fafc;
+
+      border-radius: 12px;
+
+      padding: 16px;
+
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+
+    .timeline-item.late {
+
+      background: #fee2e2;
+
+      border: 2px solid #ef4444;
+    }
+
+    .timeline-title {
+
+      font-weight: bold;
+
+      color: #1e293b;
+
+      margin-bottom: 10px;
+    }
+
+    .timeline-meta {
+
+      color: #475569;
+
+      font-size: 14px;
+
+      margin-bottom: 6px;
+    }
+
+    /* =========================
+       EMPTY PLACEHOLDER
+    ========================= */
 
     .placeholder {
-      color: #64748b;
-      font-style: italic;
-      padding: 20px 0;
-    }
 
+      color: #64748b;
+
+      font-style: italic;
+
+      padding: 15px 0;
+    }
 
     /* =========================
        RESPONSIVE
     ========================= */
+
+    @media (max-width: 1200px) {
+
+      .dashboard-grid {
+
+        grid-template-columns: 1fr;
+      }
+    }
 
     @media (max-width: 900px) {
 
@@ -83,58 +304,11 @@
       .topbar-left h1 {
         font-size: 18px;
       }
+
+      .content {
+        padding: 20px;
+      }
     }
-
-.dashboard-grid {
-  position: relative;
-  z-index: 2;
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: auto auto;
-  gap: 20px;
-}
-
-.card {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.full-width {
-  grid-column: 1 / -1;
-}
-
-/* Activity feed */
-.feed-item {
-  padding: 10px;
-  border-bottom: 1px solid #eee;
-  font-size: 14px;
-}
-
-/* Risk labels */
-.badge-red { color: red; font-weight: bold; }
-.badge-orange { color: orange; font-weight: bold; }
-.badge-yellow { color: goldenrod; font-weight: bold; }
-
-/* Timeline slider */
-.timeline {
-  display: flex;
-  overflow-x: auto;
-  gap: 10px;
-  padding: 10px;
-}
-
-.timeline-item {
-  min-width: 200px;
-  padding: 10px;
-  border-radius: 8px;
-  background: #f3f4f6;
-}
-
-.timeline-item.late {
-  background: #fee2e2;
-}
 
   </style>
 
@@ -171,79 +345,145 @@
     <!-- TOPBAR -->
     <div class="topbar">
 
-      <div class="topbar-left" onclick="openDashboard()">
+      <div class="topbar-left"
+           onclick="openDashboard()">
 
-        <img src="icon.png" alt="System Icon">
+        <img src="icon.png"
+             alt="System Icon">
 
         <h1>Automated Grading System</h1>
 
       </div>
 
-      <div class="lecturer-name" id="lecturerName">
+      <div class="lecturer-name"
+           id="lecturerName">
+
         Lecturer
+
       </div>
 
     </div>
 
-    <div class="dashboard-grid">
+    <!-- CONTENT -->
+    <div class="content">
 
-  <!-- LEFT: Activity Feed -->
-  <div class="card" id="activityFeed">
-    <h2>Activity Feed</h2>
-    <div id="activityList"></div>
-  </div>
+      <div class="dashboard-grid">
 
-  <!-- MIDDLE: At Risk -->
-  <div class="card" id="atRisk">
-    <h2>At Risk Students</h2>
-    <div id="riskList"></div>
-  </div>
+        <!-- ACTIVITY FEED -->
+        <div class="card">
 
-  <!-- RIGHT: Module Overview -->
-  <div class="card">
-    <h2>Module Overview</h2>
+          <h2>Activity Feed</h2>
 
-    <select id="moduleSelector"></select>
+          <div id="activityList">
 
-    <canvas id="moduleChart"></canvas>
-    <canvas id="submissionChart"></canvas>
-  </div>
+            <div class="placeholder">
+              Loading activity...
+            </div>
 
-  <!-- BOTTOM: Marking Queue -->
-  <div class="card full-width">
-    <h2>Marking Queue</h2>
-    <div id="markingTimeline"></div>
-  </div>
+          </div>
 
-</div>
+        </div>
+
+        <!-- AT RISK STUDENTS -->
+        <div class="card">
+
+          <h2>At Risk Students</h2>
+
+          <div id="riskList">
+
+            <div class="placeholder">
+              Loading students...
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- MODULE OVERVIEW -->
+        <div class="card">
+
+          <h2>Module Overview</h2>
+
+          <select id="moduleSelector"></select>
+
+          <canvas id="moduleChart"></canvas>
+
+          <canvas id="submissionChart"></canvas>
+
+          <div class="module-summary"
+               id="moduleSummary">
+
+          </div>
+
+        </div>
+
+        <!-- MARKING QUEUE -->
+        <div class="card full-width">
+
+          <h2>Marking Queue</h2>
+
+          <div class="timeline"
+               id="markingTimeline">
+
+            <div class="placeholder">
+              Loading queue...
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
 
   </div>
 
   <!-- CHAT -->
-  <div id="chatToggle" class="chat-toggle">
-    <img src="../Images/chat.png" alt="Chat" />
+  <div id="chatToggle"
+       class="chat-toggle">
+
+    <img src="../Images/chat.png"
+         alt="Chat" />
+
   </div>
 
-  <div id="chatWidget" class="chat-widget hidden">
+  <div id="chatWidget"
+       class="chat-widget hidden">
 
     <div class="chat-header">
+
       <span>Support Chat</span>
+
       <button onclick="toggleChat()">✕</button>
+
     </div>
 
-    <div id="chatMessages" class="chat-messages"></div>
+    <div id="chatMessages"
+         class="chat-messages"></div>
 
     <div class="chat-input">
-      <input id="chatInput" type="text" placeholder="Type a message..." />
-      <button onclick="sendMessage()">Send</button>
+
+      <input id="chatInput"
+             type="text"
+             placeholder="Type a message..." />
+
+      <button onclick="sendMessage()">
+        Send
+      </button>
+
     </div>
 
   </div>
 
-  <script src="../JS/lecturerNavigation.js"></script>
-  <script src="../JS/lecturer-dashboard.js"></script>
-  <script src="../JS/chatWidget.js"></script>
+  <!-- CHART JS -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+  <script src="../JS/lecturerNavigation.js"></script>
+
+  <script src="../JS/lecturer-dashboard.js"></script>
+
+  <script src="../JS/chatWidget.js"></script>
 
 </body>
 
