@@ -591,4 +591,73 @@ public ResponseEntity<?> getSubmissions(@PathVariable int assignmentId) {
     return ResponseEntity.badRequest().body(e.getMessage());
   }
 }
+
+@GetMapping("/getSubmissionDetails/{submissionId}")
+public ResponseEntity<?> getSubmissionDetails(@PathVariable int submissionId) {
+
+  try {
+
+    AssignmentSubmission submission = assignmentSubmissionRepository.findById(submissionId)
+        .orElseThrow(() -> new RuntimeException("Submission not found"));
+
+    Assignment assignment = submission.getAssignment();
+
+    Map<String, Object> response = new HashMap<>();
+
+
+    response.put("id", submission.getId());
+
+    response.put("submittedAt",
+        submission.getSubmittedAt() != null ? submission.getSubmittedAt().toString() : null);
+
+    // assignment info
+
+    response.put("assignmentTitle", assignment.getTitle());
+
+    response.put("assignmentDescription", assignment.getTaskDescription());
+
+    response.put("markingCriteria", assignment.getMarkingCriteria());
+
+    response.put("assignmentDeadline",
+        assignment.getDeadline() != null ? assignment.getDeadline().toString() : null);
+
+
+    // FILE DOWNLOAD
+
+    if (submission.getPdfFiles() != null && !submission.getPdfFiles().isEmpty()) {
+
+      String filePath = submission.getPdfFiles().get(0);
+
+      response.put("fileUrl", "/files/" + new File(filePath).getName());
+
+    } else {
+
+      response.put("fileUrl", null);
+    }
+
+    // AI ANALYSIS
+
+    response.put("analysisFeedback", submission.getFeedbackForAssignment());
+
+    response.put("proposedGrade", submission.getSuggestedGrade());
+
+    // LECTURER MARKING
+
+    response.put("lecturerFeedback", submission.getFeedbackForAssignment());
+
+    response.put("finalMark", submission.getMark());
+
+    return ResponseEntity.ok(response);
+
+
+  } catch (Exception e) {
+
+
+    e.printStackTrace();
+
+    return ResponseEntity.badRequest().body(e.getMessage());
+
+  }
+}
+
 }
