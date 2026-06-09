@@ -101,23 +101,19 @@ public class AssignmentController {
       if (file != null && !file.isEmpty()) {
 
         // uploads directory
-        String uploadDir = "uploads/";
+        String uploadDir = System.getProperty("java.io.tmpdir") + "/uploads/";
 
         File dir = new File(uploadDir);
-
         if (!dir.exists()) {
           dir.mkdirs();
         }
 
-        // unique filename
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
         File destination = new File(dir, fileName);
 
-        // save file
         file.transferTo(destination);
 
-        // store path
         pdfPath = destination.getAbsolutePath();
       }
 
