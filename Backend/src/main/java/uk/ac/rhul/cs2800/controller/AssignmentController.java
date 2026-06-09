@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,6 +38,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.ac.rhul.cs2800.dataObjects.AssignmentLecturerDTO;
 import uk.ac.rhul.cs2800.dataObjects.AssignmentSubmissionLecturerDTO;
+import uk.ac.rhul.cs2800.dataObjects.MarkSubmissionRequest;
 import uk.ac.rhul.cs2800.model.Assignment;
 import uk.ac.rhul.cs2800.model.AssignmentSubmission;
 import uk.ac.rhul.cs2800.model.Lecturer;
@@ -660,4 +662,20 @@ public ResponseEntity<?> getSubmissionDetails(@PathVariable int submissionId) {
   }
 }
 
+  @PostMapping("/markSubmission/{submissionId}")
+  public ResponseEntity<?> markSubmission(@PathVariable int submissionId,
+      @RequestBody MarkSubmissionRequest request) {
+
+    AssignmentSubmission submission = assignmentSubmissionRepository.findById(submissionId)
+        .orElseThrow(() -> new RuntimeException("Submission not found"));
+
+    // update marking fields
+    submission.setLecturerFeedback(request.getLecturerFeedback());
+    submission.setMark(request.getFinalMark());
+    submission.setMarked(true);
+
+    assignmentSubmissionRepository.save(submission);
+
+    return ResponseEntity.ok("Submission marked successfully");
+  }
 }

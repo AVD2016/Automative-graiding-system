@@ -52,6 +52,9 @@ public class AssignmentSubmission {
   @Column(columnDefinition = "TEXT")
   private String feedbackForAssignment;
 
+  @Column(columnDefinition = "TEXT")
+  private String lecturerFeedback;
+
   /* =========================
      CONSTRUCTORS
   ========================= */
@@ -132,5 +135,13 @@ public class AssignmentSubmission {
 
   public void setPdfFiles(List<String> pdfFiles) {
     this.pdfFiles = pdfFiles;
+  }
+
+  public String getLecturerFeedback() {
+    return lecturerFeedback;
+  }
+
+  public void setLecturerFeedback(String lecturerFeedback) {
+    this.lecturerFeedback = lecturerFeedback;
   }
 }
