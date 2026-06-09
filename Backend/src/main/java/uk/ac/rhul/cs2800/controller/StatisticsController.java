@@ -39,6 +39,7 @@ public class StatisticsController {
   public ResponseEntity<?> getLecturerDashboard(@PathVariable int lecturerId) {
 
     System.out.println("execution started!!!!!!!!!!");
+
     try {
 
       /*
@@ -49,7 +50,7 @@ public class StatisticsController {
           .orElseThrow(() -> new RuntimeException("Lecturer not found"));
 
       /*
-       * ========================= 2. GET MODULES (via registrations) =========================
+       * ========================= 2. GET MODULES =========================
        */
 
       List<Registration> registrations = lecturer.getRegistered();
@@ -58,7 +59,7 @@ public class StatisticsController {
           registrations.stream().map(Registration::getModule).distinct().toList();
 
       /*
-       * ========================= 3. ACTIVITY FEED (latest submissions) =========================
+       * ========================= 3. ACTIVITY FEED =========================
        */
 
       List<Map<String, Object>> activityFeed = new ArrayList<>();
@@ -129,12 +130,18 @@ public class StatisticsController {
       }
 
       /*
-       * ========================= 5. MODULE OVERVIEW =========================
+       * ========================= 5. MODULE OVERVIEW (FIXED SUBMISSION RATE)
+       * =========================
        */
 
       List<Map<String, Object>> moduleData = new ArrayList<>();
 
       for (Module module : modules) {
+
+        List<Registration> moduleRegs = module.getRegistrations();
+        int enrolledStudents = moduleRegs != null ? moduleRegs.size() : 0;
+
+        int totalAssignments = module.getAssignments() != null ? module.getAssignments().size() : 0;
 
         int totalSubmissions = 0;
         int marked = 0;
@@ -148,25 +155,32 @@ public class StatisticsController {
           marked += subs.stream().filter(AssignmentSubmission::isMarked).count();
         }
 
-        double submissionRate =
-            totalSubmissions == 0 ? 0 : (double) totalSubmissions / (modules.size() * 10) * 100; // safe
-                                                                                                 // fallback
+        /*
+         * FIX: correct expected submissions (only enrolled students × assignments)
+         */
 
-        double avgGrade = 0;
+        int expectedSubmissions = enrolledStudents * totalAssignments;
+
+        double submissionRate =
+            expectedSubmissions == 0 ? 0 : ((double) totalSubmissions / expectedSubmissions) * 100;
+
+        /*
+         * AVG GRADE
+         */
 
         List<Integer> allMarks = new ArrayList<>();
 
         for (Assignment assignment : module.getAssignments()) {
 
           assignmentSubmissionRepository.findByAssignmentId(assignment.getId()).forEach(s -> {
-            if (s.getMark() != null)
+            if (s.getMark() != null) {
               allMarks.add(s.getMark());
+            }
           });
         }
 
-        if (!allMarks.isEmpty()) {
-          avgGrade = allMarks.stream().mapToInt(i -> i).average().orElse(0);
-        }
+        double avgGrade =
+            allMarks.isEmpty() ? 0 : allMarks.stream().mapToInt(i -> i).average().orElse(0);
 
         Map<String, Object> map = new HashMap<>();
         map.put("code", module.getCode());
@@ -196,7 +210,6 @@ public class StatisticsController {
           if (unmarked > 0) {
 
             Map<String, Object> map = new HashMap<>();
-
             map.put("title", assignment.getTitle());
             map.put("deadline", assignment.getDeadline());
             map.put("unmarkedCount", unmarked);
@@ -211,7 +224,6 @@ public class StatisticsController {
        */
 
       Map<String, Object> response = new HashMap<>();
-
       response.put("activityFeed", activityFeed);
       response.put("atRiskStudents", atRiskStudents);
       response.put("modules", moduleData);

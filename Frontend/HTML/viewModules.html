@@ -11,12 +11,13 @@
   <link rel="stylesheet" href="../CSS/generalStyles.css">
 
   <style>
+
     .content {
-    flex: 1;
-     padding: 30px;
-     overflow-y: auto;
-     position: relative;
-   }
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+      position: relative;
+    }
 
     .lecturer-name {
       font-size: 16px;
@@ -24,9 +25,7 @@
       color: #1e293b;
     }
 
-    /* =========================
-       CONTENT (TABLE ONLY)
-    ========================= */
+    /* ========================= TABLE CARD ========================= */
 
     .table-card {
       position: relative;
@@ -58,11 +57,53 @@
 
     tr:hover {
       background: #f8fafc;
+      cursor: pointer;
     }
 
     .loading {
       text-align: center;
       padding: 20px;
+      color: #64748b;
+    }
+
+    /* ========================= DROPDOWN ROW ========================= */
+
+    .expand-row {
+      display: none;
+      background: #f8fafc;
+    }
+
+    .expand-cell {
+      padding: 0 !important;
+    }
+
+    .student-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #ffffff;
+    }
+
+    .student-table th {
+      background: #334155;
+      color: white;
+      font-size: 13px;
+    }
+
+    .student-table td {
+      font-size: 13px;
+    }
+
+    .email-link {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    .email-link:hover {
+      text-decoration: underline;
+    }
+
+    .small-note {
+      font-size: 12px;
       color: #64748b;
     }
 
@@ -72,10 +113,7 @@
 
 <body>
 
-  <!-- =========================
-       SIDEBAR (UNCHANGED)
-  ========================== -->
-
+  <!-- SIDEBAR -->
   <div class="sidebar">
 
     <h2>Lecturer Panel</h2>
@@ -87,13 +125,10 @@
 
   </div>
 
-  <!-- =========================
-       MAIN
-  ========================== -->
-
+  <!-- MAIN -->
   <div class="main">
 
-    <!-- TOPBAR (UNCHANGED) -->
+    <!-- TOPBAR -->
     <div class="topbar">
 
       <div class="topbar-left" onclick="openDashboard()">
@@ -161,6 +196,24 @@
     </div>
 
   </div>
+
+  <!-- =========================
+       EXPAND LOGIC
+  ========================== -->
+
+  <script>
+
+    function toggleStudents(moduleCode) {
+
+      const row = document.getElementById("expand-" + moduleCode);
+
+      if (!row) return;
+
+      row.style.display =
+        row.style.display === "table-row" ? "none" : "table-row";
+    }
+
+  </script>
 
   <!-- JS -->
   <script src="../JS/viewModules.js"></script>

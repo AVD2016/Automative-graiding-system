@@ -254,9 +254,3 @@ function formatTimeAgo(date) {
 function formatDate(date) {
   return new Date(date).toLocaleString();
 }
-
-/* =========================
-   OPTIONAL: REFRESH
-========================= */
-
-setInterval(loadDashboard, 60000);

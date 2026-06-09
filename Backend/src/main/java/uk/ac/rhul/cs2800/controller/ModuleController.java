@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,12 +19,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.ac.rhul.cs2800.dataObjects.LecturerModuleExpandedDTO;
+import uk.ac.rhul.cs2800.dataObjects.LecturerModuleStudentDTO;
 import uk.ac.rhul.cs2800.dataObjects.LecturerViewModulesDTO;
 import uk.ac.rhul.cs2800.model.Assignment;
+import uk.ac.rhul.cs2800.model.AssignmentSubmission;
 import uk.ac.rhul.cs2800.model.Lecturer;
 import uk.ac.rhul.cs2800.model.Module;
 import uk.ac.rhul.cs2800.model.Registration;
 import uk.ac.rhul.cs2800.model.Student;
+import uk.ac.rhul.cs2800.repository.AssignmentSubmissionRepository;
 import uk.ac.rhul.cs2800.repository.LecturerRepository;
 import uk.ac.rhul.cs2800.repository.ModuleRepository;
 import uk.ac.rhul.cs2800.repository.RegistrationRepository;
@@ -41,10 +46,12 @@ public class ModuleController {
   private StudentRepository studentRepository;
 
   @Autowired
-  LecturerRepository lecturerRepository;
+  private LecturerRepository lecturerRepository;
 
   @Autowired
-  RegistrationRepository registrationRepository;
+  private RegistrationRepository registrationRepository;
+
+  private AssignmentSubmissionRepository assignmentSubmissionRepository;
 
   @GetMapping("/getAvailableModules/{studentId}")
   public List<Map<String, Object>> getAvailableModules(@PathVariable int studentId) {
@@ -194,54 +201,86 @@ public class ModuleController {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Module already exists");
     }
 
-    // SAVE MODULE
-
+    // save module
     Module savedModule = moduleRepository.save(module);
 
     return ResponseEntity.ok(savedModule);
   }
 
-
+  @Transactional
   @GetMapping("/overview/{lecturerId}")
-  public ResponseEntity<List<LecturerViewModulesDTO>> getModuleOverview(
+  public ResponseEntity<List<LecturerModuleExpandedDTO>> getModuleOverview(
       @PathVariable int lecturerId) {
 
-    Optional<Lecturer> optionalLecturer = lecturerRepository.findById(lecturerId);
+    Lecturer lecturer = lecturerRepository.findById(lecturerId)
+        .orElseThrow(() -> new RuntimeException("Lecturer not found"));
 
-    if (optionalLecturer.isEmpty()) {
-      return ResponseEntity.notFound().build();
-    }
+    List<LecturerModuleExpandedDTO> result = new ArrayList<>();
 
-    Lecturer lecturer = optionalLecturer.get();
-
-    List<LecturerViewModulesDTO> result = new ArrayList<>();
-
-    // use SET logic to avoid duplicate modules
     Set<Module> modules = lecturer.getRegistered().stream().map(Registration::getModule)
         .filter(Objects::nonNull).collect(Collectors.toSet());
 
     for (Module module : modules) {
 
-      // 1. coursework count
+      // MODULE BASIC STATS
       int courseworkCount = module.getAssignments() != null ? module.getAssignments().size() : 0;
 
-      // 2. assigned credits
       int assignedCredits = module.getAssignments() != null
           ? module.getAssignments().stream().mapToInt(Assignment::getCredits).sum()
           : 0;
 
-      // 3. students enrolled (ONLY Student users)
-      int studentsEnrolled = 0;
+      int studentsEnrolled =
+          module.getRegistrations() != null
+              ? (int) module.getRegistrations().stream().map(Registration::getUser)
+                  .filter(u -> u instanceof Student).count()
+              : 0;
 
-      if (module.getRegistrations() != null) {
-        studentsEnrolled = (int) module.getRegistrations().stream().map(Registration::getUser)
-            .filter(user -> user instanceof Student).count();
+      LecturerViewModulesDTO moduleDTO =
+          new LecturerViewModulesDTO(module.getCode(), module.getName(), module.getCredits(),
+              assignedCredits, courseworkCount, studentsEnrolled);
+
+      // student details
+      List<LecturerModuleStudentDTO> studentDTOs = new ArrayList<>();
+
+      if (module.getRegistrations() != null && module.getAssignments() != null) {
+
+        List<Student> students = module.getRegistrations().stream().map(Registration::getUser)
+            .filter(u -> u instanceof Student).map(u -> (Student) u).toList();
+
+        for (Student student : students) {
+
+          int missedDeadlines = 0;
+          List<Integer> marks = new ArrayList<>();
+
+          for (Assignment assignment : module.getAssignments()) {
+
+            List<AssignmentSubmission> subs =
+                assignmentSubmissionRepository.findByAssignmentId(assignment.getId());
+
+            AssignmentSubmission submission = subs.stream()
+                .filter(s -> s.getStudent().getId() == student.getId()).findFirst().orElse(null);
+
+            boolean missed =
+                submission == null || submission.getSubmittedAt().isAfter(assignment.getDeadline());
+
+            if (missed) {
+              missedDeadlines++;
+              marks.add(0);
+            } else {
+              marks.add(submission.getMark() != null ? submission.getMark() : 0);
+            }
+          }
+
+          double avg = marks.stream().mapToInt(i -> i).average().orElse(0);
+
+          studentDTOs.add(new LecturerModuleStudentDTO(student.getId(),
+              student.getFirstName() + " " + student.getLastName(), student.getEmail(),
+              missedDeadlines, avg));
+        }
       }
 
-      LecturerViewModulesDTO dto = new LecturerViewModulesDTO(module.getCode(), module.getName(),
-          module.getCredits(), assignedCredits, courseworkCount, studentsEnrolled);
-
-      result.add(dto);
+      // final wrap
+      result.add(new LecturerModuleExpandedDTO(moduleDTO, studentDTOs));
     }
 
     return ResponseEntity.ok(result);
