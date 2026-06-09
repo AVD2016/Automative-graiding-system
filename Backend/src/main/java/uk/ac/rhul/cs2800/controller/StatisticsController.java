@@ -1,5 +1,6 @@
 package uk.ac.rhul.cs2800.controller;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +34,9 @@ public class StatisticsController {
   private AssignmentSubmissionRepository assignmentSubmissionRepository;
   @Autowired
   private StudentRepository studentRepository;
+
+  @Autowired
+  private AssRepository submissionRepository;
 
   @Transactional
   @GetMapping("/lecturer/{lecturerId}")
@@ -235,5 +239,94 @@ public class StatisticsController {
       e.printStackTrace();
       return ResponseEntity.status(500).body(e.getMessage());
     }
+  }
+
+  @GetMapping("/student/{studentId}")
+  @Transactional
+  public ResponseEntity<?> getStudentDashboard(@PathVariable int studentId) {
+
+    Student student = studentRepository.findById(studentId)
+        .orElseThrow(() -> new RuntimeException("Student not found"));
+
+    List<Registration> registrations = student.getRegistered();
+
+    List<Map<String, Object>> assignmentDTOs = new ArrayList<>();
+
+    LocalDateTime now = LocalDateTime.now();
+
+    double totalMarks = 0;
+    int countForAverage = 0;
+
+    for (Registration reg : registrations) {
+
+      Module module = reg.getModule();
+
+      if (module.getAssignments() == null)
+        continue;
+
+      for (Assignment assignment : module.getAssignments()) {
+
+        AssignmentSubmission submission = assignmentSubmissionRepository
+            .findByStudentIdAndAssignmentId(studentId, assignment.getId()).orElse(null);
+
+        LocalDateTime deadline = assignment.getDeadline();
+
+        boolean hasSubmission = submission != null;
+        boolean isMarked = hasSubmission && submission.isMarked();
+        boolean isSubmitted = hasSubmission && submission.getSubmittedAt() != null;
+
+        String status;
+
+        // status logic
+
+        if (isMarked) {
+          status = "MARKED";
+
+        } else if (isSubmitted) {
+          status = "SUBMITTED";
+
+        } else if (deadline != null && deadline.isBefore(now)) {
+          status = "UNSUBMITTED";
+
+        } else {
+          status = "FUTURE";
+        }
+
+        // average logic
+
+        if (isMarked) {
+
+          // only marked assignments count
+          totalMarks += submission.getMark();
+          countForAverage++;
+
+        } else if (!hasSubmission && deadline != null && deadline.isBefore(now)) {
+
+          // missed deadline → counts as 0
+          totalMarks += 0;
+          countForAverage++;
+
+        }
+
+        // DTO
+
+        Map<String, Object> dto = new HashMap<>();
+        dto.put("title", assignment.getTitle());
+        dto.put("module", module.getCode());
+        dto.put("deadline", assignment.getDeadline());
+        dto.put("status", status);
+        dto.put("credits", assignment.getCredits());
+
+        assignmentDTOs.add(dto);
+      }
+    }
+
+    double avgGrade = countForAverage == 0 ? 0 : totalMarks / countForAverage;
+
+    Map<String, Object> response = new HashMap<>();
+    response.put("assignments", assignmentDTOs);
+    response.put("avgGrade", avgGrade);
+
+    return ResponseEntity.ok(response);
   }
 }
