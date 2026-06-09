@@ -311,7 +311,6 @@ async function openSubmissionModal(submissionId) {
 
 try {
 
-```
 const response = await fetch(
   `${API_BASE}/assignment/getSubmissionDetails/${submissionId}`,
   {
@@ -407,16 +406,10 @@ document.getElementById("submissionModal")
 
 document.getElementById("submissionModal").style.display =
   "flex";
-```
 
 } catch (err) {
-
-```
-console.error(err);
-
-alert("Failed to load submission details");
-```
-
+  console.error(err);
+  alert("Failed to load submission details");
 }
 }
 
@@ -426,63 +419,55 @@ SAVE MARKING
 
 async function saveMarking() {
 
-try {
+  try {
+    const modal =
+      document.getElementById("submissionModal");
 
-```
-const modal =
-  document.getElementById("submissionModal");
+    const submissionId =
+      modal.dataset.submissionId;
 
-const submissionId =
-  modal.dataset.submissionId;
+    const lecturerFeedback =
+      document.getElementById("lecturerFeedback").value;
 
-const lecturerFeedback =
-  document.getElementById("lecturerFeedback").value;
+    const finalMark =
+      document.getElementById("finalMark").value;
 
-const finalMark =
-  document.getElementById("finalMark").value;
+    const response = await fetch(
+      `${API_BASE}/assignment/markSubmission/${submissionId}`,
+      {
+        method: "POST",
+        credentials: "include",
 
-const response = await fetch(
-  `${API_BASE}/assignment/markSubmission/${submissionId}`,
-  {
-    method: "POST",
-    credentials: "include",
+        headers: {
+          "Content-Type": "application/json"
+        },
 
-    headers: {
-      "Content-Type": "application/json"
-    },
+        body: JSON.stringify({
+          lecturerFeedback,
+          finalMark
+        })
+      }
+    );
 
-    body: JSON.stringify({
-      lecturerFeedback,
-      finalMark
-    })
+    if (!response.ok) {
+      throw new Error("Failed to save marking");
+    }
+
+    alert("Mark saved successfully");
+
+    closeModal();
+
+    // refresh assignments table
+    loadAssignments();
+
+    // clear cache so submissions reload
+    Object.keys(submissionsCache)
+      .forEach(key => delete submissionsCache[key]);
+
+  } catch (err) {
+    console.error(err);
+    alert("Failed to save mark");
   }
-);
-
-if (!response.ok) {
-  throw new Error("Failed to save marking");
-}
-
-alert("Mark saved successfully");
-
-closeModal();
-
-// refresh assignments table
-loadAssignments();
-
-// clear cache so submissions reload
-Object.keys(submissionsCache)
-  .forEach(key => delete submissionsCache[key]);
-```
-
-} catch (err) {
-
-```
-console.error(err);
-
-alert("Failed to save mark");
-```
-
-}
 }
 
 /* =========================
