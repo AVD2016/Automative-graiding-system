@@ -99,63 +99,41 @@ public class AssignmentController {
       int usedCredits = module.getAssignments().stream().mapToInt(Assignment::getCredits).sum();
 
       if (usedCredits + credits > module.getCredits()) {
-
         return ResponseEntity.badRequest().body("Not enough available module credits");
       }
 
-      String pdfPath = null;
+      String fileName = null;
 
       if (file != null && !file.isEmpty()) {
 
-        // uploads directory
-        String uploadDir = System.getProperty("java.io.tmpdir") + "/uploads/";
+        Path uploadPath = getUploadPath();
 
-        File dir = new File(uploadDir);
-        if (!dir.exists()) {
-          dir.mkdirs();
+        if (!Files.exists(uploadPath)) {
+          Files.createDirectories(uploadPath);
         }
 
-        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        Path destination = uploadPath.resolve(fileName);
 
-        File destination = new File(dir, fileName);
-
-        file.transferTo(destination);
-
-        pdfPath = fileName;;
+        file.transferTo(destination.toFile());
       }
 
       Assignment assignment = new Assignment();
-
       assignment.setTitle(title);
-
       assignment.setCredits(credits);
-
       assignment.setTaskDescription(taskDescription);
-
       assignment.setMarkingCriteria(markingCriteria);
-
       assignment.setDeadline(LocalDateTime.parse(deadline));
-
-      assignment.setPdfFilePath(pdfPath);
+      assignment.setPdfFilePath(fileName);
 
       module.addAssignment(assignment);
-
-      // save
       moduleRepository.save(module);
 
       return ResponseEntity.ok("Assignment created successfully");
 
-    } catch (IOException e) {
-
-      e.printStackTrace();
-
-      return ResponseEntity.status(500).body("File upload failed: " + e.getMessage());
-
     } catch (Exception e) {
-
       e.printStackTrace();
-
-      return ResponseEntity.status(400).body(e.getMessage());
+      return ResponseEntity.status(500).body(e.getMessage());
     }
   }
 
@@ -163,59 +141,75 @@ public class AssignmentController {
   @GetMapping("/student/getAssignments/{studentId}")
   public ResponseEntity<?> getStudentAssignments(@PathVariable int studentId) {
 
-    // 1. Load student
-    Student student = studentRepository.findById(studentId)
-        .orElseThrow(() -> new RuntimeException("Student not found"));
+    try {
 
-    // 2. Get modules student is registered on
-    List<Registration> registrations = student.getRegistered();
+      // 1. Load student
+      Student student = studentRepository.findById(studentId)
+          .orElseThrow(() -> new RuntimeException("Student not found"));
 
-    List<Module> modules = registrations.stream().map(Registration::getModule).toList();
+      // 2. Get modules student is registered on
+      List<Registration> registrations = student.getRegistered();
 
-    // 3. Collect assignments
-    List<Assignment> assignments =
-        modules.stream().flatMap(module -> module.getAssignments().stream()).toList();
+      List<Module> modules = registrations.stream().map(Registration::getModule).toList();
 
-    // 4. Build response with submission info
-    List<Map<String, Object>> response = assignments.stream().map(a -> {
+      // 3. Collect assignments
+      List<Assignment> assignments =
+          modules.stream().flatMap(module -> module.getAssignments().stream()).toList();
 
-      Map<String, Object> map = new HashMap<>();
+      // 4. Build response
+      List<Map<String, Object>> response = assignments.stream().map(a -> {
 
-      map.put("id", a.getId());
-      map.put("title", a.getTitle());
-      map.put("taskDescription", a.getTaskDescription());
-      map.put("markingCriteria", a.getMarkingCriteria());
-      map.put("credits", a.getCredits());
-      map.put("deadline", a.getDeadline());
-      map.put("url", "/api/files/" + a.getPdfFilePath());
-      map.put("moduleCode", a.getModule().getCode());
-      map.put("moduleName", a.getModule().getName());
+        Map<String, Object> map = new HashMap<>();
 
-      // SUBMISSION LOGIC (NEW)
+        map.put("id", a.getId());
+        map.put("title", a.getTitle());
+        map.put("taskDescription", a.getTaskDescription());
+        map.put("markingCriteria", a.getMarkingCriteria());
+        map.put("credits", a.getCredits());
+        map.put("deadline", a.getDeadline());
+        map.put("moduleCode", a.getModule().getCode());
+        map.put("moduleName", a.getModule().getName());
 
-      Optional<AssignmentSubmission> submissionOpt =
-          assignmentSubmissionRepository.findByStudentIdAndAssignmentId(studentId, a.getId());
+        // ✅ FIXED FILE URL (NEW SYSTEM)
+        String fileName = a.getPdfFilePath();
 
-      if (submissionOpt.isPresent()) {
+        if (fileName != null && !fileName.isBlank()) {
+          map.put("url", "/api/assignment/files/" + fileName);
+        } else {
+          map.put("url", null);
+        }
 
-        AssignmentSubmission submission = submissionOpt.get();
+        // SUBMISSION LOGIC
+        Optional<AssignmentSubmission> submissionOpt =
+            assignmentSubmissionRepository.findByStudentIdAndAssignmentId(studentId, a.getId());
 
-        map.put("submitted", true);
-        map.put("submittedDate", submission.getSubmittedAt());
-        map.put("mark", submission.getMark());
+        if (submissionOpt.isPresent()) {
 
-      } else {
+          AssignmentSubmission submission = submissionOpt.get();
 
-        map.put("submitted", false);
-        map.put("submittedDate", null);
-        map.put("mark", null);
-      }
+          map.put("submitted", true);
+          map.put("submittedDate", submission.getSubmittedAt());
+          map.put("mark", submission.getMark());
 
-      return map;
-    }).toList();
+        } else {
 
-    return ResponseEntity.ok(response);
+          map.put("submitted", false);
+          map.put("submittedDate", null);
+          map.put("mark", null);
+        }
+
+        return map;
+      }).toList();
+
+      return ResponseEntity.ok(response);
+
+    } catch (Exception e) {
+      e.printStackTrace();
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
+
+  // student requesting details on an assignment
   @GetMapping("/getAssignmentDetails/{id}")
   public ResponseEntity<?> getAssignmentDetails(@PathVariable int id,
       @RequestParam(required = false) Integer studentId) {
@@ -703,19 +697,29 @@ public ResponseEntity<?> getSubmissionDetails(@PathVariable int submissionId) {
   public ResponseEntity<Resource> getFile(@PathVariable String filename) {
 
     try {
-      Path filePath = Paths.get(UPLOAD_DIR).resolve(filename).normalize();
 
-      Resource resource = new UrlResource(filePath.toUri());
+      Path filePath = getUploadPath().resolve(filename).normalize();
 
-      if (!resource.exists() || !resource.isReadable()) {
-        throw new RuntimeException("File not found");
+      File file = filePath.toFile();
+
+      if (!file.exists() || !file.isFile()) {
+        return ResponseEntity.notFound().build();
       }
 
-      return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-          "inline; filename=\"" + resource.getFilename() + "\"").body(resource);
+      Resource resource = new UrlResource(file.toURI());
+
+      return ResponseEntity.ok()
+          .header(HttpHeaders.CONTENT_DISPOSITION,
+              "inline; filename=\"" + resource.getFilename() + "\"")
+          .contentType(MediaType.APPLICATION_PDF).body(resource);
 
     } catch (Exception e) {
-      throw new RuntimeException("Error reading file", e);
+      e.printStackTrace();
+      return ResponseEntity.internalServerError().build();
     }
+  }
+
+  private Path getUploadPath() {
+    return Paths.get(System.getProperty("java.io.tmpdir"), "uploads");
   }
 }
