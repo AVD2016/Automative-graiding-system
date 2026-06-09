@@ -76,7 +76,7 @@ public class AssignmentController {
 
   private static final Logger log = LoggerFactory.getLogger(AssignmentController.class);
 
-  // CREATE ASSIGNMENT by lecturer
+  // create assignment by lecturer
   @PostMapping("/create")
   public ResponseEntity<?> createAssignment(@RequestParam String moduleCode,
       @RequestParam String title,
@@ -120,7 +120,7 @@ public class AssignmentController {
 
       // 4. Create assignment
       Assignment assignment = new Assignment();
-      assignment.setTitle(title); // ✅ ADD THIS
+      assignment.setTitle(title);
       assignment.setCredits(credits);
       assignment.setTaskDescription(taskDescription);
       assignment.setMarkingCriteria(markingCriteria);
@@ -175,9 +175,7 @@ public class AssignmentController {
       map.put("moduleCode", a.getModule().getCode());
       map.put("moduleName", a.getModule().getName());
 
-      // =========================
       // SUBMISSION LOGIC (NEW)
-      // =========================
 
       Optional<AssignmentSubmission> submissionOpt =
           assignmentSubmissionRepository.findByStudentIdAndAssignmentId(studentId, a.getId());
@@ -212,9 +210,7 @@ public class AssignmentController {
 
     Map<String, Object> response = new HashMap<>();
 
-    // =========================
     // BASIC INFO
-    // =========================
     response.put("id", assignment.getId());
     response.put("title", assignment.getTitle());
 
@@ -225,9 +221,7 @@ public class AssignmentController {
     response.put("credits", assignment.getCredits());
     response.put("deadline", assignment.getDeadline());
 
-    // =========================
     // FILES (adapt single file → list)
-    // =========================
     List<Map<String, Object>> files = new ArrayList<>();
 
     if (assignment.getPdfFilePath() != null) {
@@ -320,9 +314,8 @@ public class AssignmentController {
         submission.setPdfFiles(new ArrayList<>(List.of(destination.toString())));
       }
 
-      // =========================
+
       // 7. SAVE TO DB
-      // =========================
       assignmentSubmissionRepository.save(submission);
 
       // fire-and-forget (does NOT block response)
@@ -509,10 +502,12 @@ private String buildPrompt(Assignment assignment, String submissionText, LocalDa
       STUDENT SUBMISSION:
       %s  
       INSTRUCTIONS:
-      - Grade the work fairly using the marking criteria.
-      - Apply late penalties 0–24 hours late: -10 percent penalty, more than 24 hours late: grade = 0. There is no need to mention anything about subission deadline if it was met.
-      - Provide feedback for the professor. Return STRICT JSON only. Do NOT use markdown.
-      - Do NOT include explanation outside JSON.
+      Grade the work fairly using the marking criteria.
+      Apply late penalties 0–24 hours late: -10 percent penalty, more than 24 hours late: grade = 0.
+      There is no need to mention anything about subission deadline if it was met.
+      Provide feedback for the professor that consists of: general analysis, what student did well,
+      what student failed to achive. Return STRICT JSON only. Do NOT use markdown.
+      Do NOT include explanation outside JSON.
 
       REQUIRED RESPONSE FORMAT:
       {

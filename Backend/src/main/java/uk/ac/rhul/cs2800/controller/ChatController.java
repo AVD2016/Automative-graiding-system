@@ -65,21 +65,27 @@ public class ChatController {
       StringBuilder messages = new StringBuilder();
       messages.append("[");
 
+      // general context of the website
       messages.append(
           """
-              { "role": "system", "content": "Instructions: You are helper chat on the website, helping users navigate a university grading system.
-              Use only plain text, 100 words limit. The rest of the context are past messages (yours and users), continue the chat.
-              Respond on the language that user writes to you. General structure of the system: user can be loged in as Admin, Lecturer and Student.
-              Admin has following pages: View All Lecturers, Add New Lecturer, View All Students, Add New student.
-              Lecturer has following pages: View Modules, Create Assignment, Mark Assignment.
-              Student has following pages: View Module, Grades, Assignments.
-              Functionalities of the website: Administrator can add new students, lecturers and modules to the system, registering students and lectures to modules.
-              Lecturer can view basic statistics on the modules they are registered on including students that are registered on the same module, create assignments for those modules and mark assignments
-              Student can vew all modules they are registered on, view statistics on their grades and submit assignments.
-              Special functionality of this website is that all submited assignments are revewed by the LLM AI that gives lecturer feedback and proposed grade for the sudmission to the assignment lecturer can use to grade the assignment.
+              { "role": "system", "content": "Instructions: You are helper chat on the website, helping users
+              navigate a university grading system. Use only plain text, 100 words limit. The rest of the
+              context are past messages (yours and users), continue the chat. Respond on the language that
+              user writes to you. General structure of the system: user can be loged in as Admin, Lecturer
+              and Student. Admin has following pages: View All Lecturers, Add New Lecturer, View All Students,
+              Add New student. Lecturer has following pages: View Modules, Create Assignment, Mark Assignment.
+              Student has following pages: View Module, Grades, Assignments. Functionalities of the website:
+              Administrator can add new students, lecturers and modules to the system, registering students and
+              lectures to modules. Lecturer can view basic statistics on the modules they are registered on
+              including students that are registered on the same module, create assignments for those modules
+              and mark assignments.Student can vew all modules they are registered on, view statistics on their
+              grades and submit assignments.Special functionality of this website is that all submited assignments
+              are revewed by the LLM AI that gives lecturer feedback and proposed grade for the sudmission to the
+              assignment. Lecturer can use this feedback to grade the assignment.
               " }
               """);
 
+      // adding history of messages as context to the message
       if (!history.isEmpty()) {
         messages.append(",");
       }
@@ -87,7 +93,6 @@ public class ChatController {
       for (int i = 0; i < history.size(); i++) {
 
         Map<String, String> msg = history.get(i);
-
         String role = msg.get("role");
         String content =
             msg.get("content").replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n");

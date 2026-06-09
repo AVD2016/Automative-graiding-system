@@ -22,9 +22,7 @@ public class AddLecturerController {
   @Autowired
   private LecturerRepository lecturerRepository;
 
-  /**
-   * Adds a new lecturer to the system.
-   */
+  // Adds a new lecturer to the system.
   @PostMapping("/addLecturer")
   public ResponseEntity<?> addLecturer(@RequestBody Lecturer lecturer) {
 
@@ -53,9 +51,7 @@ public class AddLecturerController {
     return ResponseEntity.ok(saved);
   }
 
-  // =========================
   // GET LECTURERS (FOR TABLE)
-  // =========================
   @GetMapping("/getLecturers")
   public ResponseEntity<List<LecturerDTO>> getLecturers() {
 
