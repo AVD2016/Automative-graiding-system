@@ -35,9 +35,6 @@ public class StatisticsController {
   @Autowired
   private StudentRepository studentRepository;
 
-  @Autowired
-  private AssRepository submissionRepository;
-
   @Transactional
   @GetMapping("/lecturer/{lecturerId}")
   public ResponseEntity<?> getLecturerDashboard(@PathVariable int lecturerId) {
