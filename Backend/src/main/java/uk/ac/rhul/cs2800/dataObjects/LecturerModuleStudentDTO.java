@@ -7,15 +7,15 @@ public class LecturerModuleStudentDTO {
   private String email;
 
   private int missedDeadlines;
-  private double averageGrade;
+  private double avgGrade;
 
   public LecturerModuleStudentDTO(int studentId, String fullName, String email, int missedDeadlines,
-      double averageGrade) {
+      double avgGrade) {
     this.studentId = studentId;
     this.fullName = fullName;
     this.email = email;
     this.missedDeadlines = missedDeadlines;
-    this.averageGrade = averageGrade;
+    this.avgGrade = avgGrade;
   }
 
   public int getStudentId() {
@@ -35,6 +35,6 @@ public class LecturerModuleStudentDTO {
   }
 
   public double getAverageGrade() {
-    return averageGrade;
+    return avgGrade;
   }
 }

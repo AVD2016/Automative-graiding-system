@@ -311,19 +311,19 @@ public class ModuleController {
           }
 
           // AVG logic rules
-          double avg;
+          double avgGrade;
 
           if (!hasAnyGraded && allAssignmentsInFuture) {
-            avg = -1; // nothing due yet or nothing graded
+            avgGrade = -1; // nothing due yet or nothing graded
           } else if (hasPastDeadlineUnmarked) {
-            avg = -2; // backlog: submissions waiting to be marked
+            avgGrade = -2; // backlog: submissions waiting to be marked
           } else {
-            avg = marks.stream().mapToInt(i -> i).average().orElse(0);
+            avgGrade = marks.stream().mapToInt(i -> i).average().orElse(0);
           }
 
           studentDTOs.add(new LecturerModuleStudentDTO(student.getId(),
               student.getFirstName() + " " + student.getLastName(), student.getEmail(),
-              missedDeadlines, avg));
+              missedDeadlines, avgGrade));
         }
       }
 
