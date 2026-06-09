@@ -16,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -55,6 +57,8 @@ import uk.ac.rhul.cs2800.repository.StudentRepository;
 @RequestMapping("/api/assignment")
 @CrossOrigin(originPatterns = "https://*.vercel.app")
 public class AssignmentController {
+
+  private static final String UPLOAD_DIR = System.getProperty("java.io.tmpdir") + "/uploads/";
 
   @Autowired
   private AssignmentRepository assignmentRepository;
@@ -114,7 +118,7 @@ public class AssignmentController {
 
         file.transferTo(destination);
 
-        pdfPath = destination.getAbsolutePath();
+        pdfPath = fileName;;
       }
 
       Assignment assignment = new Assignment();
@@ -180,8 +184,7 @@ public class AssignmentController {
       map.put("markingCriteria", a.getMarkingCriteria());
       map.put("credits", a.getCredits());
       map.put("deadline", a.getDeadline());
-      map.put("pdfFilePath", a.getPdfFilePath());
-
+      map.put("url", "/api/files/" + a.getPdfFilePath());
       map.put("moduleCode", a.getModule().getCode());
       map.put("moduleName", a.getModule().getName());
 
@@ -224,15 +227,12 @@ public class AssignmentController {
     // BASIC INFO
     response.put("id", assignment.getId());
     response.put("title", assignment.getTitle());
-
     response.put("description", assignment.getTaskDescription());
-
     response.put("markingCriteria", assignment.getMarkingCriteria());
     response.put("credits", assignment.getCredits());
     response.put("deadline", assignment.getDeadline());
 
-    // leecturer Feedback
-
+    // STUDENT SUBMISSION INFO
     String lecturerFeedback = null;
 
     if (studentId != null) {
@@ -250,21 +250,22 @@ public class AssignmentController {
         response.put("submittedAt", submission.getSubmittedAt());
         response.put("marked", submission.isMarked());
       }
-    }
+      }
 
     response.put("lecturerFeedback", lecturerFeedback);
 
-    // files
-
+    // FILES (FIXED FOR NEW SYSTEM)
     List<Map<String, Object>> files = new ArrayList<>();
 
-    if (assignment.getPdfFilePath() != null) {
+    String fileName = assignment.getPdfFilePath();
+
+    if (fileName != null && !fileName.isBlank()) {
 
       Map<String, Object> file = new HashMap<>();
 
       file.put("name", "Assignment PDF");
 
-      file.put("url", "/files/" + new File(assignment.getPdfFilePath()).getName());
+      file.put("url", "/api/files/" + fileName);
 
       files.add(file);
     }
@@ -311,15 +312,14 @@ public class AssignmentController {
       Student student = studentRepository.findById(studentId)
           .orElseThrow(() -> new RuntimeException("Student not found"));
 
-
-      // 3. SAFE UPLOAD DIRECTORY
+      // 3. SAFE UPLOAD DIRECTORY (Render-safe temporary storage)
       Path uploadPath = Paths.get(System.getProperty("java.io.tmpdir"), "uploads");
 
       if (!Files.exists(uploadPath)) {
         Files.createDirectories(uploadPath);
       }
 
-      // 4. SAFE FILE NAME
+      // 4. SAFE UNIQUE FILE NAME
       String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
       Path destination = uploadPath.resolve(fileName);
@@ -327,32 +327,29 @@ public class AssignmentController {
       // 5. SAVE FILE
       file.transferTo(destination.toFile());
 
-      // 6. CHECK IF SUBMISSION ALREADY EXISTS
+      // 6. CHECK EXISTING SUBMISSION
       Optional<AssignmentSubmission> existingSubmission =
           assignmentSubmissionRepository.findByStudentIdAndAssignmentId(studentId, assignmentId);
 
-      AssignmentSubmission submission;
-
       if (existingSubmission.isPresent()) {
-
-        // OPTION A: BLOCK resubmission
         return ResponseEntity.status(409).body("You have already submitted this assignment.");
-
-      } else {
-        submission = new AssignmentSubmission();
-        submission.setAssignment(assignment);
-        submission.setStudent(student);
-        submission.setSubmittedAt(LocalDateTime.now());
-        submission.setMarked(false);
-        submission.setMark(null);
-        submission.setPdfFiles(new ArrayList<>(List.of(destination.toString())));
       }
 
+      // 7. CREATE SUBMISSION
+      AssignmentSubmission submission = new AssignmentSubmission();
+      submission.setAssignment(assignment);
+      submission.setStudent(student);
+      submission.setSubmittedAt(LocalDateTime.now());
+      submission.setMarked(false);
+      submission.setMark(null);
 
-      // 7. SAVE TO DB
+      // 🔥 IMPORTANT FIX: store ONLY filename, NOT full path
+      submission.setPdfFiles(new ArrayList<>(List.of(fileName)));
+
+      // 8. SAVE TO DB
       assignmentSubmissionRepository.save(submission);
 
-      // fire-and-forget (does NOT block response)
+      // 9. async review (non-blocking)
       try {
         createReviewAsync(submission.getId());
       } catch (Exception ignored) {
@@ -368,7 +365,7 @@ public class AssignmentController {
     } catch (Exception e) {
       e.printStackTrace();
       return ResponseEntity.status(400).body(e.getMessage());
-    }
+      }
   }
 
   // method to request the review by LLM
@@ -384,35 +381,44 @@ public class AssignmentController {
 
       Assignment assignment = submission.getAssignment();
 
+      // 1. VALIDATE FILE LIST
       if (submission.getPdfFiles() == null || submission.getPdfFiles().isEmpty()) {
         throw new RuntimeException("No PDF file linked to submissionId=" + submissionId);
       }
 
-      String filePath = submission.getPdfFiles().get(0);
+      // 2. GET STORED FILE NAME (NOT FULL PATH ANYMORE)
+      String fileName = submission.getPdfFiles().get(0);
+
+      // 3. REBUILD FULL PATH (IMPORTANT FIX FOR NEW STORAGE MODEL)
+      String uploadDir = System.getProperty("java.io.tmpdir") + "/uploads/";
+      String filePath = Paths.get(uploadDir, fileName).toString();
+
       log.info("Extracting PDF for submissionId={}, file={}", submissionId, filePath);
 
+      // 4. EXTRACT TEXT
       String submissionText = extractTextFromPdf(filePath);
 
       if (submissionText == null || submissionText.isBlank()) {
         throw new RuntimeException("Empty PDF text for submissionId=" + submissionId);
       }
 
+      // 5. BUILD PROMPT
       String prompt = buildPrompt(assignment, submissionText, submission.getSubmittedAt(),
           assignment.getDeadline());
 
       log.info("Sending LLM request submissionId={}", submissionId);
-
       log.info("PROMPT LENGTH submissionId={} chars={}", submissionId, prompt.length());
 
       log.debug("PROMPT PREVIEW submissionId={} preview={}", submissionId,
           prompt.substring(0, Math.min(prompt.length(), 2000)));
 
+      // 6. CALL LLM
       String rawResponse = callLLM(prompt);
 
       log.info("LLM RAW response submissionId={} response={}", submissionId, rawResponse);
 
+      // 7. PARSE RESPONSE
       ObjectMapper mapper = new ObjectMapper();
-
       JsonNode root = mapper.readTree(rawResponse);
 
       JsonNode choices = root.path("choices");
@@ -427,6 +433,7 @@ public class AssignmentController {
         throw new RuntimeException("Empty LLM content");
       }
 
+      // clean markdown wrappers
       content = content.replace("```json", "").replace("```", "").trim();
 
       JsonNode result = mapper.readTree(content);
@@ -438,6 +445,7 @@ public class AssignmentController {
         throw new RuntimeException("Invalid parsed LLM JSON: " + content);
       }
 
+      // 8. SAVE RESULTS
       submission.setFeedbackForAssignment(feedback);
       submission.setSuggestedGrade(grade);
 
@@ -622,7 +630,6 @@ public ResponseEntity<?> getSubmissions(@PathVariable int assignmentId) {
     return ResponseEntity.badRequest().body(e.getMessage());
   }
 }
-
 @GetMapping("/getSubmissionDetails/{submissionId}")
 public ResponseEntity<?> getSubmissionDetails(@PathVariable int submissionId) {
 
@@ -635,60 +642,42 @@ public ResponseEntity<?> getSubmissionDetails(@PathVariable int submissionId) {
 
     Map<String, Object> response = new HashMap<>();
 
-
     response.put("id", submission.getId());
 
     response.put("submittedAt",
         submission.getSubmittedAt() != null ? submission.getSubmittedAt().toString() : null);
 
     // assignment info
-
     response.put("assignmentTitle", assignment.getTitle());
-
     response.put("assignmentDescription", assignment.getTaskDescription());
-
     response.put("markingCriteria", assignment.getMarkingCriteria());
 
     response.put("assignmentDeadline",
         assignment.getDeadline() != null ? assignment.getDeadline().toString() : null);
 
-
-    // FILE DOWNLOAD
-
+    // file download
     if (submission.getPdfFiles() != null && !submission.getPdfFiles().isEmpty()) {
 
-      String filePath = submission.getPdfFiles().get(0);
+      String fileName = submission.getPdfFiles().get(0);
 
-      response.put("fileUrl", "/files/" + new File(filePath).getName());
+      response.put("fileUrl", "/api/files/" + fileName);
 
     } else {
-
       response.put("fileUrl", null);
     }
 
-    // AI ANALYSIS
-
     response.put("analysisFeedback", submission.getFeedbackForAssignment());
-
     response.put("proposedGrade", submission.getSuggestedGrade());
 
-    // LECTURER MARKING
-
-    response.put("lecturerFeedback", submission.getFeedbackForAssignment());
-
+    response.put("lecturerFeedback", submission.getLecturerFeedback());
     response.put("finalMark", submission.getMark());
 
     return ResponseEntity.ok(response);
 
-
   } catch (Exception e) {
-
-
     e.printStackTrace();
-
     return ResponseEntity.badRequest().body(e.getMessage());
-
-  }
+    }
 }
 
 // mark assignment by lecturer
@@ -707,5 +696,25 @@ public ResponseEntity<?> getSubmissionDetails(@PathVariable int submissionId) {
     assignmentSubmissionRepository.save(submission);
 
     return ResponseEntity.ok("Submission marked successfully");
+  }
+
+  @GetMapping("/files/{filename}")
+  public ResponseEntity<Resource> getFile(@PathVariable String filename) {
+
+    try {
+      Path filePath = Paths.get(UPLOAD_DIR).resolve(filename).normalize();
+
+      Resource resource = new UrlResource(filePath.toUri());
+
+      if (!resource.exists() || !resource.isReadable()) {
+        throw new RuntimeException("File not found");
+      }
+
+      return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
+          "inline; filename=\"" + resource.getFilename() + "\"").body(resource);
+
+    } catch (Exception e) {
+      throw new RuntimeException("Error reading file", e);
+    }
   }
 }
