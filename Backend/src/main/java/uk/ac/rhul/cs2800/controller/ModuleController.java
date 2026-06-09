@@ -223,7 +223,9 @@ public class ModuleController {
 
     for (Module module : modules) {
 
+      // =========================
       // MODULE BASIC STATS
+      // =========================
       int courseworkCount = module.getAssignments() != null ? module.getAssignments().size() : 0;
 
       int assignedCredits = module.getAssignments() != null
@@ -240,7 +242,9 @@ public class ModuleController {
           new LecturerViewModulesDTO(module.getCode(), module.getName(), module.getCredits(),
               assignedCredits, courseworkCount, studentsEnrolled);
 
-      // student details
+      // =========================
+      // STUDENT DETAILS
+      // =========================
       List<LecturerModuleStudentDTO> studentDTOs = new ArrayList<>();
 
       if (module.getRegistrations() != null && module.getAssignments() != null) {
@@ -251,7 +255,12 @@ public class ModuleController {
         for (Student student : students) {
 
           int missedDeadlines = 0;
+
           List<Integer> marks = new ArrayList<>();
+
+          boolean hasPastDeadlineUnmarked = false;
+          boolean hasAnyGraded = false;
+          boolean allAssignmentsInFuture = true;
 
           for (Assignment assignment : module.getAssignments()) {
 
@@ -261,18 +270,56 @@ public class ModuleController {
             AssignmentSubmission submission = subs.stream()
                 .filter(s -> s.getStudent().getId() == student.getId()).findFirst().orElse(null);
 
-            boolean missed =
-                submission == null || submission.getSubmittedAt().isAfter(assignment.getDeadline());
+            boolean isFutureDeadline = assignment.getDeadline() != null
+                && assignment.getDeadline().isAfter(java.time.LocalDateTime.now());
 
-            if (missed) {
-              missedDeadlines++;
+            if (!isFutureDeadline) {
+              allAssignmentsInFuture = false;
+            }
+
+            boolean missed =
+                submission == null || submission.getSubmittedAt() == null
+                    || submission.getSubmittedAt().isAfter(assignment.getDeadline());
+
+            if (submission == null) {
+              // no submission at all
+              if (!isFutureDeadline) {
+                hasPastDeadlineUnmarked = true;
+              }
               marks.add(0);
+              missedDeadlines++;
             } else {
-              marks.add(submission.getMark() != null ? submission.getMark() : 0);
+
+              // submission exists
+              if (missed) {
+                missedDeadlines++;
+              }
+
+              Integer mark = submission.getMark();
+
+              if (mark != null) {
+                hasAnyGraded = true;
+                marks.add(mark);
+              } else {
+                // submitted but not marked yet
+                if (!isFutureDeadline) {
+                  hasPastDeadlineUnmarked = true;
+                }
+                marks.add(0);
+              }
             }
           }
 
-          double avg = marks.stream().mapToInt(i -> i).average().orElse(0);
+          // AVG logic rules
+          double avg;
+
+          if (!hasAnyGraded && allAssignmentsInFuture) {
+            avg = -1; // nothing due yet or nothing graded
+          } else if (hasPastDeadlineUnmarked) {
+            avg = -2; // backlog: submissions waiting to be marked
+          } else {
+            avg = marks.stream().mapToInt(i -> i).average().orElse(0);
+          }
 
           studentDTOs.add(new LecturerModuleStudentDTO(student.getId(),
               student.getFirstName() + " " + student.getLastName(), student.getEmail(),
@@ -280,7 +327,6 @@ public class ModuleController {
         }
       }
 
-      // final wrap
       result.add(new LecturerModuleExpandedDTO(moduleDTO, studentDTOs));
     }
 

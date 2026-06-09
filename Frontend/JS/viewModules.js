@@ -30,10 +30,10 @@ async function loadModules() {
       <tr><td colspan="6">Loading...</td></tr>
     `;
 
-   const res = await fetch(
-     `https://automative-graiding-system.onrender.com/api/module/overview/${lecturer.id}`,
-     { credentials: "include" }
-   );
+    const res = await fetch(
+      `https://automative-graiding-system.onrender.com/api/module/overview/${lecturer.id}`,
+      { credentials: "include" }
+    );
 
     if (!res.ok) {
       throw new Error("Failed to load modules");
@@ -53,6 +53,10 @@ async function loadModules() {
   }
 }
 
+/* =========================
+   RENDER MODULE TABLE
+========================= */
+
 function renderModules(tableBody, data) {
 
   tableBody.innerHTML = "";
@@ -68,11 +72,12 @@ function renderModules(tableBody, data) {
 
   modules.forEach(entry => {
 
-    const module = entry.module;
+    const module = entry.module;      // FIXED: backend wrapper DTO
     const students = entry.students || [];
 
     const code = module.code;
 
+    /* MAIN ROW */
     const mainRow = document.createElement("tr");
     mainRow.style.cursor = "pointer";
     mainRow.onclick = () => toggleModule(code);
@@ -88,6 +93,7 @@ function renderModules(tableBody, data) {
 
     tableBody.appendChild(mainRow);
 
+    /* EXPAND ROW */
     const expandRow = document.createElement("tr");
     expandRow.id = `expand-${code}`;
     expandRow.style.display = "none";
@@ -103,7 +109,7 @@ function renderModules(tableBody, data) {
 }
 
 /* =========================
-   STUDENT TABLE HTML
+   STUDENT TABLE
 ========================= */
 
 function renderStudentTable(students) {
@@ -126,21 +132,41 @@ function renderStudentTable(students) {
 
       <tbody>
 
-        ${students.map(s => `
-          <tr>
-            <td>${s.name}</td>
+        ${students.map(s => {
 
-            <td>
-              <a class="email-link" href="mailto:${s.email}">
-                ${s.email}
-              </a>
-            </td>
+          // FIX: backend may send "name" OR "fullName"
+          const name =
+            s.name ??
+            s.fullName ??
+            `${s.firstName ?? ""} ${s.lastName ?? ""}`.trim();
 
-            <td>${s.missedAssignments ?? 0}</td>
+          const email = s.email ?? "-";
 
-            <td>${(s.avgGrade ?? 0).toFixed(1)}</td>
-          </tr>
-        `).join("")}
+          let avg = s.avgGrade ?? 0;
+
+          // handle -1 and -2 states from backend
+          let avgDisplay = avg;
+
+          if (avg === -1) avgDisplay = "No grades yet";
+          else if (avg === -2) avgDisplay = "Pending marking";
+          else avgDisplay = avg.toFixed(1);
+
+          return `
+            <tr>
+              <td>${name || "Unknown"}</td>
+
+              <td>
+                <a class="email-link" href="mailto:${email}">
+                  ${email}
+                </a>
+              </td>
+
+              <td>${s.missedDeadlines ?? s.missedAssignments ?? 0}</td>
+
+              <td>${avgDisplay}</td>
+            </tr>
+          `;
+        }).join("")}
 
       </tbody>
 
