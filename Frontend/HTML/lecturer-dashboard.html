@@ -132,22 +132,37 @@
 
     </div>
 
-    <!-- CONTENT -->
-    <div class="content">
+    <div class="dashboard-grid">
 
-      <div class="submissions-card">
+  <!-- LEFT: Activity Feed -->
+  <div class="card" id="activityFeed">
+    <h2>Activity Feed</h2>
+    <div id="activityList"></div>
+  </div>
 
-        <h2>Latest Submissions</h2>
+  <!-- MIDDLE: At Risk -->
+  <div class="card" id="atRisk">
+    <h2>At Risk Students</h2>
+    <div id="riskList"></div>
+  </div>
 
-        <div class="placeholder">
+  <!-- RIGHT: Module Overview -->
+  <div class="card">
+    <h2>Module Overview</h2>
 
-          Latest assignment submissions will appear here.
+    <select id="moduleSelector"></select>
 
-        </div>
+    <canvas id="moduleChart"></canvas>
+    <canvas id="submissionChart"></canvas>
+  </div>
 
-      </div>
+  <!-- BOTTOM: Marking Queue -->
+  <div class="card full-width">
+    <h2>Marking Queue</h2>
+    <div id="markingTimeline"></div>
+  </div>
 
-    </div>
+</div>
 
   </div>
 
