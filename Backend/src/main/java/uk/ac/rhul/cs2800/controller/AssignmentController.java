@@ -60,6 +60,9 @@ public class AssignmentController {
 
   private static final String UPLOAD_DIR = System.getProperty("java.io.tmpdir") + "/uploads/";
 
+  @Value("${backend.url}")
+  private String backendUrl;
+
   @Autowired
   private AssignmentRepository assignmentRepository;
 
@@ -213,8 +216,6 @@ public class AssignmentController {
 
     return ResponseEntity.ok(response);
   }
-
-  // get details on a assignment
   @GetMapping("/getAssignmentDetails/{id}")
   public ResponseEntity<?> getAssignmentDetails(@PathVariable int id,
       @RequestParam(required = false) Integer studentId) {
@@ -250,11 +251,10 @@ public class AssignmentController {
         response.put("submittedAt", submission.getSubmittedAt());
         response.put("marked", submission.isMarked());
       }
-      }
+    }
 
     response.put("lecturerFeedback", lecturerFeedback);
 
-    // FILES (FIXED FOR NEW SYSTEM)
     List<Map<String, Object>> files = new ArrayList<>();
 
     String fileName = assignment.getPdfFilePath();
@@ -262,10 +262,12 @@ public class AssignmentController {
     if (fileName != null && !fileName.isBlank()) {
 
       Map<String, Object> file = new HashMap<>();
-
       file.put("name", "Assignment PDF");
 
-      file.put("url", "/api/files/" + fileName);
+      String fileUrl =
+          "https://automative-graiding-system.onrender.com/api/assignment/files/" + fileName;
+
+      file.put("url", fileUrl);
 
       files.add(file);
     }
@@ -274,7 +276,6 @@ public class AssignmentController {
 
     return ResponseEntity.ok(response);
   }
-
 
   @DeleteMapping("/deleteSubmission/{assignmentId}")
   public ResponseEntity<?> deleteSubmission(@PathVariable int assignmentId,
