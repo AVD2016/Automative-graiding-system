@@ -415,7 +415,7 @@ public class StatisticsController {
   }
 
   // admin dashboard statistics
-  @GetMapping("/statistics/admin")
+  @GetMapping("/admin")
   @Transactional
   public ResponseEntity<Map<String, Object>> getAdminStatistics() {
 
