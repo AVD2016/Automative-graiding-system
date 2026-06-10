@@ -65,7 +65,6 @@ async function loadModules() {
 // =========================
 // RENDER MODULES
 // =========================
-
 function renderModules() {
 
   const tableBody =
@@ -94,8 +93,16 @@ function renderModules() {
       module.averageGrade ?? 0;
 
     let gradeClass = "grade-green";
+    let displayGrade = `${avgGrade.toFixed(1)}%`;
 
-    if (avgGrade < 40) {
+    // =========================
+    // HANDLE -1 CASE
+    // =========================
+    if (avgGrade === -1) {
+      displayGrade = "No submissions yet";
+      gradeClass = "grade-grey"; // optional styling
+    }
+    else if (avgGrade < 40) {
       gradeClass = "grade-red";
     }
     else if (avgGrade < 60) {
@@ -114,7 +121,7 @@ function renderModules() {
       </td>
 
       <td class="${gradeClass}">
-        ${avgGrade.toFixed(1)}%
+        ${displayGrade}
       </td>
     `;
 

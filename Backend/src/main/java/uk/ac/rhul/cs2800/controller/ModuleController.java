@@ -370,6 +370,8 @@ public class ModuleController {
       double total = 0;
       int counted = 0;
 
+      boolean hasAnyRelevantData = false;
+
       LocalDateTime now = LocalDateTime.now();
 
       for (Assignment assignment : assignments) {
@@ -377,25 +379,48 @@ public class ModuleController {
         AssignmentSubmission submission = assignmentSubmissionRepository
             .findByStudentIdAndAssignmentId(studentId, assignment.getId()).orElse(null);
 
+        boolean isPastDeadline =
+            assignment.getDeadline() != null && assignment.getDeadline().isBefore(now);
+
+        // =========================
+        // MARKED SUBMISSION
+        // =========================
         if (submission != null && submission.isMarked()) {
 
           total += submission.getMark();
           counted++;
+          hasAnyRelevantData = true;
+        }
 
-        } else if (assignment.getDeadline().isBefore(now)) {
+        // =========================
+        // MISSED DEADLINE (NO SUBMISSION)
+        // =========================
+        else if (isPastDeadline) {
 
-          total += 0;
+          total += 0; // penalty
           counted++;
+          hasAnyRelevantData = true;
         }
       }
 
-      double avg = counted == 0 ? 0 : total / counted;
+      // =========================
+      // FINAL AVERAGE RULES
+      // =========================
+      double avg;
+
+      if (!hasAnyRelevantData) {
+        avg = -1; // no submissions and no past-deadline activity
+      } else if (counted == 0) {
+        avg = 0;
+      } else {
+        avg = total / counted;
+      }
+
       moduleMap.put("averageGrade", avg);
 
       // =========================
-      // LECTURERS (FIXED)
+      // LECTURERS
       // =========================
-
       List<Map<String, Object>> lecturers = new ArrayList<>();
 
       for (Registration reg : module.getRegistrations()) {
