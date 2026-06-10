@@ -235,7 +235,6 @@ public class StatisticsController {
       return ResponseEntity.status(500).body(e.getMessage());
     }
   }
-
   @GetMapping("/student/{studentId}")
   @Transactional
   public ResponseEntity<?> getStudentDashboard(@PathVariable int studentId) {
@@ -249,20 +248,37 @@ public class StatisticsController {
 
     LocalDateTime now = LocalDateTime.now();
 
-    double totalMarks = 0;
-    int countForAverage = 0;
+    double totalModuleAverages = 0;
+    int gradedModules = 0;
 
     for (Registration reg : registrations) {
 
       Module module = reg.getModule();
 
+      if (module == null)
+        continue;
+
+      /*
+       * USE SAME CALCULATION AS GRADES PAGE
+       */
+      double moduleAverage = calculateModuleAverage(student.getId(), module, now);
+
+      if (moduleAverage != -1) {
+
+        totalModuleAverages += moduleAverage;
+        gradedModules++;
+      }
+
+      /*
+       * ASSIGNMENT DTOS
+       */
       if (module.getAssignments() == null)
         continue;
 
       for (Assignment assignment : module.getAssignments()) {
 
         AssignmentSubmission submission = assignmentSubmissionRepository
-            .findByStudentIdAndAssignmentId(studentId, assignment.getId()).orElse(null);
+            .findByStudentIdAndAssignmentId(student.getId(), assignment.getId()).orElse(null);
 
         LocalDateTime deadline = assignment.getDeadline();
 
@@ -274,10 +290,7 @@ public class StatisticsController {
 
         if (isMarked) {
 
-          boolean isLate = submission.getSubmittedAt() != null && deadline != null
-              && submission.getSubmittedAt().isAfter(deadline);
-
-          status = isLate ? "LATE" : "MARKED";
+          status = "MARKED";
 
         } else if (isSubmitted) {
 
@@ -292,14 +305,6 @@ public class StatisticsController {
           status = "FUTURE";
         }
 
-        Double gradeResult = calculateAssignmentContribution(assignment, submission, now);
-
-        if (gradeResult != null) {
-
-          totalMarks += gradeResult;
-          countForAverage++;
-        }
-
         Map<String, Object> dto = new HashMap<>();
 
         dto.put("title", assignment.getTitle());
@@ -310,9 +315,9 @@ public class StatisticsController {
 
         assignmentDTOs.add(dto);
       }
-    }
+      }
 
-    double avgGrade = countForAverage == 0 ? 0 : totalMarks / countForAverage;
+    double avgGrade = gradedModules == 0 ? 0 : totalModuleAverages / gradedModules;
 
     Map<String, Object> response = new HashMap<>();
 
