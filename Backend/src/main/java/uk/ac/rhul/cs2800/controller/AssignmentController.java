@@ -341,7 +341,7 @@ public class AssignmentController {
       submission.setMarked(false);
       submission.setMark(null);
 
-      submission.setPdfFiles(List.of(fileName));
+      submission.setPdfFiles(new ArrayList<>(List.of(fileName)));
 
       // 8. SAVE TO DB
       assignmentSubmissionRepository.save(submission);
