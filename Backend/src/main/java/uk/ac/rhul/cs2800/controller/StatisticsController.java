@@ -39,7 +39,7 @@ public class StatisticsController {
   @GetMapping("/lecturer/{lecturerId}")
   public ResponseEntity<?> getLecturerDashboard(@PathVariable int lecturerId) {
 
-    System.out.println("execution started!!!!!!!!!!");
+    System.out.println("execution started!");
 
     try {
 

@@ -383,21 +383,13 @@ public class AssignmentController {
         throw new RuntimeException("No PDF file linked to submissionId=" + submissionId);
       }
 
-      // 2. GET STORED FILE NAME (NOT FULL PATH ANYMORE)
+      // 2. GET STORED FILE NAME
       String fileName = submission.getPdfFiles().get(0);
 
-      // 3. REBUILD FULL PATH (IMPORTANT FIX FOR NEW STORAGE MODEL)
-      String uploadDir = System.getProperty("java.io.tmpdir") + "/uploads/";
-      String filePath = Paths.get(uploadDir, fileName).toString();
+      log.info("Extracting PDF for submissionId={}, file={}", submissionId, fileName);
 
-      log.info("Extracting PDF for submissionId={}, file={}", submissionId, filePath);
-
-      // 4. EXTRACT TEXT
-      String submissionText = extractTextFromPdf(filePath);
-
-      if (submissionText == null || submissionText.isBlank()) {
-        throw new RuntimeException("Empty PDF text for submissionId=" + submissionId);
-      }
+      // 3. EXTRACT TEXT
+      String submissionText = extractTextFromPdf(fileName);
 
       // 5. BUILD PROMPT
       String prompt = buildPrompt(assignment, submissionText, submission.getSubmittedAt(),
