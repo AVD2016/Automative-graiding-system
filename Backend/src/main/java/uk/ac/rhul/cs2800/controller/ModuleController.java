@@ -343,7 +343,7 @@ public class ModuleController {
   }
 
   // get modules and registered lecturers for s student
-  @GetMapping("/getModules/{studentId}")
+  @GetMapping("/student/getModules/{studentId}")
   public ResponseEntity<List<Map<String, Object>>> getModules(@PathVariable int studentId) {
 
     Student student = studentRepository.findById(studentId)
