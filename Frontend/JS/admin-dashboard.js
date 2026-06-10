@@ -22,7 +22,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadDashboard();
 });
 
-
+/* =========================
+   LOAD SINGLE ENDPOINT
+========================= */
 
 async function loadDashboard() {
 

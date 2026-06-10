@@ -460,16 +460,50 @@ public class StatisticsController {
         moduleCount++;
         totalCredits += module.getCredits();
 
-        // ALWAYS use unified average rule
-        double avg = calculateModuleAverage(s.getId(), module, now);
+        /*
+         * ================= MODULE AVERAGE (NEW LOGIC) =================
+         */
 
-        // IMPORTANT: even -1 modules must still count as 0 impact
-        double safeAvg = (avg == -1) ? 0 : avg;
+        double total = 0;
+        int counted = 0;
 
-        studentModuleSum += safeAvg;
+        List<Assignment> assignments = module.getAssignments();
+
+        if (assignments != null) {
+
+          for (Assignment a : assignments) {
+
+            AssignmentSubmission submission = assignmentSubmissionRepository
+                .findByStudentIdAndAssignmentId(s.getId(), a.getId()).orElse(null);
+
+            boolean isPastDeadline = a.getDeadline() != null && a.getDeadline().isBefore(now);
+
+            // CASE 1: marked submission → use mark
+            if (submission != null && submission.isMarked()) {
+              total += submission.getMark();
+              counted++;
+            }
+
+            // CASE 2: no submission + past deadline → 0
+            else if (submission == null && isPastDeadline) {
+              total += 0;
+              counted++;
+            }
+
+            // CASE 3: ignored
+          }
+        }
+
+        double moduleAvg = counted == 0 ? 0 : total / counted;
+
+        /*
+         * ================= STUDENT AGGREGATION =================
+         */
+
+        studentModuleSum += moduleAvg;
         studentModuleCount++;
 
-        if (safeAvg >= 40) {
+        if (moduleAvg >= 40) {
           completedCredits += module.getCredits();
         }
       }
@@ -477,14 +511,14 @@ public class StatisticsController {
       double avgGrade = studentModuleCount == 0 ? 0 : studentModuleSum / studentModuleCount;
 
       /*
-       * ========================= SYSTEM AVERAGE =========================
+       * ================= SYSTEM AVERAGE =================
        */
 
       systemTotal += avgGrade;
       systemCount++;
 
       /*
-       * ========================= DISTRIBUTION (BASED ON SAME RULE) =========================
+       * ================= DISTRIBUTION =================
        */
 
       if (avgGrade < 40)
@@ -511,7 +545,7 @@ public class StatisticsController {
     }
 
     /*
-     * ========================= LECTURERS (UNCHANGED LOGIC) =========================
+     * ========================= LECTURERS (UNCHANGED) =========================
      */
 
     for (Lecturer l : lecturers) {
