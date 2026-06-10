@@ -99,9 +99,9 @@ body {
 /* background image */
 .content::after {
   content: "";
-  position: fixed;   /* 🔥 KEY CHANGE */
+  position: fixed;  
   top: 0;
-  left: 240px;       /* matches sidebar width */
+  left: 240px;       
   width: calc(100% - 240px);
   height: 100vh;
 
@@ -117,7 +117,7 @@ body {
 /* dark overlay */
 .content::before {
   content: "";
-  position: fixed;   /* 🔥 KEY CHANGE */
+  position: fixed;   
   top: 0;
   left: 240px;
   width: calc(100% - 240px);
