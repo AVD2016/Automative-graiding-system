@@ -291,10 +291,12 @@ public class StatisticsController {
 
         if (isMarked) {
 
-          // only marked assignments count
-          totalMarks += submission.getMark();
-          countForAverage++;
+          boolean isLate = submission.getSubmittedAt() != null && assignment.getDeadline() != null
+              && submission.getSubmittedAt().isAfter(assignment.getDeadline());
 
+          // late submission = 0, on-time = mark
+          totalMarks += isLate ? 0 : submission.getMark();
+          countForAverage++;
         } else if (!hasSubmission && deadline != null && deadline.isBefore(now)) {
 
           // missed deadline → counts as 0
@@ -339,7 +341,6 @@ public class StatisticsController {
     for (Registration reg : student.getRegistered()) {
 
       Module module = reg.getModule();
-
       if (module == null)
         continue;
 
@@ -351,36 +352,48 @@ public class StatisticsController {
 
       List<Assignment> assignments = module.getAssignments();
 
-      int counted = 0;
-      double total = 0;
-
       int assignmentCount = assignments != null ? assignments.size() : 0;
       moduleMap.put("assignmentCount", assignmentCount);
 
+      if (assignments == null || assignments.isEmpty()) {
+        moduleMap.put("averageGrade", -1);
+        response.add(moduleMap);
+        continue;
+      }
+
+      double total = 0;
+      int counted = 0;
+
       for (Assignment assignment : assignments) {
 
-        boolean isPastDeadline =
-            assignment.getDeadline() != null && assignment.getDeadline().isBefore(now);
+        LocalDateTime deadline = assignment.getDeadline();
+        boolean isPastDeadline = deadline != null && deadline.isBefore(now);
 
         AssignmentSubmission submission = assignmentSubmissionRepository
             .findByStudentIdAndAssignmentId(studentId, assignment.getId()).orElse(null);
 
-        if (submission != null && submission.isMarked()) {
+        boolean hasSubmission = submission != null;
+        boolean isMarked = hasSubmission && submission.isMarked();
 
-          total += submission.getMark();
+        if (isMarked) {
+
+          boolean isLate = submission.getSubmittedAt() != null && deadline != null
+              && submission.getSubmittedAt().isAfter(deadline);
+
+          // late submission = 0, on-time = mark
+          total += isLate ? 0 : submission.getMark();
           counted++;
         }
 
-        else if (submission == null && isPastDeadline) {
+        else if (!hasSubmission && isPastDeadline) {
 
-          total += 0; // penalty
+          total += 0;
           counted++;
         }
 
-        // CASE 3: ignore (future + no submission OR unmarked)
       }
 
-      double avg = (counted == 0) ? -1 : (total / counted);
+      double avg = counted == 0 ? -1 : (total / counted);
 
       moduleMap.put("averageGrade", avg);
 
