@@ -5,6 +5,7 @@ const API_BASE =
 
 let student = null;
 let modules = [];
+let chartInstance = null;
 
 // INIT
 
@@ -60,6 +61,7 @@ function renderAll() {
   renderTable();
   renderSummary();
   renderInsights();
+  renderChart(); // 🔥 THIS WAS MISSING
 }
 
 // STATUS LOGIC
@@ -145,7 +147,7 @@ function renderSummary() {
     `Risk Level: ${risk}`;
 }
 
-// insights
+// INSIGHTS
 
 function renderInsights() {
 
@@ -174,11 +176,13 @@ function renderInsights() {
     `Weakest Module: ${worst.code} (${worst.averageGrade.toFixed(1)}%)`;
 }
 
+// CHART
+
 function renderChart() {
 
   const canvas = document.getElementById("progressChart");
 
-  if (!canvas) return; // safety guard
+  if (!canvas) return;
 
   const ctx = canvas.getContext("2d");
 
@@ -188,7 +192,6 @@ function renderChart() {
     m.averageGrade === -1 ? 0 : m.averageGrade
   );
 
-  // destroy previous chart to avoid duplicates
   if (chartInstance) {
     chartInstance.destroy();
   }
