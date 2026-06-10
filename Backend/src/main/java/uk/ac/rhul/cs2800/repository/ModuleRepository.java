@@ -23,7 +23,8 @@ public interface ModuleRepository extends CrudRepository<Module, String> {
           SELECT DISTINCT m
           FROM Module m
           JOIN m.registrations r
-          WHERE r.student.id = :studentId
+          WHERE TYPE(r.user) = Student
+          AND r.user.id = :studentId
       """)
   List<Module> findModulesByStudentId(@Param("studentId") int studentId);
 }
