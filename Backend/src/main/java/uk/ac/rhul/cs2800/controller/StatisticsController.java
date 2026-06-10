@@ -357,78 +357,59 @@ public class StatisticsController {
 
       moduleMap.put("assignmentCount", assignmentCount);
 
-      if (assignments == null || assignments.isEmpty()) {
+      /*
+       * USE SHARED HELPER METHOD
+       */
+      double averageGrade = calculateModuleAverage(studentId, module, now);
 
-        moduleMap.put("averageGrade", -1);
-        response.add(moduleMap);
-        continue;
-      }
-
-      double total = 0;
-      int counted = 0;
-
-      for (Assignment assignment : assignments) {
-
-        AssignmentSubmission submission = assignmentSubmissionRepository
-            .findByStudentIdAndAssignmentId(studentId, assignment.getId()).orElse(null);
-
-        Double gradeResult = calculateAssignmentContribution(assignment, submission, now);
-
-        if (gradeResult != null) {
-
-          total += gradeResult;
-          counted++;
-        }
-      }
-
-      double avg = counted == 0 ? -1 : total / counted;
-
-      moduleMap.put("averageGrade", avg);
+      moduleMap.put("averageGrade", averageGrade);
 
       response.add(moduleMap);
-    }
+      }
 
     return ResponseEntity.ok(response);
   }
 
   // helper method to calculate average
-  private Double calculateAssignmentContribution(Assignment assignment,
-      AssignmentSubmission submission, LocalDateTime now) {
+  private double calculateModuleAverage(int studentId, Module module, LocalDateTime now) {
 
-    LocalDateTime deadline = assignment.getDeadline();
+    List<Assignment> assignments = module.getAssignments();
 
-    boolean isPastDeadline = deadline != null && deadline.isBefore(now);
-
-    boolean hasSubmission = submission != null;
-
-    boolean isMarked = hasSubmission && submission.isMarked();
-
-    // CASE 1:
-    // Marked assignment
-
-    if (isMarked) {
-
-      boolean isLate = submission.getSubmittedAt() != null && deadline != null
-          && submission.getSubmittedAt().isAfter(deadline);
-
-      // late submission = 0
-      if (isLate) {
-        return 0.0;
+    if (assignments == null || assignments.isEmpty()) {
+      return -1;
       }
 
-      return (double) submission.getMark();
-    }
+    double total = 0;
+    int counted = 0;
 
-    // CASE 2:
-    // No submission + missed deadline = 0
+    for (Assignment assignment : assignments) {
 
-    if (!hasSubmission && isPastDeadline) {
-      return 0.0;
-    }
+      LocalDateTime deadline = assignment.getDeadline();
 
-    // CASE 3:
-    // Future / unmarked assignments ignored
+      boolean isPastDeadline = deadline != null && deadline.isBefore(now);
 
-    return null;
+      AssignmentSubmission submission = assignmentSubmissionRepository
+          .findByStudentIdAndAssignmentId(studentId, assignment.getId()).orElse(null);
+
+      boolean hasSubmission = submission != null;
+      boolean isMarked = hasSubmission && submission.isMarked();
+
+      if (isMarked) {
+
+        boolean isLate = submission.getSubmittedAt() != null && deadline != null
+            && submission.getSubmittedAt().isAfter(deadline);
+
+        total += isLate ? 0 : submission.getMark();
+        counted++;
+      }
+
+      else if (!hasSubmission && isPastDeadline) {
+
+        total += 0;
+        counted++;
+      }
+      }
+
+    return counted == 0 ? -1 : (total / counted);
   }
 }
