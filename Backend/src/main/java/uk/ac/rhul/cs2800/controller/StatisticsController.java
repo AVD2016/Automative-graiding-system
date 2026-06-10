@@ -35,6 +35,7 @@ public class StatisticsController {
   @Autowired
   private StudentRepository studentRepository;
 
+
   @Transactional
   @GetMapping("/lecturer/{lecturerId}")
   public ResponseEntity<?> getLecturerDashboard(@PathVariable int lecturerId) {
@@ -411,5 +412,175 @@ public class StatisticsController {
       }
 
     return counted == 0 ? -1 : (total / counted);
+  }
+
+  // admin dashboard statistics
+  @GetMapping("/statistics/admin")
+  @Transactional
+  public ResponseEntity<Map<String, Object>> getAdminStatistics() {
+
+    LocalDateTime now = LocalDateTime.now();
+
+    List<Student> students = studentRepository.findAll();
+    List<Lecturer> lecturers = lecturerRepository.findAll();
+
+    List<Map<String, Object>> studentDTOs = new ArrayList<>();
+    List<Map<String, Object>> lecturerDTOs = new ArrayList<>();
+
+    int pendingMarking = 0;
+
+    int fail = 0;
+    int pass = 0;
+    int strong = 0;
+    int merit = 0;
+    int distinction = 0;
+
+    double systemTotal = 0;
+    int systemCount = 0;
+
+    /*
+     * ========================= STUDENTS =========================
+     */
+
+    for (Student s : students) {
+
+      double studentModuleSum = 0;
+      int studentModuleCount = 0;
+
+      int totalCredits = 0;
+      int completedCredits = 0;
+      int moduleCount = 0;
+
+      for (Registration reg : s.getRegistered()) {
+
+        Module module = reg.getModule();
+        if (module == null)
+          continue;
+
+        moduleCount++;
+        totalCredits += module.getCredits();
+
+        // ALWAYS use unified average rule
+        double avg = calculateModuleAverage(s.getId(), module, now);
+
+        // IMPORTANT: even -1 modules must still count as 0 impact
+        double safeAvg = (avg == -1) ? 0 : avg;
+
+        studentModuleSum += safeAvg;
+        studentModuleCount++;
+
+        if (safeAvg >= 40) {
+          completedCredits += module.getCredits();
+        }
+      }
+
+      double avgGrade = studentModuleCount == 0 ? 0 : studentModuleSum / studentModuleCount;
+
+      /*
+       * ========================= SYSTEM AVERAGE =========================
+       */
+
+      systemTotal += avgGrade;
+      systemCount++;
+
+      /*
+       * ========================= DISTRIBUTION (BASED ON SAME RULE) =========================
+       */
+
+      if (avgGrade < 40)
+        fail++;
+      else if (avgGrade < 60)
+        pass++;
+      else if (avgGrade < 75)
+        strong++;
+      else if (avgGrade < 90)
+        merit++;
+      else
+        distinction++;
+
+      Map<String, Object> dto = new HashMap<>();
+      dto.put("firstName", s.getFirstName());
+      dto.put("lastName", s.getLastName());
+      dto.put("email", s.getEmail());
+      dto.put("moduleCount", moduleCount);
+      dto.put("totalCredits", totalCredits);
+      dto.put("completedCredits", completedCredits);
+      dto.put("averageGrade", avgGrade);
+
+      studentDTOs.add(dto);
+    }
+
+    /*
+     * ========================= LECTURERS (UNCHANGED LOGIC) =========================
+     */
+
+    for (Lecturer l : lecturers) {
+
+      int workloadCredits = 0;
+      int unmarkedPastDeadline = 0;
+
+      for (Registration reg : l.getRegistered()) {
+
+        Module module = reg.getModule();
+        if (module == null)
+          continue;
+
+        workloadCredits += module.getCredits();
+
+        List<Assignment> assignments = module.getAssignments();
+        if (assignments == null)
+          continue;
+
+        for (Assignment a : assignments) {
+
+          boolean isPast = a.getDeadline() != null && a.getDeadline().isBefore(now);
+          if (!isPast)
+            continue;
+
+          List<AssignmentSubmission> submissions =
+              assignmentSubmissionRepository.findByAssignmentId(a.getId());
+
+          boolean hasMarked = submissions.stream().anyMatch(AssignmentSubmission::isMarked);
+
+          if (!hasMarked) {
+            unmarkedPastDeadline++;
+            pendingMarking++;
+          }
+        }
+      }
+
+      Map<String, Object> dto = new HashMap<>();
+      dto.put("firstName", l.getFirstName());
+      dto.put("lastName", l.getLastName());
+      dto.put("email", l.getEmail());
+      dto.put("workloadCredits", workloadCredits);
+      dto.put("unmarkedPastDeadline", unmarkedPastDeadline);
+
+      lecturerDTOs.add(dto);
+    }
+
+    /*
+     * ========================= RESPONSE =========================
+     */
+
+    double systemAverage = systemCount == 0 ? 0 : systemTotal / systemCount;
+
+    Map<String, Object> response = new HashMap<>();
+
+    response.put("students", studentDTOs);
+    response.put("lecturers", lecturerDTOs);
+
+    Map<String, Object> distribution = new HashMap<>();
+    distribution.put("fail", fail);
+    distribution.put("pass", pass);
+    distribution.put("strong", strong);
+    distribution.put("merit", merit);
+    distribution.put("distinction", distinction);
+
+    response.put("gradeDistribution", distribution);
+    response.put("systemAverage", systemAverage);
+    response.put("pendingMarking", pendingMarking);
+
+    return ResponseEntity.ok(response);
   }
 }

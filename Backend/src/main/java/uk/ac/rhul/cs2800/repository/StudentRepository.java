@@ -1,5 +1,6 @@
 package uk.ac.rhul.cs2800.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.CrudRepository;
 import uk.ac.rhul.cs2800.model.Student;
@@ -16,6 +17,7 @@ import uk.ac.rhul.cs2800.model.Student;
  * @since 2025-10-24
  */
 public interface StudentRepository extends CrudRepository<Student, Integer> {
+  List<Student> findAll();
 
   Optional<Student> findByUsername(String username);
 

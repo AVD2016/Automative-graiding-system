@@ -1,7 +1,6 @@
 const API_BASE = "https://automative-graiding-system.onrender.com/api";
 
-let students = [];
-let lecturers = [];
+let dashboard = null;
 let chartInstance = null;
 
 /* =========================
@@ -20,29 +19,26 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("adminName").textContent =
     `${admin.firstName} ${admin.lastName}`;
 
-  await loadAllData();
+  await loadDashboard();
 });
 
 /* =========================
-   LOAD DATA
+   LOAD SINGLE ENDPOINT
 ========================= */
 
-async function loadAllData() {
+async function loadDashboard() {
 
   try {
 
-    // You may already have these endpoints or will map them later
-    const [studentsRes, lecturersRes] = await Promise.all([
-      fetch(`${API_BASE}/admin/students`),
-      fetch(`${API_BASE}/admin/lecturers`)
-    ]);
+    const res = await fetch(`${API_BASE}/statistics/admin`, {
+      credentials: "include"
+    });
 
-    if (!studentsRes.ok || !lecturersRes.ok) {
-      throw new Error("Failed to load admin data");
+    if (!res.ok) {
+      throw new Error("Failed to load admin dashboard");
     }
 
-    students = await studentsRes.json();
-    lecturers = await lecturersRes.json();
+    dashboard = await res.json();
 
     renderAll();
 
@@ -73,58 +69,45 @@ function renderAll() {
 }
 
 /* =========================
-   STATUS CLASSIFICATION
-========================= */
-
-function getResult(avg) {
-
-  if (avg < 40) return "Fail";
-  if (avg < 60) return "Pass";
-  if (avg < 75) return "Strong Pass";
-  if (avg < 90) return "Merit";
-  return "Distinction";
-}
-
-/* =========================
    STUDENTS TABLE
 ========================= */
 
 function renderStudents() {
 
   const tbody = document.getElementById("studentsTable");
-  tbody.innerHTML = "";
 
-  students.forEach(s => {
+  const students = dashboard.students || [];
+
+  if (students.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6">No students found</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = students.map(s => {
 
     const fullName = `${s.firstName} ${s.lastName}`;
 
-    const modules = s.modules ?? [];
-    const email = s.email ?? "";
-
-    const totalCredits = modules.reduce(
-      (sum, m) => sum + (m.credits || 0),
-      0
-    );
-
-    const completedCredits = modules.reduce(
-      (sum, m) => sum + (m.completedCredits || 0),
-      0
-    );
-
     const avg = s.averageGrade ?? 0;
-    const predicted = getResult(avg);
 
-    tbody.innerHTML += `
+    const predicted =
+      avg < 40 ? "Fail" :
+      avg < 60 ? "Pass" :
+      avg < 75 ? "Strong Pass" :
+      avg < 90 ? "Merit" :
+      "Distinction";
+
+    return `
       <tr>
         <td>${fullName}</td>
-        <td>${modules.length}</td>
-        <td>${totalCredits}</td>
-        <td>${completedCredits}</td>
+        <td>${s.moduleCount ?? 0}</td>
+        <td>${s.totalCredits ?? 0}</td>
+        <td>${s.completedCredits ?? 0}</td>
         <td>${predicted}</td>
-        <td class="email">${email}</td>
+        <td class="email">${s.email ?? ""}</td>
       </tr>
     `;
-  });
+
+  }).join("");
 }
 
 /* =========================
@@ -134,83 +117,62 @@ function renderStudents() {
 function renderLecturers() {
 
   const tbody = document.getElementById("lecturersTable");
-  tbody.innerHTML = "";
 
-  lecturers.forEach(l => {
+  const lecturers = dashboard.lecturers || [];
 
-    const fullName = `${l.firstName} ${l.lastName}`;
+  if (lecturers.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4">No lecturers found</td></tr>`;
+    return;
+  }
 
-    const workload = l.modules?.reduce(
-      (sum, m) => sum + (m.credits || 0),
-      0
-    ) ?? 0;
+  tbody.innerHTML = lecturers.map(l => {
 
-    const unmarked = l.unmarkedPastDeadline ?? 0;
-    const email = l.email ?? "";
-
-    tbody.innerHTML += `
+    return `
       <tr>
-        <td>${fullName}</td>
-        <td>${workload}</td>
-        <td>${unmarked}</td>
-        <td class="email">${email}</td>
+        <td>${l.firstName} ${l.lastName}</td>
+        <td>${l.workloadCredits ?? 0}</td>
+        <td>${l.unmarkedPastDeadline ?? 0}</td>
+        <td class="email">${l.email ?? ""}</td>
       </tr>
     `;
-  });
+
+  }).join("");
 }
 
 /* =========================
-   OVERVIEW STATS
+   OVERVIEW
 ========================= */
 
 function renderOverview() {
 
-  const totalStudents = students.length;
-  const totalLecturers = lecturers.length;
+  document.getElementById("studentCount").textContent =
+    dashboard.students?.length ?? 0;
 
-  let totalAvg = 0;
-  let count = 0;
-  let pendingMarking = 0;
+  document.getElementById("lecturerCount").textContent =
+    dashboard.lecturers?.length ?? 0;
 
-  students.forEach(s => {
+  document.getElementById("pendingMarking").textContent =
+    dashboard.pendingMarking ?? 0;
 
-    totalAvg += (s.averageGrade || 0);
-    count++;
-
-    pendingMarking += (s.pendingCount || 0);
-  });
-
-  const systemAvg = count === 0 ? 0 : totalAvg / count;
-
-  document.getElementById("studentCount").textContent = totalStudents;
-  document.getElementById("lecturerCount").textContent = totalLecturers;
-  document.getElementById("pendingMarking").textContent = pendingMarking;
   document.getElementById("systemAverage").textContent =
-    systemAvg.toFixed(1) + "%";
+    (dashboard.systemAverage ?? 0).toFixed(1) + "%";
 }
 
 /* =========================
-   CHART (GRADE DISTRIBUTION)
+   CHART
 ========================= */
 
 function renderChart() {
 
-  let fail = 0;
-  let pass = 0;
-  let strong = 0;
-  let merit = 0;
-  let distinction = 0;
+  const dist = dashboard.gradeDistribution || {};
 
-  students.forEach(s => {
-
-    const avg = s.averageGrade ?? 0;
-
-    if (avg < 40) fail++;
-    else if (avg < 60) pass++;
-    else if (avg < 75) strong++;
-    else if (avg < 90) merit++;
-    else distinction++;
-  });
+  const data = [
+    dist.fail ?? 0,
+    dist.pass ?? 0,
+    dist.strong ?? 0,
+    dist.merit ?? 0,
+    dist.distinction ?? 0
+  ];
 
   const ctx = document.getElementById("gradeDistributionChart");
 
@@ -224,10 +186,16 @@ function renderChart() {
 
     data: {
 
-      labels: ["Fail", "Pass", "Strong Pass", "Merit", "Distinction"],
+      labels: [
+        "Fail",
+        "Pass",
+        "Strong Pass",
+        "Merit",
+        "Distinction"
+      ],
 
       datasets: [{
-        data: [fail, pass, strong, merit, distinction],
+        data,
         backgroundColor: [
           "#dc2626",
           "#f59e0b",
