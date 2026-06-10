@@ -91,8 +91,14 @@
     }
 
     canvas {
+      width: 100% !important;
+      height: 240px !important;
+    }
+
+    .chart-wrapper {
       width: 100%;
-      max-height: 220px;
+      height: 260px;
+      position: relative;
     }
 
   </style>
@@ -183,7 +189,10 @@
         <div class="card">
 
           <h2>Performance Trend</h2>
-          <canvas id="progressChart"></canvas>
+
+          <div class="chart-wrapper">
+            <canvas id="progressChart"></canvas>
+          </div>
 
         </div>
 
@@ -220,5 +229,4 @@
 <script src="../JS/studentGrades.js"></script>
 
 </body>
-
 </html>
