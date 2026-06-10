@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="../CSS/chatWidget.css">
   <link rel="stylesheet" href="../CSS/generalStyles.css">
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
 
     .content {
@@ -34,8 +36,6 @@
       gap: 20px;
     }
 
-    <!-- CARDS  -->
-
     .card {
       background: rgba(255,255,255,0.96);
       border-radius: 10px;
@@ -48,8 +48,6 @@
       margin-bottom: 12px;
       color: #1e293b;
     }
-
-    <!-- TABLE -->
 
     table {
       width: 100%;
@@ -70,6 +68,7 @@
 
     tr:hover {
       background: #f1f5f9;
+      cursor: pointer;
     }
 
     .status-critical { color: #dc2626; font-weight: bold; }
@@ -93,7 +92,7 @@
 
     canvas {
       width: 100%;
-      max-height: 200px;
+      max-height: 220px;
     }
 
   </style>
@@ -102,7 +101,6 @@
 
 <body>
 
-<!-- SIDEBAR -->
 <div class="sidebar">
 
   <h2>Student Panel</h2>
@@ -114,14 +112,12 @@
 
 </div>
 
-<!-- MAIN -->
 <div class="main">
 
-  <!-- TOPBAR -->
   <div class="topbar">
 
     <div class="topbar-left" onclick="openDashboard()">
-      <img src="icon.png">
+      <img src="../Images/logo.png">
       <h1>Grade Analytics</h1>
     </div>
 
@@ -131,12 +127,10 @@
 
   </div>
 
-  <!-- CONTENT -->
   <div class="content">
 
     <div class="dashboard-grid">
 
-      <!-- LEFT: TABLE -->
       <div class="card">
 
         <h2>Module Performance Breakdown</h2>
@@ -164,10 +158,8 @@
 
       </div>
 
-      <!-- RIGHT SIDE -->
       <div class="side">
 
-        <!-- SUMMARY -->
         <div class="card">
 
           <h2>Performance Summary</h2>
@@ -179,18 +171,12 @@
 
         </div>
 
-        <!-- INSIGHTS -->
         <div class="card">
 
           <h2>Insights</h2>
 
-          <div class="insight" id="strongestModule">
-            Strongest Module: --
-          </div>
-
-          <div class="insight" id="weakestModule">
-            Weakest Module: --
-          </div>
+          <div class="insight" id="strongestModule">Strongest Module: --</div>
+          <div class="insight" id="weakestModule">Weakest Module: --</div>
 
         </div>
 
@@ -209,9 +195,8 @@
 
 </div>
 
-<!-- CHAT -->
 <div id="chatToggle" class="chat-toggle">
-  <img src="../Images/chat.png" alt="Chat" />
+  <img src="../Images/chat.png">
 </div>
 
 <div id="chatWidget" class="chat-widget hidden">
@@ -230,10 +215,10 @@
 
 </div>
 
-<!-- JS -->
 <script src="../JS/chatWidget.js"></script>
 <script src="../JS/studentNavigation.js"></script>
 <script src="../JS/studentGrades.js"></script>
 
 </body>
+
 </html>
