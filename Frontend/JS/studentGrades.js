@@ -7,6 +7,7 @@ const API_BASE =
 
 let student = null;
 let modules = [];
+let chartInstance = null; // IMPORTANT: prevents duplicate charts
 
 // =========================
 // INIT
@@ -68,7 +69,7 @@ function renderAll() {
   renderTable();
   renderSummary();
   renderInsights();
-  renderChart();
+  renderChart(); // ✅ FIXED (now exists)
 }
 
 // =========================
@@ -138,8 +139,7 @@ function renderSummary() {
   document.getElementById("moduleCount").textContent =
     `Modules: ${modules.length}`;
 
-  // Completion rate (modules with real activity)
-  const completed = modules.filter(m => m.averageGrade !== -1).length;
+  const completed = validModules.length;
 
   const completionRate =
     modules.length === 0
@@ -149,12 +149,10 @@ function renderSummary() {
   document.getElementById("completionRate").textContent =
     `Completion Rate: ${completionRate.toFixed(1)}%`;
 
-  // Risk level
   let risk = "Low";
 
-  const critical = modules.filter(m => m.averageGrade !== -1 && m.averageGrade < 40).length;
-
-  const weak = modules.filter(m => m.averageGrade !== -1 && m.averageGrade < 60).length;
+  const critical = validModules.filter(m => m.averageGrade < 40).length;
+  const weak = validModules.filter(m => m.averageGrade < 60).length;
 
   if (critical > 0) risk = "High";
   else if (weak > 1) risk = "Medium";
@@ -192,4 +190,53 @@ function renderInsights() {
 
   document.getElementById("weakestModule").textContent =
     `Weakest Module: ${worst.code} (${worst.averageGrade.toFixed(1)}%)`;
+}
+
+// =========================
+// CHART (FIXED)
+// =========================
+
+function renderChart() {
+
+  const canvas = document.getElementById("progressChart");
+
+  if (!canvas) return; // safety guard
+
+  const ctx = canvas.getContext("2d");
+
+  const labels = modules.map(m => m.code);
+
+  const data = modules.map(m =>
+    m.averageGrade === -1 ? 0 : m.averageGrade
+  );
+
+  // destroy previous chart to avoid duplicates
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+
+  chartInstance = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Module Performance",
+        data: data
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100
+        }
+      }
+    }
+  });
 }
