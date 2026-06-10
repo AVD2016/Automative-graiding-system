@@ -1,17 +1,12 @@
-// =========================
 // STATE
-// =========================
 
 const API_BASE =
   "https://automative-graiding-system.onrender.com/api";
 
 let student = null;
 let modules = [];
-let chartInstance = null; // IMPORTANT: prevents duplicate charts
 
-// =========================
 // INIT
-// =========================
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -28,9 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
   loadModules();
 });
 
-// =========================
 // LOAD MODULES
-// =========================
 
 async function loadModules() {
 
@@ -60,21 +53,16 @@ async function loadModules() {
   }
 }
 
-// =========================
 // MAIN RENDER
-// =========================
 
 function renderAll() {
 
   renderTable();
   renderSummary();
   renderInsights();
-  renderChart(); // ✅ FIXED (now exists)
 }
 
-// =========================
 // STATUS LOGIC
-// =========================
 
 function getStatus(avg) {
 
@@ -91,9 +79,7 @@ function getStatus(avg) {
   return { text: "Distinction", cls: "status-distinction" };
 }
 
-// =========================
 // TABLE RENDER
-// =========================
 
 function renderTable() {
 
@@ -119,9 +105,7 @@ function renderTable() {
   });
 }
 
-// =========================
 // SUMMARY METRICS
-// =========================
 
 function renderSummary() {
 
@@ -161,9 +145,7 @@ function renderSummary() {
     `Risk Level: ${risk}`;
 }
 
-// =========================
-// INSIGHTS
-// =========================
+// insights
 
 function renderInsights() {
 
@@ -190,53 +172,4 @@ function renderInsights() {
 
   document.getElementById("weakestModule").textContent =
     `Weakest Module: ${worst.code} (${worst.averageGrade.toFixed(1)}%)`;
-}
-
-// =========================
-// CHART (FIXED)
-// =========================
-
-function renderChart() {
-
-  const canvas = document.getElementById("progressChart");
-
-  if (!canvas) return; // safety guard
-
-  const ctx = canvas.getContext("2d");
-
-  const labels = modules.map(m => m.code);
-
-  const data = modules.map(m =>
-    m.averageGrade === -1 ? 0 : m.averageGrade
-  );
-
-  // destroy previous chart to avoid duplicates
-  if (chartInstance) {
-    chartInstance.destroy();
-  }
-
-  chartInstance = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: labels,
-      datasets: [{
-        label: "Module Performance",
-        data: data
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: {
-        legend: {
-          display: false
-        }
-      },
-      scales: {
-        y: {
-          beginAtZero: true,
-          max: 100
-        }
-      }
-    }
-  });
 }
