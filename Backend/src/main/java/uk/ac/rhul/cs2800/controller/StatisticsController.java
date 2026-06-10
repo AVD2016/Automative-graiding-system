@@ -220,9 +220,7 @@ public class StatisticsController {
         }
       }
 
-      /*
-       * ========================= FINAL RESPONSE =========================
-       */
+
 
       Map<String, Object> response = new HashMap<>();
       response.put("activityFeed", activityFeed);
@@ -323,6 +321,71 @@ public class StatisticsController {
     Map<String, Object> response = new HashMap<>();
     response.put("assignments", assignmentDTOs);
     response.put("avgGrade", avgGrade);
+
+    return ResponseEntity.ok(response);
+  }
+
+  // for grades page student
+  @GetMapping("/student/grades/{studentId}")
+  public ResponseEntity<List<Map<String, Object>>> getStudentGrades(@PathVariable int studentId) {
+
+    Student student = studentRepository.findById(studentId)
+        .orElseThrow(() -> new RuntimeException("Student not found"));
+
+    List<Map<String, Object>> response = new ArrayList<>();
+
+    LocalDateTime now = LocalDateTime.now();
+
+    for (Registration reg : student.getRegistered()) {
+
+      Module module = reg.getModule();
+
+      if (module == null)
+        continue;
+
+      Map<String, Object> moduleMap = new HashMap<>();
+
+      moduleMap.put("code", module.getCode());
+      moduleMap.put("name", module.getName());
+      moduleMap.put("credits", module.getCredits());
+
+      List<Assignment> assignments = module.getAssignments();
+
+      int counted = 0;
+      double total = 0;
+
+      int assignmentCount = assignments != null ? assignments.size() : 0;
+      moduleMap.put("assignmentCount", assignmentCount);
+
+      for (Assignment assignment : assignments) {
+
+        boolean isPastDeadline =
+            assignment.getDeadline() != null && assignment.getDeadline().isBefore(now);
+
+        AssignmentSubmission submission = assignmentSubmissionRepository
+            .findByStudentIdAndAssignmentId(studentId, assignment.getId()).orElse(null);
+
+        if (submission != null && submission.isMarked()) {
+
+          total += submission.getMark();
+          counted++;
+        }
+
+        else if (submission == null && isPastDeadline) {
+
+          total += 0; // penalty
+          counted++;
+        }
+
+        // CASE 3: ignore (future + no submission OR unmarked)
+      }
+
+      double avg = (counted == 0) ? -1 : (total / counted);
+
+      moduleMap.put("averageGrade", avg);
+
+      response.add(moduleMap);
+    }
 
     return ResponseEntity.ok(response);
   }

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+  <title>Student Grades Analytics</title>
+
+  <link rel="stylesheet" href="../CSS/chatWidget.css">
+  <link rel="stylesheet" href="../CSS/generalStyles.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+
+    .content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .content::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 240px;
+      width: calc(100% - 240px);
+      height: 100vh;
+
+      background-image: url("../Images/Background.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+
+      z-index: 0;
+    }
+
+    .content::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 240px;
+      width: calc(100% - 240px);
+      height: 100vh;
+
+      background: rgba(0,0,0,0.35);
+      z-index: 1;
+    }
+
+    .dashboard-grid {
+      position: relative;
+      z-index: 2;
+
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.96);
+      border-radius: 10px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    }
+
+    .card h2 {
+      font-size: 18px;
+      margin-bottom: 12px;
+      color: #1e293b;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #e2e8f0;
+      text-align: left;
+    }
+
+    th {
+      background: #1e293b;
+      color: white;
+    }
+
+    tr:hover {
+      background: #f1f5f9;
+    }
+
+     // colours for status
+    .status-critical { color: #dc2626; font-weight: bold; }
+    .status-pass { color: #f59e0b; font-weight: bold; }
+    .status-strong { color: #3b82f6; font-weight: bold; }
+    .status-merit { color: #10b981; font-weight: bold; }
+    .status-distinction { color: #7c3aed; font-weight: bold; }
+    .status-na { color: #94a3b8; font-style: italic; }
+
+
+    .insight {
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: #334155;
+    }
+
+    .side {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+  <h2>Student Panel</h2>
+
+  <button onclick="openDashboard()">Dashboard</button>
+  <button onclick="openViewModules()">View Modules</button>
+  <button onclick="openGrades()">Grades</button>
+  <button onclick="openAssignments()">Assignments</button>
+  <button onclick="logout()">Logout</button>
+
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+
+    <div class="topbar-left" onclick="openDashboard()">
+      <img src="../Images/logo.png">
+      <h1>Grade Analytics</h1>
+    </div>
+
+    <div class="student-name" id="studentName">
+      Student
+    </div>
+
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <div class="dashboard-grid">
+
+      <!-- LEFT SIDE -->
+      <div class="card">
+
+        <h2>Module Performance Breakdown</h2>
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Module</th>
+              <th>Average</th>
+              <th>Status</th>
+              <th>Assignments</th>
+            </tr>
+          </thead>
+
+          <tbody id="moduleBreakdown">
+            <tr>
+              <td colspan="4" class="status-na">
+                Loading analytics...
+              </td>
+            </tr>
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <!-- RIGHT SIDE -->
+      <div class="side">
+
+        <!-- SUMMARY -->
+        <div class="card">
+
+          <h2>Performance Summary</h2>
+
+          <div class="insight" id="overallAvg">Overall Average: --</div>
+          <div class="insight" id="moduleCount">Modules: --</div>
+          <div class="insight" id="completionRate">Completion Rate: --</div>
+          <div class="insight" id="riskLevel">Risk Level: --</div>
+
+        </div>
+
+        <!-- INSIGHTS -->
+        <div class="card">
+
+          <h2>Insights</h2>
+
+          <div class="insight" id="strongestModule">
+            Strongest Module: --
+          </div>
+
+          <div class="insight" id="weakestModule">
+            Weakest Module: --
+          </div>
+
+        </div>
+
+        <!-- CHART -->
+        <div class="card">
+
+          <h2>Performance Trend</h2>
+          <canvas id="progressChart"></canvas>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- CHAT WIDGET -->
+<div id="chatToggle" class="chat-toggle">
+  <img src="../Images/chat.png">
+</div>
+
+<div id="chatWidget" class="chat-widget hidden">
+
+  <div class="chat-header">
+    <span>Support Chat</span>
+    <button onclick="toggleChat()">✕</button>
+  </div>
+
+  <div id="chatMessages" class="chat-messages"></div>
+
+  <div class="chat-input">
+    <input id="chatInput" type="text">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+</div>
+
+<!-- JS -->
+<script src="../JS/chatWidget.js"></script>
+<script src="../JS/studentNavigation.js"></script>
+<script src="../JS/studentGrades.js"></script>
+
+</body>
+
+</html>
