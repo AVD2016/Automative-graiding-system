@@ -342,6 +342,9 @@ function renderWarnings() {
 /* =========================
    PROGRESS CHART
 ========================= */
+/* =========================
+   PROGRESS CHART
+========================= */
 
 function renderChart() {
 
@@ -351,26 +354,33 @@ function renderChart() {
   let pendingCredits = 0;
   let futureCredits = 0;
 
-  const now = new Date();
-
   assignments.forEach(a => {
 
-    const deadline = new Date(a.deadline);
-
     const credits = Number(a.credits || 0);
+
+    /* =========================
+       MARKED
+    ========================= */
 
     if (a.status === "MARKED") {
 
       markedCredits += credits;
+    }
 
-    } else if (a.status === "SUBMITTED") {
+    /* =========================
+       SUBMITTED / WAITING MARK
+    ========================= */
+
+    else if (a.status === "SUBMITTED") {
 
       pendingCredits += credits;
+    }
 
-    } else if (
-      a.status === "UNSUBMITTED" &&
-      deadline > now
-    ) {
+    /* =========================
+       FUTURE ASSIGNMENTS
+    ========================= */
+
+    else if (a.status === "FUTURE") {
 
       futureCredits += credits;
     }
