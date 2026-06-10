@@ -272,42 +272,36 @@ public class StatisticsController {
 
         String status;
 
-        // status logic
-
         if (isMarked) {
-          status = "MARKED";
+
+          boolean isLate = submission.getSubmittedAt() != null && deadline != null
+              && submission.getSubmittedAt().isAfter(deadline);
+
+          status = isLate ? "LATE" : "MARKED";
 
         } else if (isSubmitted) {
+
           status = "SUBMITTED";
 
         } else if (deadline != null && deadline.isBefore(now)) {
+
           status = "UNSUBMITTED";
 
         } else {
+
           status = "FUTURE";
         }
 
-        // average logic
+        Double gradeResult = calculateAssignmentContribution(assignment, submission, now);
 
-        if (isMarked) {
+        if (gradeResult != null) {
 
-          boolean isLate = submission.getSubmittedAt() != null && assignment.getDeadline() != null
-              && submission.getSubmittedAt().isAfter(assignment.getDeadline());
-
-          // late submission = 0, on-time = mark
-          totalMarks += isLate ? 0 : submission.getMark();
+          totalMarks += gradeResult;
           countForAverage++;
-        } else if (!hasSubmission && deadline != null && deadline.isBefore(now)) {
-
-          // missed deadline → counts as 0
-          totalMarks += 0;
-          countForAverage++;
-
         }
 
-        // DTO
-
         Map<String, Object> dto = new HashMap<>();
+
         dto.put("title", assignment.getTitle());
         dto.put("module", module.getCode());
         dto.put("deadline", assignment.getDeadline());
@@ -321,6 +315,7 @@ public class StatisticsController {
     double avgGrade = countForAverage == 0 ? 0 : totalMarks / countForAverage;
 
     Map<String, Object> response = new HashMap<>();
+
     response.put("assignments", assignmentDTOs);
     response.put("avgGrade", avgGrade);
 
@@ -341,6 +336,7 @@ public class StatisticsController {
     for (Registration reg : student.getRegistered()) {
 
       Module module = reg.getModule();
+
       if (module == null)
         continue;
 
@@ -353,9 +349,11 @@ public class StatisticsController {
       List<Assignment> assignments = module.getAssignments();
 
       int assignmentCount = assignments != null ? assignments.size() : 0;
+
       moduleMap.put("assignmentCount", assignmentCount);
 
       if (assignments == null || assignments.isEmpty()) {
+
         moduleMap.put("averageGrade", -1);
         response.add(moduleMap);
         continue;
@@ -366,34 +364,19 @@ public class StatisticsController {
 
       for (Assignment assignment : assignments) {
 
-        LocalDateTime deadline = assignment.getDeadline();
-        boolean isPastDeadline = deadline != null && deadline.isBefore(now);
-
         AssignmentSubmission submission = assignmentSubmissionRepository
             .findByStudentIdAndAssignmentId(studentId, assignment.getId()).orElse(null);
 
-        boolean hasSubmission = submission != null;
-        boolean isMarked = hasSubmission && submission.isMarked();
+        Double gradeResult = calculateAssignmentContribution(assignment, submission, now);
 
-        if (isMarked) {
+        if (gradeResult != null) {
 
-          boolean isLate = submission.getSubmittedAt() != null && deadline != null
-              && submission.getSubmittedAt().isAfter(deadline);
-
-          // late submission = 0, on-time = mark
-          total += isLate ? 0 : submission.getMark();
+          total += gradeResult;
           counted++;
         }
-
-        else if (!hasSubmission && isPastDeadline) {
-
-          total += 0;
-          counted++;
-        }
-
       }
 
-      double avg = counted == 0 ? -1 : (total / counted);
+      double avg = counted == 0 ? -1 : total / counted;
 
       moduleMap.put("averageGrade", avg);
 
@@ -401,5 +384,46 @@ public class StatisticsController {
     }
 
     return ResponseEntity.ok(response);
+  }
+
+  // helper method to calculate average
+  private Double calculateAssignmentContribution(Assignment assignment,
+      AssignmentSubmission submission, LocalDateTime now) {
+
+    LocalDateTime deadline = assignment.getDeadline();
+
+    boolean isPastDeadline = deadline != null && deadline.isBefore(now);
+
+    boolean hasSubmission = submission != null;
+
+    boolean isMarked = hasSubmission && submission.isMarked();
+
+    // CASE 1:
+    // Marked assignment
+
+    if (isMarked) {
+
+      boolean isLate = submission.getSubmittedAt() != null && deadline != null
+          && submission.getSubmittedAt().isAfter(deadline);
+
+      // late submission = 0
+      if (isLate) {
+        return 0.0;
+      }
+
+      return (double) submission.getMark();
+    }
+
+    // CASE 2:
+    // No submission + missed deadline = 0
+
+    if (!hasSubmission && isPastDeadline) {
+      return 0.0;
+    }
+
+    // CASE 3:
+    // Future / unmarked assignments ignored
+
+    return null;
   }
 }
