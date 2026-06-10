@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Student Modules</title>
+
+  <link rel="stylesheet" href="../CSS/chatWidget.css">
+  <link rel="stylesheet" href="../CSS/generalStyles.css">
+
+  <style>
+
+    .content {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .student-name {
+      font-size: 16px;
+      font-weight: bold;
+      color: #1e293b;
+    }
+
+    /* ========================= TABLE CARD ========================= */
+
+    .table-card {
+      position: relative;
+      z-index: 2;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      background: #1e293b;
+      color: white;
+      text-align: left;
+      padding: 12px;
+      font-size: 14px;
+    }
+
+    td {
+      padding: 12px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+
+    tr:hover {
+      background: #f8fafc;
+      cursor: pointer;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #64748b;
+    }
+
+    /* ========================= GRADE COLORS ========================= */
+
+    .grade-green {
+      color: #16a34a;
+      font-weight: bold;
+    }
+
+    .grade-orange {
+      color: #ea580c;
+      font-weight: bold;
+    }
+
+    .grade-red {
+      color: #dc2626;
+      font-weight: bold;
+    }
+
+    /* ========================= MODAL ========================= */
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: white;
+      width: 600px;
+      max-width: 95%;
+      border-radius: 12px;
+      padding: 25px;
+      position: relative;
+    }
+
+    .close {
+      position: absolute;
+      right: 18px;
+      top: 12px;
+      font-size: 24px;
+      cursor: pointer;
+      color: #64748b;
+    }
+
+    .close:hover {
+      color: black;
+    }
+
+    .lecturer-table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    .lecturer-table th {
+      background: #334155;
+      color: white;
+      padding: 10px;
+      font-size: 13px;
+    }
+
+    .lecturer-table td {
+      padding: 10px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 13px;
+    }
+
+    .email-link {
+      color: #2563eb;
+      text-decoration: none;
+    }
+
+    .email-link:hover {
+      text-decoration: underline;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <h2>Student Panel</h2>
+
+    <button onclick="openDashboard()">Dashboard</button>
+    <button onclick="openAssignments()">Assignments</button>
+    <button onclick="openModules()">Modules</button>
+    <button onclick="logout()">Logout</button>
+
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+
+      <div class="topbar-left" onclick="openDashboard()">
+        <img src="icon.png" alt="System Icon">
+        <h1>Automated Grading System</h1>
+      </div>
+
+      <div class="student-name" id="studentName">
+        Student
+      </div>
+
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <div class="table-card">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Module Code</th>
+              <th>Module Name</th>
+              <th>Credits</th>
+              <th>No. Assignments</th>
+              <th>Average Grade</th>
+            </tr>
+          </thead>
+
+          <tbody id="modulesTableBody">
+
+            <tr>
+              <td colspan="5" class="loading">
+                Loading modules...
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- MODAL -->
+  <div id="lecturerModal" class="modal">
+
+    <div class="modal-content">
+
+      <span class="close" onclick="closeModal()">&times;</span>
+
+      <h2 id="modalTitle">
+        Module Lecturers
+      </h2>
+
+      <table class="lecturer-table">
+
+        <thead>
+          <tr>
+            <th>Lecturer Name</th>
+            <th>Email</th>
+          </tr>
+        </thead>
+
+        <tbody id="lecturersTableBody">
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+  <!-- CHAT -->
+  <div id="chatToggle" class="chat-toggle">
+    <img src="../Images/chat.png" alt="Chat" />
+  </div>
+
+  <div id="chatWidget" class="chat-widget hidden">
+
+    <div class="chat-header">
+      <span>Support Chat</span>
+      <button onclick="toggleChat()">✕</button>
+    </div>
+
+    <div id="chatMessages" class="chat-messages"></div>
+
+    <div class="chat-input">
+      <input id="chatInput" type="text" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
+
+  </div>
+
+  <!-- JS -->
+  <script src="../JS/studentViewModules.js"></script>
+  <script src="../JS/chatWidget.js"></script>
+  <script src="../JS/studentNavigation.js"></script>
+
+</body>
+
+</html>

@@ -1,5 +1,6 @@
 package uk.ac.rhul.cs2800.controller;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import uk.ac.rhul.cs2800.model.Lecturer;
 import uk.ac.rhul.cs2800.model.Module;
 import uk.ac.rhul.cs2800.model.Registration;
 import uk.ac.rhul.cs2800.model.Student;
+import uk.ac.rhul.cs2800.model.User;
 import uk.ac.rhul.cs2800.repository.AssignmentSubmissionRepository;
 import uk.ac.rhul.cs2800.repository.LecturerRepository;
 import uk.ac.rhul.cs2800.repository.ModuleRepository;
@@ -207,6 +209,8 @@ public class ModuleController {
 
     return ResponseEntity.ok(savedModule);
   }
+
+  // show modules for Lecturers
   @Transactional
   @GetMapping("/overview/{lecturerId}")
   public ResponseEntity<List<LecturerModuleExpandedDTO>> getModuleOverview(
@@ -336,5 +340,84 @@ public class ModuleController {
     }
 
     return ResponseEntity.ok(result);
+  }
+
+  // get modules and registered lecturers for s student
+  @GetMapping("/getModules/{studentId}")
+  public ResponseEntity<List<Map<String, Object>>> getModules(@PathVariable int studentId) {
+
+    Student student = studentRepository.findById(studentId)
+        .orElseThrow(() -> new RuntimeException("Student not found"));
+
+    List<Module> modules = moduleRepository.findModulesByStudentId(studentId);
+
+    List<Map<String, Object>> response = new ArrayList<>();
+
+    for (Module module : modules) {
+
+      Map<String, Object> moduleMap = new HashMap<>();
+
+      moduleMap.put("code", module.getCode());
+      moduleMap.put("name", module.getName());
+      moduleMap.put("credits", module.getCredits());
+
+      // =========================
+      // ASSIGNMENTS + AVERAGE
+      // =========================
+      List<Assignment> assignments = module.getAssignments();
+      moduleMap.put("assignmentCount", assignments.size());
+
+      double total = 0;
+      int counted = 0;
+
+      LocalDateTime now = LocalDateTime.now();
+
+      for (Assignment assignment : assignments) {
+
+        AssignmentSubmission submission = assignmentSubmissionRepository
+            .findByStudentIdAndAssignmentId(studentId, assignment.getId()).orElse(null);
+
+        if (submission != null && submission.isMarked()) {
+
+          total += submission.getMark();
+          counted++;
+
+        } else if (assignment.getDeadline().isBefore(now)) {
+
+          total += 0;
+          counted++;
+        }
+      }
+
+      double avg = counted == 0 ? 0 : total / counted;
+      moduleMap.put("averageGrade", avg);
+
+      // =========================
+      // LECTURERS (FIXED)
+      // =========================
+
+      List<Map<String, Object>> lecturers = new ArrayList<>();
+
+      for (Registration reg : module.getRegistrations()) {
+
+        User user = reg.getUser();
+
+        if (user instanceof Lecturer lecturer) {
+
+          Map<String, Object> lecMap = new HashMap<>();
+          lecMap.put("firstName", lecturer.getFirstName());
+          lecMap.put("lastName", lecturer.getLastName());
+          lecMap.put("email", lecturer.getEmail());
+
+          lecturers.add(lecMap);
+        }
+      }
+
+      moduleMap.put("lecturers", lecturers);
+
+      response.add(moduleMap);
+    }
+
+    return ResponseEntity.ok(response);
   }
 }
