@@ -173,3 +173,48 @@ function renderInsights() {
   document.getElementById("weakestModule").textContent =
     `Weakest Module: ${worst.code} (${worst.averageGrade.toFixed(1)}%)`;
 }
+
+function renderChart() {
+
+  const canvas = document.getElementById("progressChart");
+
+  if (!canvas) return; // safety guard
+
+  const ctx = canvas.getContext("2d");
+
+  const labels = modules.map(m => m.code);
+
+  const data = modules.map(m =>
+    m.averageGrade === -1 ? 0 : m.averageGrade
+  );
+
+  // destroy previous chart to avoid duplicates
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+
+  chartInstance = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: labels,
+      datasets: [{
+        label: "Module Performance",
+        data: data
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100
+        }
+      }
+    }
+  });
+}
